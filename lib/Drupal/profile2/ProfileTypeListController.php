@@ -7,58 +7,62 @@
 
 namespace Drupal\profile2;
 
-use Drupal\Core\Config\Entity\ConfigEntityListController;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 
 /**
  * List controller for profile types.
  */
-class ProfileTypeListController extends ConfigEntityListController {
+class ProfileTypeListController extends ConfigEntityListBuilder {
 
   /**
-   * Overrides \Drupal\Core\Entity\EntityListController::buildHeader().
+   * {@inheritdoc}
    */
   public function buildHeader() {
-    $row = parent::buildHeader();
-    $operations = array_pop($row);
-    $row['registration'] = t('Registration');
-    $row['operations'] = $operations;
-    return $row;
+    $header['type'] = t('Profile type');
+    $header['registration'] = t('Registration');
+    return $header + parent::buildHeader();
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\EntityListController::buildRow().
+   * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row = parent::buildRow($entity);
-    $operations = array_pop($row);
-    $row['registration'] = $entity->get('registration') ? t('Yes') : t('No');
-    $row['operations'] = $operations;
-    return $row;
+    $row['type'] = \Drupal::linkGenerator()
+      ->generateFromUrl($entity->label(), $entity->urlInfo());
+    $row['registration'] = $entity->registration ? t('Yes') : t('No');
+    return $row + parent::buildRow($entity);
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\EntityListController::getOperations().
+   * {@inheritdoc}
    */
   public function getOperations(EntityInterface $entity) {
     $operations = parent::getOperations($entity);
-    if (module_exists('field_ui')) {
-      // Unlike other bundle entities, the most common operation for profile
-      // types is to manage fields, so we suggest that as default operation.
-      $uri = $entity->uri();
-      $operations['manage-fields'] = array(
-        'title' => t('Manage fields'),
-        'href' => $uri['path'] . '/fields',
-        'options' => $uri['options'],
-        'weight' => 5,
-      );
-      $operations['manage-display'] = array(
-        'title' => t('Manage display'),
-        'href' => $uri['path'] . '/display',
-        'options' => $uri['options'],
-        'weight' => 6,
-      );
+    // Remove manage display link.
+    if (isset($operations['manage-display'])) {
+      unset($operations['manage-display']);
     }
+    // Place the edit operation after the operations added by field_ui.module
+    // which have the weights 15, 20, 25.
+    if (isset($operations['edit'])) {
+      $operations['edit'] = array(
+          'title' => t('Edit'),
+          'weight' => 30,
+        ) + $entity->urlInfo('edit-form')->toArray();
+    }
+    if (isset($operations['delete'])) {
+      $operations['delete'] = array(
+          'title' => t('Delete'),
+          'weight' => 35,
+        ) + $entity->urlInfo('delete-form')->toArray();
+    }
+    // Sort the operations to normalize link order.
+    uasort($operations, array(
+        'Drupal\Component\Utility\SortArray',
+        'sortByWeightElement'
+      ));
+
     return $operations;
   }
 

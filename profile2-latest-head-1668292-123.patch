@@ -1,0 +1,1775 @@
+diff --git a/config/install/profile2.type.main.yml b/config/install/profile2.type.main.yml
+new file mode 100644
+index 0000000..83828c8
+--- /dev/null
++++ b/config/install/profile2.type.main.yml
+@@ -0,0 +1,4 @@
++id: main
++label: 'Main profile'
++registration: 0
++langcode: en
+diff --git a/config/schema/profile2.schema.yml b/config/schema/profile2.schema.yml
+new file mode 100644
+index 0000000..f3e8869
+--- /dev/null
++++ b/config/schema/profile2.schema.yml
+@@ -0,0 +1,19 @@
++profile2.type.*:
++  type: mapping
++  label: 'Profile type settings'
++  mapping:
++    id:
++      type: string
++      label: 'Machine-readable name'
++    uuid:
++      type: string
++      label: 'UUID'
++    label:
++      type: label
++      label: 'Label'
++    registration:
++        type: boolean
++        label: 'Registration'
++    langcode:
++      type: string
++      label: 'Default language'
+diff --git a/lib/Drupal/profile2/Entity/Profile.php b/lib/Drupal/profile2/Entity/Profile.php
+new file mode 100644
+index 0000000..b525176
+--- /dev/null
++++ b/lib/Drupal/profile2/Entity/Profile.php
+@@ -0,0 +1,201 @@
++<?php
++
++/**
++ * @file
++ * Contains \Drupal\profile2\Entity\Profile.
++ */
++
++namespace Drupal\profile2\Entity;
++
++use Drupal\Core\Entity\ContentEntityInterface;
++use Drupal\Core\Entity\Entity;
++use Drupal\Component\Annotation\Plugin;
++use Drupal\Core\Annotation\Translation;
++
++use Drupal\Core\Entity\ContentEntityBase;
++use Drupal\Core\Entity\EntityStorageInterface;
++use Drupal\Core\Entity\EntityTypeInterface;
++use Drupal\Core\Field\FieldDefinition;
++use Drupal\profile2\ProfileInterface;
++
++/**
++ * Defines the profile entity class.
++ *
++ * @ContentEntityType(
++ *   id = "profile2",
++ *   label = @Translation("Profile"),
++ *   bundle_label = @Translation("Profile type"),
++ *   controllers = {
++ *     "access" = "Drupal\profile2\ProfileAccessController",
++ *     "form" = {
++ *       "default" = "Drupal\profile2\ProfileFormController",
++ *       "add" = "Drupal\profile2\ProfileFormController",
++ *       "edit" = "Drupal\profile2\ProfileFormController",
++ *       "delete" = "Drupal\profile2\Form\ProfileDeleteForm",
++ *     },
++ *   },
++ *   admin_permission = "administer profiles",
++ *   base_table = "profile",
++ *   links = {
++ *     "canonical" = "profile2.edit",
++ *     "delete-form" = "profile2.delete",
++ *     "edit-form" = "profile2.edit",
++ *     "admin-form" = "profile2.type_edit"
++ *   },
++ *   fieldable = TRUE,
++ *   entity_keys = {
++ *     "id" = "pid",
++ *     "bundle" = "type",
++ *     "label" = "label",
++ *     "uuid" = "uuid"
++ *   },
++ *   bundle_entity_type = "profile2"
++ * )
++ */
++class Profile extends ContentEntityBase implements ProfileInterface {
++
++  /**
++   * The profile id.
++   *
++   * @var integer
++   */
++  public $pid;
++
++  /**
++   * The profile UUID.
++   *
++   * @var string
++   */
++  public $uuid;
++
++  /**
++   * The name of the profile type.
++   *
++   * @var string
++   */
++  public $type;
++
++  /**
++   * The language code of the profile.
++   *
++   * @var
++   */
++  public $langcode;
++
++  /**
++   * The profile label.
++   *
++   * @var string
++   */
++  public $label;
++
++  /**
++   * The user id of the profile owner.
++   *
++   * @var integer
++   */
++  public $uid;
++
++  /**
++   * The Unix timestamp when the profile was created.
++   *
++   * @var integer
++   */
++  public $created;
++
++  /**
++   * The Unix timestamp when the profile was most recently saved.
++   *
++   * @var integer
++   */
++  public $changed;
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
++
++    $fields['pid'] = FieldDefinition::create('integer')
++      ->setLabel(t('Profile ID'))
++      ->setDescription(t('The profile ID.'))
++      ->setReadOnly(TRUE)
++      ->setSetting('unsigned', TRUE);
++
++    $fields['uuid'] = FieldDefinition::create('uuid')
++      ->setLabel(t('UUID'))
++      ->setDescription(t('The profile UUID.'))
++      ->setReadOnly(TRUE);
++
++    $fields['type'] = FieldDefinition::create('entity_reference')
++      ->setLabel(t('Profile type'))
++      ->setDescription(t('The profile type.'))
++      ->setSetting('target_type', 'profile2_type')
++      ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
++
++    $fields['uid'] = FieldDefinition::create('entity_reference')
++      ->setLabel(t('User ID'))
++      ->setDescription(t('The user ID of the user associated with the profile.'))
++      ->setSetting('target_type', 'user')
++      ->setSetting('default_value', 0);
++
++    $fields['langcode'] = FieldDefinition::create('language')
++      ->setLabel(t('Language code'))
++      ->setDescription(t('The profile language code.'));
++
++    $fields['label'] = FieldDefinition::create('string')
++      ->setLabel(t('Profile description'))
++      ->setDescription(t('A brief description of your profile.'))
++      ->setRequired(TRUE)
++      ->setDisplayOptions('form', array(
++        'type' => 'string',
++        'weight' => -5,
++      ))
++      ->setDisplayConfigurable('form', TRUE);
++
++    $fields['created'] = FieldDefinition::create('created')
++      ->setLabel(t('Created'))
++      ->setDescription(t('The time that the profile was created.'));
++
++    $fields['changed'] = FieldDefinition::create('changed')
++      ->setLabel(t('Changed'))
++      ->setDescription(t('The time that the profile was last edited.'));
++
++    return $fields;
++  }
++
++  /**
++   * Overrides Entity::id().
++   */
++  public function id() {
++    return isset($this->pid) ? $this->pid : NULL;
++  }
++
++  /**
++   * Overrides Entity::bundle().
++   */
++  public function bundle() {
++    return $this->type;
++  }
++
++  /**
++   * Overrides Entity::label().
++   */
++  public function label($langcode = NULL) {
++    // If this profile has a custom label, use it. Otherwise, use the label of
++    // the profile type.
++    if (isset($this->label) && $this->label !== '') {
++      return $this->label;
++    }
++    else {
++      return entity_load('profile2_type', $this->type)->label($langcode);
++    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getChangedTime() {
++    return $this->get('changed')->value;
++  }
++
++}
+diff --git a/lib/Drupal/profile2/Entity/ProfileType.php b/lib/Drupal/profile2/Entity/ProfileType.php
+new file mode 100644
+index 0000000..f170beb
+--- /dev/null
++++ b/lib/Drupal/profile2/Entity/ProfileType.php
+@@ -0,0 +1,120 @@
++<?php
++
++/**
++ * @file
++ * Contains \Drupal\profile2\Entity\ProfileType.
++ */
++
++
++namespace Drupal\profile2\Entity;
++
++use Drupal\Component\Annotation\Plugin;
++use Drupal\Core\Annotation\Translation;
++use Drupal\Core\Entity\EntityStorageInterface;
++use Drupal\Core\Config\Entity\ConfigEntityBase;
++use Drupal\profile2\ProfileTypeInterface;
++
++/**
++ * Defines the profile type entity class.
++ *
++ * @ConfigEntityType(
++ *   id = "profile2_type",
++ *   label = @Translation("Profile type"),
++ *   controllers = {
++ *     "form" = {
++ *       "default" = "Drupal\profile2\ProfileTypeFormController",
++ *       "add" = "Drupal\profile2\ProfileTypeFormController",
++ *       "edit" = "Drupal\profile2\ProfileTypeFormController",
++ *       "delete" = "Drupal\profile2\Form\ProfileTypeDeleteForm"
++ *     },
++ *     "list_builder" = "Drupal\profile2\ProfileTypeListController"
++ *   },
++ *   admin_permission = "administer profile types",
++ *   config_prefix = "type",
++ *   bundle_of = "profile2",
++ *   entity_keys = {
++ *     "id" = "id",
++ *     "label" = "label"
++ *   },
++ *   links = {
++ *     "delete-form" = "profile2.type_delete",
++ *     "edit-form" = "profile2.type_edit"
++ *   }
++ * )
++ */
++class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
++
++  /**
++   * The primary identifier of the profile type.
++   *
++   * @var integer
++   */
++  public $id;
++
++  /**
++   * The universally unique identifier of the profile type.
++   *
++   * @var string
++   */
++  public $uuid;
++
++  /**
++   * The human-readable name of the profile type.
++   *
++   * @var string
++   */
++  public $label;
++
++  /**
++   * Whether the profile type is shown during registration.
++   *
++   * @var boolean
++   */
++  public $registration = FALSE;
++
++  /**
++   * The weight of the profile type compared to others.
++   *
++   * @var integer
++   */
++  public $weight = 0;
++
++  /**
++   * {@inheritdoc}
++   */
++  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
++    parent::postSave($storage, $update);
++
++//    if (!$update) {
++//      field_attach_create_bundle('profile2', $entity->id());
++//    }
++//    elseif ($entity->original->id() != $entity->id()) {
++//      field_attach_rename_bundle('profile2', $entity->original->id(), $entity->id());
++//    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function preDelete(EntityStorageInterface $storage, array $entities) {
++    parent::preDelete($storage, $entities);
++
++//    // Delete all profiles of this type.
++//    if ($profiles = entity_load_multiple_by_properties('profile2', array('type' => array_keys($entities)))) {
++//      entity_get_controller('profile2')->delete($profiles);
++//    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function postDelete(EntityStorageInterface $storage, array $entities) {
++    parent::postDelete($storage, $entities);
++
++    foreach ($entities as $entity) {
++//      field_attach_delete_bundle('profile2', $entity->id());
++    }
++  }
++
++
++}
+diff --git a/lib/Drupal/profile2/Form/ProfileDeleteForm.php b/lib/Drupal/profile2/Form/ProfileDeleteForm.php
+new file mode 100644
+index 0000000..7d85b39
+--- /dev/null
++++ b/lib/Drupal/profile2/Form/ProfileDeleteForm.php
+@@ -0,0 +1,64 @@
++<?php
++
++/**
++ * @file
++ * Contains \Drupal\block\Form\CustomBlockDeleteForm.
++ */
++
++namespace Drupal\profile2\Form;
++
++use Drupal\Core\Entity\ContentEntityConfirmFormBase;
++
++/**
++ * Provides a confirmation form for deleting a profile entity.
++ */
++class ProfileDeleteForm extends ContentEntityConfirmFormBase {
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getQuestion() {
++    return $this->t('Are you sure you want to delete %name?', array('%name' => $this->entity->label()));
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getCancelRoute() {
++    return array(
++      'route_name' => 'block.admin_display',
++    );
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getConfirmText() {
++    return $this->t('Delete');
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function buildForm(array $form, array &$form_state) {
++    $instances = $this->entity->getInstances();
++
++    $form['message'] = array(
++      '#markup' => format_plural(count($instances), 'This will also remove 1 profile instance.', 'This will also remove @count profile instances.'),
++      '#access' => !empty($instances),
++    );
++
++    return parent::buildForm($form, $form_state);
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function submit(array $form, array &$form_state) {
++    $this->entity->delete();
++    drupal_set_message($this->t('Profile %label has been deleted.', array('%label' => $this->entity->label())));
++    watchdog('profile2', 'Profile %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
++    $form_state['redirect_route']['route_name'] = 'profile.list';
++  }
++
++}
+diff --git a/lib/Drupal/profile2/Form/ProfileTypeDeleteForm.php b/lib/Drupal/profile2/Form/ProfileTypeDeleteForm.php
+new file mode 100644
+index 0000000..73e58c5
+--- /dev/null
++++ b/lib/Drupal/profile2/Form/ProfileTypeDeleteForm.php
+@@ -0,0 +1,93 @@
++<?php
++
++/**
++ * @file
++ * Contains \Drupal\profile2\Form\CustomBlockTypeDeleteForm.
++ */
++
++namespace Drupal\profile2\Form;
++
++use Drupal\Core\Entity\EntityConfirmFormBase;
++use Drupal\Core\Entity\Query\QueryFactory;
++use Symfony\Component\DependencyInjection\ContainerInterface;
++
++/**
++ * Provides a confirmation form for deleting a Profile type entity.
++ */
++class ProfileTypeDeleteForm extends EntityConfirmFormBase {
++
++  /**
++   * The query factory to create entity queries.
++   *
++   * @var \Drupal\Core\Entity\Query\QueryFactory
++   */
++  public $queryFactory;
++
++  /**
++   * Constructs a query factory object.
++   *
++   * @param \Drupal\Core\Entity\Query\QueryFactory $query_factory
++   *   The entity query object.
++   */
++  public function __construct(QueryFactory $query_factory) {
++    $this->queryFactory = $query_factory;
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function create(ContainerInterface $container) {
++    return new static(
++      $container->get('entity.query')
++    );
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getQuestion() {
++    return $this->t('Are you sure you want to delete %label?', array('%label' => $this->entity->label()));
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getCancelRoute() {
++    return array(
++      'route_name' => 'profile2.overview_types',
++    );
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getConfirmText() {
++    return $this->t('Delete');
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function buildForm(array $form, array &$form_state) {
++    $blocks = $this->queryFactory->get('profile2')->condition('type', $this->entity->id())->execute();
++    if (!empty($blocks)) {
++      $caption = '<p>' . format_plural(count($blocks), '%label is used by 1 profile on your site. You can not remove this profile type until you have removed all of the %label profiles.', '%label is used by @count profiles on your site. You may not remove %label until you have removed all of the %label profiles.', array('%label' => $this->entity->label())) . '</p>';
++      $form['description'] = array('#markup' => $caption);
++      return $form;
++    }
++    else {
++      return parent::buildForm($form, $form_state);
++    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function submit(array $form, array &$form_state) {
++    $this->entity->delete();
++    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
++    drupal_set_message(t('Profile type %label has been deleted.', array('%label' => $this->entity->label())));
++    watchdog('profile2', 'Profile type %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
++  }
++
++}
+diff --git a/lib/Drupal/profile2/Plugin/Core/Entity/Profile.php b/lib/Drupal/profile2/Plugin/Core/Entity/Profile.php
+deleted file mode 100644
+index d92dd29..0000000
+--- a/lib/Drupal/profile2/Plugin/Core/Entity/Profile.php
++++ /dev/null
+@@ -1,127 +0,0 @@
+-<?php
+-
+-/**
+- * @file
+- * Contains \Drupal\profile2\Plugin\Core\Entity\Profile.
+- */
+-
+-namespace Drupal\profile2\Plugin\Core\Entity;
+-
+-use Drupal\Core\Entity\ContentEntityInterface;
+-use Drupal\Core\Entity\Entity;
+-use Drupal\Component\Annotation\Plugin;
+-use Drupal\Core\Annotation\Translation;
+-
+-/**
+- * Defines the profile entity class.
+- *
+- * @Plugin(
+- *   id = "profile2",
+- *   label = @Translation("Profile"),
+- *   module = "profile2",
+- *   controller_class = "Drupal\profile2\ProfileStorageController",
+- *   access_controller_class = "Drupal\profile2\ProfileAccessController",
+- *   form_controller_class = {
+- *     "default" = "Drupal\profile2\ProfileFormController"
+- *   },
+- *   render_controller_class = "Drupal\Core\Entity\EntityRenderController",
+- *   base_table = "profile",
+- *   uri_callback = "profile2_profile_uri",
+- *   fieldable = TRUE,
+- *   entity_keys = {
+- *     "id" = "pid",
+- *     "uuid" = "uuid",
+- *     "bundle" = "type",
+- *     "label" = "label"
+- *   },
+- *   bundle_keys = {
+- *     "bundle" = "id"
+- *   },
+- *   view_modes = {
+- *     "account" = {
+- *       "label" = "User account",
+- *       "custom_settings" = FALSE
+- *     }
+- *   }
+- * )
+- */
+-class Profile extends Entity implements ContentEntityInterface {
+-
+-  /**
+-   * The profile id.
+-   *
+-   * @var integer
+-   */
+-  public $pid;
+-
+-  /**
+-   * The profile UUID.
+-   *
+-   * @var string
+-   */
+-  public $uuid;
+-
+-  /**
+-   * The name of the profile type.
+-   *
+-   * @var string
+-   */
+-  public $type;
+-
+-  /**
+-   * The profile label.
+-   *
+-   * @var string
+-   */
+-  public $label;
+-
+-  /**
+-   * The user id of the profile owner.
+-   *
+-   * @var integer
+-   */
+-  public $uid;
+-
+-  /**
+-   * The Unix timestamp when the profile was created.
+-   *
+-   * @var integer
+-   */
+-  public $created;
+-
+-  /**
+-   * The Unix timestamp when the profile was most recently saved.
+-   *
+-   * @var integer
+-   */
+-  public $changed;
+-
+-  /**
+-   * Overrides Entity::id().
+-   */
+-  public function id() {
+-    return isset($this->pid) ? $this->pid : NULL;
+-  }
+-
+-  /**
+-   * Overrides Entity::bundle().
+-   */
+-  public function bundle() {
+-    return $this->type;
+-  }
+-
+-  /**
+-   * Overrides Entity::label().
+-   */
+-  public function label($langcode = NULL) {
+-    // If this profile has a custom label, use it. Otherwise, use the label of
+-    // the profile type.
+-    if (isset($this->label) && $this->label !== '') {
+-      return $this->label;
+-    }
+-    else {
+-      return entity_load('profile2_type', $this->type)->label($langcode);
+-    }
+-  }
+-
+-}
+diff --git a/lib/Drupal/profile2/Plugin/Core/Entity/ProfileType.php b/lib/Drupal/profile2/Plugin/Core/Entity/ProfileType.php
+deleted file mode 100644
+index 326dd4d..0000000
+--- a/lib/Drupal/profile2/Plugin/Core/Entity/ProfileType.php
++++ /dev/null
+@@ -1,71 +0,0 @@
+-<?php
+-
+-/**
+- * @file
+- * Contains \Drupal\profile2\Plugin\Core\Entity\ProfileType.
+- */
+-
+-namespace Drupal\profile2\Plugin\Core\Entity;
+-
+-use Drupal\Component\Annotation\Plugin;
+-use Drupal\Core\Annotation\Translation;
+-use Drupal\Core\Config\Entity\ConfigEntityBase;
+-
+-/**
+- * Defines the profile type entity class.
+- *
+- * @Plugin(
+- *   id = "profile2_type",
+- *   label = @Translation("Profile type"),
+- *   module = "profile2",
+- *   controller_class = "Drupal\profile2\ProfileTypeStorageController",
+- *   list_controller_class = "Drupal\profile2\ProfileTypeListController",
+- *   form_controller_class = {
+- *     "default" = "Drupal\profile2\ProfileTypeFormController"
+- *   },
+- *   config_prefix = "profile2.type",
+- *   uri_callback = "profile2_profile_type_uri",
+- *   entity_keys = {
+- *     "id" = "id",
+- *     "label" = "label"
+- *   }
+- * )
+- */
+-class ProfileType extends ConfigEntityBase {
+-
+-  /**
+-   * The primary identifier of the profile type.
+-   *
+-   * @var integer
+-   */
+-  public $id;
+-
+-  /**
+-   * The universally unique identifier of the profile type.
+-   *
+-   * @var string
+-   */
+-  public $uuid;
+-
+-  /**
+-   * The human-readable name of the profile type.
+-   *
+-   * @var string
+-   */
+-  public $label;
+-
+-  /**
+-   * Whether the profile type is shown during registration.
+-   *
+-   * @var boolean
+-   */
+-  public $registration = FALSE;
+-
+-  /**
+-   * The weight of the profile type compared to others.
+-   *
+-   * @var integer
+-   */
+-  public $weight = 0;
+-
+-}
+diff --git a/lib/Drupal/profile2/ProfileAccessController.php b/lib/Drupal/profile2/ProfileAccessController.php
+index 82a6132..7e73226 100644
+--- a/lib/Drupal/profile2/ProfileAccessController.php
++++ b/lib/Drupal/profile2/ProfileAccessController.php
+@@ -9,109 +9,102 @@ namespace Drupal\profile2;
+ 
+ use Drupal\Core\Entity\EntityInterface;
+ use Drupal\Core\Entity\EntityAccessControllerInterface;
+-use Drupal\user\Plugin\Core\Entity\User;
++use Drupal\user\Entity\User;
++use Drupal\Core\Entity\EntityAccessController;
+ 
+-/**
+- * Access controller for profiles.
+- */
+-class ProfileAccessController implements EntityAccessControllerInterface {
+-
+-  /**
+-   * Static cache for access checks.
+-   *
+-   * @var array
+-   */
+-  protected $accessCache = array();
+-
+-  /**
+-   * Implements EntityAccessControllerInterface::viewAccess().
+-   */
+-  public function viewAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
+-    return $this->access($profile, 'view', $langcode, $account);
+-  }
+-
+-  /**
+-   * Implements EntityAccessControllerInterface::createAccess().
+-   */
+-  public function createAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
+-    // Create and update operations are folded into edit access for profiles.
+-    return $this->access($profile, 'edit', $langcode, $account);
+-  }
+-
+-  /**
+-   * Implements EntityAccessControllerInterface::updateAccess().
+-   */
+-  public function updateAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
+-    // Create and update operations are folded into edit access for profiles.
+-    return $this->access($profile, 'edit', $langcode, $account);
+-  }
+-
+-  /**
+-   * Implements EntityAccessControllerInterface::deleteAccess().
+-   */
+-  public function deleteAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
+-    return $this->access($profile, 'delete', $langcode, $account);
+-  }
+-
+-  /**
+-   * Determines whether the given user has access to a profile.
+-   *
+-   * @param \Drupal\Core\Entity\EntityInterface $profile
+-   *   A profile to check access for.
+-   * @param string $operation
+-   *   The operation being performed. One of 'view', 'create', 'update', or
+-   *   'delete'.
+-   * @param string $langcode
+-   *   The language code for which to check access.
+-   * @param \Drupal\user\Plugin\Core\Entity\User $account
+-   *   (optional) The user to check for. Omit to check access for the global
+-   *   user.
+-   *
+-   * @return bool
+-   *   TRUE if access is allowed, FALSE otherwise.
+-   *
+-   * @see hook_profile2_access()
+-   * @see profile2_profile2_access()
+-   */
+-  protected function access(EntityInterface $profile, $operation, $langcode, User $account = NULL) {
+-    if (!isset($account)) {
+-      $account = entity_load('user', $GLOBALS['user']->uid);
+-    }
+-    // Check for the bypass access permission first. No need to cache this,
+-    // since user_access() is cached already.
+-    if (user_access('bypass profile access', $account)) {
+-      return TRUE;
+-    }
+-    $uid = $account->id();
+-    // For existing profiles, check access for the particular profile ID. When
+-    // creating a new profile, check access for the profile's bundle.
+-    $pid = $profile->id() ?: $profile->bundle();
+-
+-    if (isset($this->accessCache[$uid][$operation][$pid][$langcode])) {
+-      return $this->accessCache[$uid][$operation][$pid][$langcode];
+-    }
+-
+-    $access = NULL;
+-    // Ask modules to grant or deny access.
+-    foreach (module_implements('profile2_access', $operation, $profile, $account) as $module) {
+-      $return = module_invoke($module, 'profile2_access', $operation, $profile, $account);
+-      // If a module denies access, there is no point in asking further.
+-      if ($return === FALSE) {
+-        $access = FALSE;
+-        break;
+-      }
+-      // A module may grant access, but others may still deny.
+-      if ($return === TRUE) {
+-        $access = TRUE;
+-      }
+-    }
+-    // Final access is only TRUE if any module explicitly returned TRUE. If at
+-    // least one returned FALSE, $access will be FALSE. If no module returned
+-    // anything, $access will be NULL, which means access is denied.
+-    // @see hook_profile2_access()
+-    $this->accessCache[$uid][$operation][$pid][$langcode] = ($access === TRUE);
+-
+-    return $this->accessCache[$uid][$operation][$pid][$langcode];
+-  }
+-
+-}
++//
++///**
++// * Access controller for profiles.
++// */
++//class ProfileAccessController extends EntityAccessController {
++//
++//  /**
++//   * Static cache for access checks.
++//   *
++//   * @var array
++//   */
++//  protected $accessCache = array();
++//
++//  /**
++//   * Implements EntityAccessControllerInterface::viewAccess().
++//   */
++//  public function viewAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
++//    return $this->access($profile, 'view', $langcode, $account);
++//  }
++//
++//  /**
++//   * {@inheritdoc}
++//   */
++//  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = array()) {
++//    $account = $this->prepareUser($account);
++//
++//    // Create and update operations are folded into edit access for profiles.
++////    return $this->access($profile, 'edit', $langcode, $account);
++//
++//    return parent::createAccess($entity_bundle, $account, $context);
++//  }
++//
++//  /**
++//   * Implements EntityAccessControllerInterface::updateAccess().
++//   */
++//  public function updateAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
++//    // Create and update operations are folded into edit access for profiles.
++//    return $this->access($profile, 'edit', $langcode, $account);
++//  }
++//
++//  /**
++//   * Implements EntityAccessControllerInterface::deleteAccess().
++//   */
++//  public function deleteAccess(EntityInterface $profile, $langcode = LANGUAGE_DEFAULT, User $account = NULL) {
++//    return $this->access($profile, 'delete', $langcode, $account);
++//  }
++//
++//  /**
++//   * {@inheritdoc}
++//   */
++//  public function access(EntityInterface $entity, $operation, $langcode = Language::LANGCODE_DEFAULT, AccountInterface $account = NULL) {
++//    if (!isset($account)) {
++//      $account = entity_load('user', $GLOBALS['user']->uid);
++//    }
++//    // Check for the bypass access permission first. No need to cache this,
++//    // since user_access() is cached already.
++//    if (user_access('bypass profile access', $account)) {
++//      return TRUE;
++//    }
++//    $uid = $account->id();
++//    // For existing profiles, check access for the particular profile ID. When
++//    // creating a new profile, check access for the profile's bundle.
++//
++//    // @todo:
++//    $pid = 0;
++////    $pid = $profile->id() ?: $profile->bundle();
++//
++//    if (isset($this->accessCache[$uid][$operation][$pid][$langcode])) {
++//      return $this->accessCache[$uid][$operation][$pid][$langcode];
++//    }
++//
++//    $access = NULL;
++//    // Ask modules to grant or deny access.
++//    foreach (module_implements('profile2_access', $operation, $profile, $account) as $module) {
++//      $return = module_invoke($module, 'profile2_access', $operation, $profile, $account);
++//      // If a module denies access, there is no point in asking further.
++//      if ($return === FALSE) {
++//        $access = FALSE;
++//        break;
++//      }
++//      // A module may grant access, but others may still deny.
++//      if ($return === TRUE) {
++//        $access = TRUE;
++//      }
++//    }
++//    // Final access is only TRUE if any module explicitly returned TRUE. If at
++//    // least one returned FALSE, $access will be FALSE. If no module returned
++//    // anything, $access will be NULL, which means access is denied.
++//    // @see hook_profile2_access()
++//    $this->accessCache[$uid][$operation][$pid][$langcode] = ($access === TRUE);
++//
++//    return $this->accessCache[$uid][$operation][$pid][$langcode];
++//  }
++//
++//}
++//
+diff --git a/lib/Drupal/profile2/ProfileInterface.php b/lib/Drupal/profile2/ProfileInterface.php
+new file mode 100644
+index 0000000..12ad355
+--- /dev/null
++++ b/lib/Drupal/profile2/ProfileInterface.php
+@@ -0,0 +1,18 @@
++<?php
++
++/**
++ * @file
++ * Contains \Drupal\profile2\ProfileInterface.
++ */
++
++namespace Drupal\profile2;
++
++use Drupal\Core\Entity\ContentEntityInterface;
++use Drupal\Core\Entity\EntityChangedInterface;
++
++/**
++ * Provides an interface defining a custom block entity.
++ */
++interface ProfileInterface extends ContentEntityInterface, EntityChangedInterface {
++
++}
+diff --git a/lib/Drupal/profile2/ProfileTypeFormController.php b/lib/Drupal/profile2/ProfileTypeFormController.php
+index c3570c9..84a42ba 100644
+--- a/lib/Drupal/profile2/ProfileTypeFormController.php
++++ b/lib/Drupal/profile2/ProfileTypeFormController.php
+@@ -7,7 +7,7 @@
+ 
+ namespace Drupal\profile2;
+ 
+-use Drupal\Core\Entity\EntityInterface;
++use Drupal\Core\Entity\EntityTypeInterface;
+ use Drupal\Core\Entity\EntityFormController;
+ 
+ /**
+@@ -16,9 +16,12 @@ use Drupal\Core\Entity\EntityFormController;
+ class ProfileTypeFormController extends EntityFormController {
+ 
+   /**
+-   * Overrides EntityFormController::form().
++   * {@inheritdoc}
+    */
+-  function form(array $form, array &$form_state, EntityInterface $type) {
++  function form(array $form, array &$form_state) {
++    $form = parent::form($form, $form_state);
++    $type = $this->entity;
++
+     $form['label'] = array(
+       '#title' => t('Label'),
+       '#type' => 'textfield',
+@@ -30,7 +33,7 @@ class ProfileTypeFormController extends EntityFormController {
+     $form['id'] = array(
+       '#type' => 'machine_name',
+       '#default_value' => $type->id(),
+-      '#maxlength' => 32,
++      '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
+       '#machine_name' => array(
+         'exists' => 'profile2_type_load',
+       ),
+@@ -38,29 +41,34 @@ class ProfileTypeFormController extends EntityFormController {
+     $form['registration'] = array(
+       '#type' => 'checkbox',
+       '#title' => t('Include in user registration form'),
+-      '#default_value' => $type->get('registration'),
++      '#default_value' => $type->registration,
+     );
+     return $form;
+   }
+ 
+   /**
+-   * Overrides EntityFormController::actions().
++   * {@inheritdoc}
+    */
+   protected function actions(array $form, array &$form_state) {
+     $actions = parent::actions($form, $form_state);
+-    if (module_exists('field_ui') && $this->getEntity($form_state)->isNew()) {
++    if (\Drupal::moduleHandler()
++        ->moduleExists('field_ui') && $this->getEntity($form_state)->isNew()
++    ) {
+       $actions['save_continue'] = $actions['submit'];
+       $actions['save_continue']['#value'] = t('Save and manage fields');
+-      $actions['save_continue']['#submit'][] = array($this, 'redirectToFieldUI');
++      $actions['save_continue']['#submit'][] = array(
++        $this,
++        'redirectToFieldUI'
++      );
+     }
+     return $actions;
+   }
+ 
+   /**
+-   * Overrides EntityFormController::save().
++   * {@inheritdoc}
+    */
+   public function save(array $form, array &$form_state) {
+-    $type = $this->getEntity($form_state);
++    $type = $this->entity;
+     $status = $type->save();
+ 
+     if ($status == SAVED_UPDATED) {
+@@ -69,23 +77,31 @@ class ProfileTypeFormController extends EntityFormController {
+     else {
+       drupal_set_message(t('%label profile type has been created.', array('%label' => $type->label())));
+     }
+-    $form_state['redirect'] = 'admin/people/profiles';
++    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
+   }
+ 
+   /**
+    * Form submission handler to redirect to Manage fields page of Field UI.
+    */
+   public function redirectToFieldUI(array $form, array &$form_state) {
+-    $type = $this->getEntity($form_state);
+-    $form_state['redirect'] = field_ui_bundle_admin_path('profile2', $type->id()) . '/fields';
++    $form_state['redirect_route'] = array(
++      'route_name' => 'field_ui.overview_profile2',
++      'route_parameters' => array(
++        'profile2_type' => $this->entity->id(),
++      ),
++    );
+   }
+ 
+   /**
+-   * Overrides EntityFormController::delete().
++   * {@inheritdoc}
+    */
+   public function delete(array $form, array &$form_state) {
+-    $type = $this->getEntity($form_state);
+-    $form_state['redirect'] = 'admin/people/profiles/manage/' . $type->id() . '/delete';
++    $form_state['redirect_route'] = array(
++      'route_name' => 'profile2.type_delete',
++      'route_parameters' => array(
++        'profile2_type' => $this->entity->id(),
++      ),
++    );
+   }
+ 
+ }
+diff --git a/lib/Drupal/profile2/ProfileTypeInterface.php b/lib/Drupal/profile2/ProfileTypeInterface.php
+new file mode 100644
+index 0000000..c85b572
+--- /dev/null
++++ b/lib/Drupal/profile2/ProfileTypeInterface.php
+@@ -0,0 +1,17 @@
++<?php
++
++/**
++ * @file
++ * Contains \Drupal\profile2\Entity\ProfileTypeInterface.
++ */
++
++namespace Drupal\profile2;
++
++use Drupal\Core\Config\Entity\ConfigEntityInterface;
++
++/**
++ * Provides an interface defining a profile type entity.
++ */
++interface ProfileTypeInterface extends ConfigEntityInterface {
++
++}
+diff --git a/lib/Drupal/profile2/ProfileTypeListController.php b/lib/Drupal/profile2/ProfileTypeListController.php
+index a94c0a4..2cccdb6 100644
+--- a/lib/Drupal/profile2/ProfileTypeListController.php
++++ b/lib/Drupal/profile2/ProfileTypeListController.php
+@@ -7,58 +7,62 @@
+ 
+ namespace Drupal\profile2;
+ 
+-use Drupal\Core\Config\Entity\ConfigEntityListController;
+ use Drupal\Core\Entity\EntityInterface;
++use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+ 
+ /**
+  * List controller for profile types.
+  */
+-class ProfileTypeListController extends ConfigEntityListController {
++class ProfileTypeListController extends ConfigEntityListBuilder {
+ 
+   /**
+-   * Overrides \Drupal\Core\Entity\EntityListController::buildHeader().
++   * {@inheritdoc}
+    */
+   public function buildHeader() {
+-    $row = parent::buildHeader();
+-    $operations = array_pop($row);
+-    $row['registration'] = t('Registration');
+-    $row['operations'] = $operations;
+-    return $row;
++    $header['type'] = t('Profile type');
++    $header['registration'] = t('Registration');
++    return $header + parent::buildHeader();
+   }
+ 
+   /**
+-   * Overrides \Drupal\Core\Entity\EntityListController::buildRow().
++   * {@inheritdoc}
+    */
+   public function buildRow(EntityInterface $entity) {
+-    $row = parent::buildRow($entity);
+-    $operations = array_pop($row);
+-    $row['registration'] = $entity->get('registration') ? t('Yes') : t('No');
+-    $row['operations'] = $operations;
+-    return $row;
++    $row['type'] = \Drupal::linkGenerator()
++      ->generateFromUrl($entity->label(), $entity->urlInfo());
++    $row['registration'] = $entity->registration ? t('Yes') : t('No');
++    return $row + parent::buildRow($entity);
+   }
+ 
+   /**
+-   * Overrides \Drupal\Core\Entity\EntityListController::getOperations().
++   * {@inheritdoc}
+    */
+   public function getOperations(EntityInterface $entity) {
+     $operations = parent::getOperations($entity);
+-    if (module_exists('field_ui')) {
+-      // Unlike other bundle entities, the most common operation for profile
+-      // types is to manage fields, so we suggest that as default operation.
+-      $uri = $entity->uri();
+-      $operations['manage-fields'] = array(
+-        'title' => t('Manage fields'),
+-        'href' => $uri['path'] . '/fields',
+-        'options' => $uri['options'],
+-        'weight' => 5,
+-      );
+-      $operations['manage-display'] = array(
+-        'title' => t('Manage display'),
+-        'href' => $uri['path'] . '/display',
+-        'options' => $uri['options'],
+-        'weight' => 6,
+-      );
++    // Remove manage display link.
++    if (isset($operations['manage-display'])) {
++      unset($operations['manage-display']);
+     }
++    // Place the edit operation after the operations added by field_ui.module
++    // which have the weights 15, 20, 25.
++    if (isset($operations['edit'])) {
++      $operations['edit'] = array(
++          'title' => t('Edit'),
++          'weight' => 30,
++        ) + $entity->urlInfo('edit-form')->toArray();
++    }
++    if (isset($operations['delete'])) {
++      $operations['delete'] = array(
++          'title' => t('Delete'),
++          'weight' => 35,
++        ) + $entity->urlInfo('delete-form')->toArray();
++    }
++    // Sort the operations to normalize link order.
++    uasort($operations, array(
++        'Drupal\Component\Utility\SortArray',
++        'sortByWeightElement'
++      ));
++
+     return $operations;
+   }
+ 
+diff --git a/lib/Drupal/profile2/ProfileTypeStorageController.php b/lib/Drupal/profile2/ProfileTypeStorageController.php
+index fddc533..eb8dbc3 100644
+--- a/lib/Drupal/profile2/ProfileTypeStorageController.php
++++ b/lib/Drupal/profile2/ProfileTypeStorageController.php
+@@ -2,54 +2,55 @@
+ 
+ /**
+  * @file
+- * Contains \Drupal\profile2\ProfileTypeController.
++ * Contains \Drupal\profile2\ProfileTypeStorageController.
+  */
+ 
+ namespace Drupal\profile2;
+ 
+-use Drupal\Core\Config\Entity\ConfigStorageController;
+-use Drupal\Core\Entity\EntityInterface;
+-
+-/**
+- * Controller class for profile types.
+- */
+-class ProfileTypeStorageController extends ConfigStorageController {
+-
+-  /**
+-   * Overrides ConfigStorageController::postSave().
+-   */
+-  protected function postSave(EntityInterface $entity, $update) {
+-    parent::postSave($entity, $update);
+-
+-    if (!$update) {
+-      field_attach_create_bundle('profile2', $entity->id());
+-    }
+-    elseif ($entity->original->id() != $entity->id()) {
+-      field_attach_rename_bundle('profile2', $entity->original->id(), $entity->id());
+-    }
+-  }
+-
+-  /**
+-   * Overrides ConfigStorageController::preDelete().
+-   */
+-  protected function preDelete($entities) {
+-    parent::preDelete($entities);
+-
+-    // Delete all profiles of this type.
+-    if ($profiles = entity_load_multiple_by_properties('profile2', array('type' => array_keys($entities)))) {
+-      entity_get_controller('profile2')->delete($profiles);
+-    }
+-  }
+-
+-  /**
+-   * Overrides ConfigStorageController::postDelete().
+-   */
+-  protected function postDelete($entities) {
+-    parent::postDelete($entities);
+-
+-    foreach ($entities as $entity) {
+-      field_attach_delete_bundle('profile2', $entity->id());
+-    }
+-  }
+-
+-}
++//
++//use Drupal\Core\Config\Entity\ConfigStorageController;
++//use Drupal\Core\Entity\EntityInterface;
++//
++///**
++// * Controller class for profile types.
++// */
++//class ProfileTypeStorageController extends ConfigStorageController {
++//
++//  /**
++//   * Overrides ConfigStorageController::postSave().
++//   */
++//  protected function postSave(EntityInterface $entity, $update) {
++//    parent::postSave($entity, $update);
++//
++//    if (!$update) {
++//      field_attach_create_bundle('profile2', $entity->id());
++//    }
++//    elseif ($entity->original->id() != $entity->id()) {
++//      field_attach_rename_bundle('profile2', $entity->original->id(), $entity->id());
++//    }
++//  }
++//
++//  /**
++//   * Overrides ConfigStorageController::preDelete().
++//   */
++//  protected function preDelete($entities) {
++//    parent::preDelete($entities);
++//
++//    // Delete all profiles of this type.
++//    if ($profiles = entity_load_multiple_by_properties('profile2', array('type' => array_keys($entities)))) {
++//      entity_get_controller('profile2')->delete($profiles);
++//    }
++//  }
++//
++//  /**
++//   * Overrides ConfigStorageController::postDelete().
++//   */
++//  protected function postDelete($entities) {
++//    parent::postDelete($entities);
++//
++//    foreach ($entities as $entity) {
++//      field_attach_delete_bundle('profile2', $entity->id());
++//    }
++//  }
++//
++//}
+diff --git a/profile2.admin.inc b/profile2.admin.inc
+index 18756ba..651f134 100644
+--- a/profile2.admin.inc
++++ b/profile2.admin.inc
+@@ -5,7 +5,7 @@
+  * Profile type editing UI.
+  */
+ 
+-use Drupal\profile2\Plugin\Core\Entity\ProfileType;
++use Drupal\profile2\Entity\ProfileType;
+ 
+ /**
+  * Page callback; Lists available ProfileType objects.
+@@ -30,7 +30,7 @@ function profile2_type_add() {
+ /**
+  * Page callback: Presents the form for editing a profile type.
+  *
+- * @param Drupal\profile2\Plugin\Core\Entity\ProfileType $type
++ * @param Drupal\profile2\Entity\ProfileType $type
+  *   The profile type to edit.
+  *
+  * @return array
+@@ -44,7 +44,7 @@ function profile2_type_edit(ProfileType $type) {
+ /**
+  * Form constructor to delete a ProfileType object.
+  *
+- * @param Drupal\profile2\Plugin\Core\Entity\ProfileType $type
++ * @param Drupal\profile2\Entity\ProfileType $type
+  *   The ProfileType object to delete.
+  */
+ function profile2_type_delete_form($form, &$form_state, ProfileType $type) {
+diff --git a/profile2.api.php b/profile2.api.php
+index d1cbaf6..0fdba18 100644
+--- a/profile2.api.php
++++ b/profile2.api.php
+@@ -19,9 +19,9 @@
+  * @param string $op
+  *   The operation being performed. One of 'view', 'edit' (being the same as
+  *   'create' or 'update'), or 'delete'.
+- * @param Drupal\profile2\Plugin\Core\Entity\Profile $profile
++ * @param Drupal\profile2\Entity\Profile $profile
+  *   A profile to check access for.
+- * @param Drupal\user\Plugin\Core\Entity\User $account
++ * @param Drupal\user\Entity\User $account
+  *   The user performing the operation; the currently logged in user by default.
+  *
+  * @return bool
+@@ -33,7 +33,7 @@
+  *   - NULL or nothing to not affect the operation. If no module explicitly
+  *     grants access, access is denied.
+  */
+-function hook_profile2_access($op, Drupal\profile2\Plugin\Core\Entity\Profile $profile, Drupal\user\Plugin\Core\Entity\User $account) {
++function hook_profile2_access($op, Drupal\profile2\Entity\Profile $profile, Drupal\user\Entity\User $account) {
+   // Explicitly deny access for a 'secret' profile type.
+   if ($profile->type == 'secret' && !user_access('custom permission')) {
+     return FALSE;
+diff --git a/profile2.info.yml b/profile2.info.yml
+index dc3cd5b..c6cd05a 100644
+--- a/profile2.info.yml
++++ b/profile2.info.yml
+@@ -1,9 +1,10 @@
+ name: Profile
++type: module
+ description: 'Provides configurable user profiles.'
+ package: Core
+ core: 8.x
+ version: VERSION
+-configure: admin/people/profiles
++configure: profile2.overview_types
+ dependencies:
+   - user
+   - field
+diff --git a/profile2.local_actions.yml b/profile2.local_actions.yml
+new file mode 100644
+index 0000000..b7ec437
+--- /dev/null
++++ b/profile2.local_actions.yml
+@@ -0,0 +1,5 @@
++profile2_type_add:
++  route_name: profile2.type_add
++  title: 'Add profile type'
++  appears_on:
++    - profile2.overview_types
+diff --git a/profile2.local_tasks.yml b/profile2.local_tasks.yml
+new file mode 100644
+index 0000000..5948085
+--- /dev/null
++++ b/profile2.local_tasks.yml
+@@ -0,0 +1,22 @@
++profile2.overview_types:
++  title: 'Profile types'
++  route_name: profile2.overview_types
++  base_route: user.admin_account
++  weight: 20
++
++profile2.user_edit_tab:
++  route_name: user.edit
++  title: Edit
++  base_route: user.edit
++
++profile2.account_edit_tab:
++  route_name: profile2.account_edit
++  title: Account
++  parent_id: user.edit
++  weight: -10
++
++profile2.account_edit_type_tab:
++  route_name: profile2.account_edit_type
++  title: Profile type
++  parent_id: user.edit
++#  derivative: 'Drupal\profile2\Plugin\Derivative\ThemeLocalTask'
+diff --git a/profile2.module b/profile2.module
+index adaf6e0..152fbcd 100644
+--- a/profile2.module
++++ b/profile2.module
+@@ -5,38 +5,30 @@
+  * Support for configurable user profiles.
+  */
+ 
+-use Drupal\entity\Plugin\Core\Entity\EntityDisplay;
+-use Drupal\profile2\Plugin\Core\Entity\Profile;
+-use Drupal\profile2\Plugin\Core\Entity\ProfileType;
+-use Drupal\user\Plugin\Core\Entity\User;
++use Drupal\Core\Entity\Display\EntityDisplayInterface;
++use Drupal\profile2\Entity\Profile;
++use Drupal\profile2\Entity\ProfileType;
++use Drupal\user\Entity\User;
++use Drupal\user\UserInterface;
++use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+ 
+ /**
+  * Implements hook_entity_bundle_info().
+  */
+ function profile2_entity_bundle_info() {
+-  $info = array();
+-  $config_names = config_get_storage_names_with_prefix('profile2.type.');
+-  foreach ($config_names as $config_name) {
+-    $config = config($config_name);
+-    $id = $config->get('id');
+-    $label = $config->get('label');
+-    $info['profile2'][$id] = array(
+-      'label' => $label,
+-      'admin' => array(
+-        'path' => 'admin/people/profiles/manage/%profile2_type',
+-        'real path' => 'admin/people/profiles/manage/' . $id,
+-        'bundle argument' => 4,
+-        'access arguments' => array('administer profile types'),
+-      ),
+-    );
++  $bundles = array();
++  foreach (\Drupal::configFactory()
++             ->listAll('profile2.type.') as $config_name) {
++    $config = \Drupal::config($config_name);
++    $bundles['profile2'][$config->get('id')]['label'] = $config->get('label');
+   }
+-  return $info;
++  return $bundles;
+ }
+ 
+ /**
+  * Entity URI callback for profiles.
+  *
+- * @param Drupal\profile2\Plugin\Core\Entity\Profile $profile
++ * @param Drupal\profile2\Entity\Profile $profile
+  *   A profile entity.
+  */
+ function profile2_profile_uri(Profile $profile) {
+@@ -48,7 +40,7 @@ function profile2_profile_uri(Profile $profile) {
+ /**
+  * Entity URI callback for profile types.
+  *
+- * @param Drupal\profile2\Plugin\Core\Entity\ProfileType $profile_type
++ * @param Drupal\profile2\Entity\ProfileType $profile_type
+  *   A profile type entity.
+  */
+ function profile2_profile_type_uri(ProfileType $profile_type) {
+@@ -58,94 +50,17 @@ function profile2_profile_type_uri(ProfileType $profile_type) {
+ }
+ 
+ /**
+- * Implements hook_menu().
+- */
+-function profile2_menu() {
+-  $items['admin/people/profiles'] = array(
+-    'title' => 'Profile types',
+-    'description' => 'Manage profile types, including fields.',
+-    'page callback' => 'profile2_type_list_page',
+-    'access arguments' => array('administer profile types'),
+-    'type' => MENU_LOCAL_TASK,
+-    // @todo User module: Apply custom/higher weights to Permissions and Roles.
+-    'weight' => -1,
+-    'file' => 'profile2.admin.inc',
+-  );
+-  $items['admin/people/profiles/add'] = array(
+-    'title' => 'Add profile type',
+-    'page callback' => 'profile2_type_add',
+-    'access arguments' => array('administer profile types'),
+-    'type' => MENU_LOCAL_ACTION,
+-    'file' => 'profile2.admin.inc',
+-  );
+-  $items['admin/people/profiles/manage/%profile2_type'] = array(
+-    'title' => 'Edit profile type',
+-    'title callback' => 'entity_page_label',
+-    'title arguments' => array(4),
+-    'page callback' => 'profile2_type_edit',
+-    'page arguments' => array(4),
+-    'access arguments' => array('administer profile types'),
+-    'file' => 'profile2.admin.inc',
+-  );
+-  $items['admin/people/profiles/manage/%profile2_type/edit'] = array(
+-    'title' => 'Edit',
+-    'type' => MENU_DEFAULT_LOCAL_TASK,
+-  );
+-  $items['admin/people/profiles/manage/%profile2_type/delete'] = array(
+-    'title' => 'Delete',
+-    'page callback' => 'drupal_get_form',
+-    'page arguments' => array('profile2_type_delete_form', 4),
+-    'access arguments' => array('administer profile types'),
+-    'type' => MENU_LOCAL_TASK,
+-    'context' => MENU_CONTEXT_INLINE,
+-    'file' => 'profile2.admin.inc',
+-  );
+-
+-  // @todo Move into User module.
+-  $items['user/%user/edit/account'] = array(
+-    'title' => 'Account',
+-    'type' => MENU_DEFAULT_LOCAL_TASK,
+-  );
+-  $items['user/%user/edit/%profile2_menu_arg'] = array(
+-    // @see http://drupal.org/node/1863502
+-    'load arguments' => array(1, 'edit'),
+-    'load arguments' => array('%map', 'edit'),
+-    'title' => 'Edit profile',
+-    'title callback' => 'entity_page_label',
+-    'title arguments' => array(3),
+-    'access callback' => 'profile2_access',
+-    'access arguments' => array(3, 'edit'),
+-    'page callback' => 'entity_get_form',
+-    'page arguments' => array(3),
+-    'type' => MENU_LOCAL_TASK,
+-  );
+-  $items['user/%user/edit/%profile2_menu_arg/delete'] = array(
+-    // @see http://drupal.org/node/1863502
+-    'load arguments' => array(1, 'delete'),
+-    'load arguments' => array('%map', 'delete'),
+-    'title' => 'Delete profile',
+-    'access callback' => 'profile2_access',
+-    'access arguments' => array(3, 'delete'),
+-    'page callback' => 'drupal_get_form',
+-    'page arguments' => array('profile2_delete_confirm_form', 3),
+-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+-    'file' => 'profile2.pages.inc',
+-  );
+-  return $items;
+-}
+-
+-/**
+  * Menu argument callback; Loads a profile of a certain type for a given user.
+  *
+  * @param string $type_id
+  *   The profile type ID to load.
+- * @param Drupal\user\Plugin\Core\Entity\User $account
++ * @param Drupal\user\Entity\User $account
+  *   The user account for which to load the profile.
+  * @param string $op
+  *   (optional) The operation to perform. If 'edit' and if there is no profile
+  *   for the user account yet, a new profile entity will be created on the fly.
+  *
+- * @return Drupal\profile2\Plugin\Core\Entity\Profile|false
++ * @return Drupal\profile2\Entity\Profile|false
+  *   The profile of type $type_id of the user account, or FALSE.
+  */
+ // @see http://drupal.org/node/1863502
+@@ -180,44 +95,34 @@ function profile2_menu_arg_load($type_id, $map, $op = '') {
+ /**
+  * Implements hook_menu_local_tasks().
+  */
+-function profile2_menu_local_tasks(&$data, $router_item, $root_path) {
+-  if ($root_path === 'user/%/edit' || $root_path === 'user/%/edit/%') {
+-    $tabs = &$data['tabs'][1];
+-    // Determine the currently selected tab, if any.
+-    $selected_index = -1;
+-    $selected_id = '';
+-    foreach ($tabs as $index => $tab) {
+-      if (isset($tab['#link']['path']) && $tab['#link']['path'] == 'user/%/edit/%') {
+-        $selected_index = $index;
+-        $selected_id = $router_item['original_map'][3];
+-      }
++function profile2_menu_local_tasks(&$data, $route_name) {
++  // Remove Manage display tab.
++  if (isset($data['tabs'][0]['field_ui.fields:display_overview_profile2'])) {
++    unset($data['tabs'][0]['field_ui.fields:display_overview_profile2']);
++  }
++  // Add profile type tabs.
++  if (($route_name == 'profile2.account_edit') && (isset($data['tabs'][1]))) {
++    $tabs = & $data['tabs'][1];
++    if (isset($tabs['profile2.account_edit_type_tab'])) {
++      unset($tabs['profile2.account_edit_type_tab']);
+     }
+-    // Expand the dynamic %profile_menu argument into a tab for each type.
+-    $types = entity_load_multiple('profile2_type');
+-    foreach ($types as $type) {
+-      // Do not expose profile types that do not have any fields attached yet.
+-      if (!field_info_instances('profile2', $type->id())) {
+-        continue;
+-      }
+-      // If the current page is the active tab registered in hook_menu(), then
+-      // the menu router item with the dynamic argument will be exposed already.
+-      // We must not duplicate that tab, but in order to ensure that all of our
+-      // tabs appear in a consistent order when switching between tabs, we need
+-      // to re-inject it.
+-      if ($type->id() === $selected_id) {
+-        $tabs[$selected_index]['#link']['title'] = $type->label();
+-        $tabs[] = $tabs[$selected_index];
+-        unset($tabs[$selected_index]);
+-        continue;
+-      }
+-      $tabs[] = array(
++
++    foreach (\Drupal::configFactory()
++               ->listAll('profile2.type.') as $config_name) {
++      $config = \Drupal::config($config_name);
++      $tabs["profile2.account_edit_type_tab:" . $config->get('id')] = array(
+         '#theme' => 'menu_local_task',
+         '#link' => array(
+-          'title' => $type->label(),
+-          'href' => $router_item['tab_root_href'] . '/edit/' . $type->id(),
+-        ),
++          'title' => $config->get('label'),
++          'route_name' => 'profile2.account_edit_type',
++          'route_parameters' => array(
++            'user' => $tabs['profile2.account_edit_tab']['#link']['route_parameters']['user'],
++            'profile_type' => $config->get('id'),
++          )
++        )
+       );
+     }
++
+   }
+ }
+ 
+@@ -227,7 +132,7 @@ function profile2_menu_local_tasks(&$data, $router_item, $root_path) {
+  * @param string $id
+  *   The machine-readable name of a profile type to load.
+  *
+- * @return Drupal\profile2\Plugin\Core\Entity\ProfileType|false
++ * @return Drupal\profile2\Entity\ProfileType|false
+  *   A profile type array or FALSE if $type does not exist.
+  */
+ function profile2_type_load($id) {
+@@ -288,7 +193,9 @@ function profile2_user_predelete(User $account) {
+ /**
+  * Implements hook_user_view().
+  */
+-function profile2_user_view(User $account, EntityDisplay $display, $view_mode, $langcode) {
++//function profile2_user_view(User $account, EntityDisplay $display, $view_mode, $langcode) {
++
++function profile2_user_view(UserInterface $account, EntityViewDisplayInterface $display, $view_mode, $langcode) {
+   // Only attach profiles for the full account view.
+   if ($view_mode != 'full') {
+     return;
+@@ -308,6 +215,8 @@ function profile2_user_view(User $account, EntityDisplay $display, $view_mode, $
+       }
+     }
+   }
++
++
+ }
+ 
+ /**
+diff --git a/profile2.pages.inc b/profile2.pages.inc
+index 1df2ba6..1d9dae9 100644
+--- a/profile2.pages.inc
++++ b/profile2.pages.inc
+@@ -5,12 +5,12 @@
+  * Page and form callbacks for profiles.
+  */
+ 
+-use Drupal\profile2\Plugin\Core\Entity\Profile;
++use Drupal\profile2\Entity\Profile;
+ 
+ /**
+  * Form constructor to confirm deletion of a profile.
+  *
+- * @param Drupal\profile2\Plugin\Core\Entity\Profile $profile
++ * @param Drupal\profile2\Entity\Profile $profile
+  *   The profile to delete.
+  *
+  * @return array
+diff --git a/profile2.routing.yml b/profile2.routing.yml
+new file mode 100644
+index 0000000..f04beab
+--- /dev/null
++++ b/profile2.routing.yml
+@@ -0,0 +1,53 @@
++profile2.overview_types:
++  path: '/admin/people/profiles'
++  defaults:
++    _entity_list: 'profile2_type'
++    _title: 'Profile types'
++  requirements:
++    _permission: 'administer profile types'
++
++profile2.type_add:
++  path: '/admin/people/profiles/add'
++  defaults:
++    _entity_form: 'profile2_type.add'
++    _title: 'Add'
++  requirements:
++    _permission: 'administer profile types'
++
++profile2.type_edit:
++  path: '/admin/people/profiles/manage/{profile2_type}/edit'
++  defaults:
++    _entity_form: 'profile2_type.edit'
++    _title: 'Edit'
++  requirements:
++    _permission: 'administer profile types'
++#    _entity_access: 'profile2_type.update'
++
++profile2.type_delete:
++  path: '/admin/people/profiles/manage/{profile2_type}/delete'
++  defaults:
++    _entity_form: 'profile2_type.delete'
++    _title: 'Edit'
++  requirements:
++    _permission: 'administer profile types'
++#    _entity_access: 'profile2_type.delete'
++
++profile2.account_edit:
++  path: '/user/{user}/edit'
++  defaults:
++    _entity_form: 'user.default'
++    _title_callback: 'Drupal\user\Controller\UserController::userTitle'
++  options:
++    _admin_route: TRUE
++  requirements:
++    _entity_access: 'user.update'
++
++profile2.account_edit_type:
++  path: '/user/{user}/edit'
++  defaults:
++    _entity_form: 'profile2.default'
++    _title: 'Profile type'
++  options:
++      _admin_route: TRUE
++  requirements:
++    _entity_access: 'user.update'

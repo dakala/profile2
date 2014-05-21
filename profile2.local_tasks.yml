@@ -1,0 +1,22 @@
+profile2.overview_types:
+  title: 'Profile types'
+  route_name: profile2.overview_types
+  base_route: user.admin_account
+  weight: 20
+
+profile2.user_edit_tab:
+  route_name: user.edit
+  title: Edit
+  base_route: user.edit
+
+profile2.account_edit_tab:
+  route_name: profile2.account_edit
+  title: Account
+  parent_id: user.edit
+  weight: -10
+
+profile2.account_edit_type_tab:
+  route_name: profile2.account_edit_type
+  title: Profile type
+  parent_id: user.edit
+#  derivative: 'Drupal\profile2\Plugin\Derivative\ThemeLocalTask'

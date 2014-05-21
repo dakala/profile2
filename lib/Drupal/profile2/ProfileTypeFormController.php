@@ -7,7 +7,7 @@
 
 namespace Drupal\profile2;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityFormController;
 
 /**
@@ -16,9 +16,12 @@ use Drupal\Core\Entity\EntityFormController;
 class ProfileTypeFormController extends EntityFormController {
 
   /**
-   * Overrides EntityFormController::form().
+   * {@inheritdoc}
    */
-  function form(array $form, array &$form_state, EntityInterface $type) {
+  function form(array $form, array &$form_state) {
+    $form = parent::form($form, $form_state);
+    $type = $this->entity;
+
     $form['label'] = array(
       '#title' => t('Label'),
       '#type' => 'textfield',
@@ -30,7 +33,7 @@ class ProfileTypeFormController extends EntityFormController {
     $form['id'] = array(
       '#type' => 'machine_name',
       '#default_value' => $type->id(),
-      '#maxlength' => 32,
+      '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#machine_name' => array(
         'exists' => 'profile2_type_load',
       ),
@@ -38,29 +41,34 @@ class ProfileTypeFormController extends EntityFormController {
     $form['registration'] = array(
       '#type' => 'checkbox',
       '#title' => t('Include in user registration form'),
-      '#default_value' => $type->get('registration'),
+      '#default_value' => $type->registration,
     );
     return $form;
   }
 
   /**
-   * Overrides EntityFormController::actions().
+   * {@inheritdoc}
    */
   protected function actions(array $form, array &$form_state) {
     $actions = parent::actions($form, $form_state);
-    if (module_exists('field_ui') && $this->getEntity($form_state)->isNew()) {
+    if (\Drupal::moduleHandler()
+        ->moduleExists('field_ui') && $this->getEntity($form_state)->isNew()
+    ) {
       $actions['save_continue'] = $actions['submit'];
       $actions['save_continue']['#value'] = t('Save and manage fields');
-      $actions['save_continue']['#submit'][] = array($this, 'redirectToFieldUI');
+      $actions['save_continue']['#submit'][] = array(
+        $this,
+        'redirectToFieldUI'
+      );
     }
     return $actions;
   }
 
   /**
-   * Overrides EntityFormController::save().
+   * {@inheritdoc}
    */
   public function save(array $form, array &$form_state) {
-    $type = $this->getEntity($form_state);
+    $type = $this->entity;
     $status = $type->save();
 
     if ($status == SAVED_UPDATED) {
@@ -69,23 +77,31 @@ class ProfileTypeFormController extends EntityFormController {
     else {
       drupal_set_message(t('%label profile type has been created.', array('%label' => $type->label())));
     }
-    $form_state['redirect'] = 'admin/people/profiles';
+    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
   }
 
   /**
    * Form submission handler to redirect to Manage fields page of Field UI.
    */
   public function redirectToFieldUI(array $form, array &$form_state) {
-    $type = $this->getEntity($form_state);
-    $form_state['redirect'] = field_ui_bundle_admin_path('profile2', $type->id()) . '/fields';
+    $form_state['redirect_route'] = array(
+      'route_name' => 'field_ui.overview_profile2',
+      'route_parameters' => array(
+        'profile2_type' => $this->entity->id(),
+      ),
+    );
   }
 
   /**
-   * Overrides EntityFormController::delete().
+   * {@inheritdoc}
    */
   public function delete(array $form, array &$form_state) {
-    $type = $this->getEntity($form_state);
-    $form_state['redirect'] = 'admin/people/profiles/manage/' . $type->id() . '/delete';
+    $form_state['redirect_route'] = array(
+      'route_name' => 'profile2.type_delete',
+      'route_parameters' => array(
+        'profile2_type' => $this->entity->id(),
+      ),
+    );
   }
 
 }
