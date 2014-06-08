@@ -1,0 +1,44 @@
+profile2.overview_types:
+  path: '/admin/people/profiles'
+  defaults:
+    _entity_list: 'profile2_type'
+    _title: 'Profile types'
+  requirements:
+    _permission: 'administer profile types'
+
+profile2.type_add:
+  path: '/admin/people/profiles/add'
+  defaults:
+    _entity_form: 'profile2_type.add'
+    _title: 'Add'
+  requirements:
+    _permission: 'administer profile types'
+
+profile2.type_edit:
+  path: '/admin/people/profiles/manage/{profile2_type}'
+  defaults:
+    _entity_form: 'profile2_type.edit'
+    _title: 'Edit'
+  requirements:
+    _permission: 'administer profile types'
+#    _entity_access: 'profile2_type.update'
+
+profile2.type_delete:
+  path: '/admin/people/profiles/manage/{profile2_type}/delete'
+  defaults:
+    _entity_form: 'profile2_type.delete'
+    _title: 'Delete'
+  requirements:
+    _permission: 'administer profile types'
+#    _entity_access: 'profile2_type.delete'
+
+profile2.account_edit_profile:
+  path: '/user/{user}/edit/{type}'
+  defaults:
+    _content: '\Drupal\profile2\Controller\ProfileController::add'
+    _title: 'Profile'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _entity_access: 'user.update'
+    _permission: 'create profiles'

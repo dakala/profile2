@@ -1,0 +1,6 @@
+id: main
+label: 'Personal information'
+registration: false
+weight: 0
+status: true
+langcode: en

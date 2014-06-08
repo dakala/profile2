@@ -1,0 +1,25 @@
+profile2.type.*:
+  type: mapping
+  label: 'Profile type settings'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readable name'
+    uuid:
+      type: string
+      label: 'UUID'
+    label:
+      type: label
+      label: 'Label'
+    registration:
+      type: boolean
+      label: 'Registration'
+    weight:
+      type: integer
+      label: 'Weight'
+    status:
+      type: boolean
+      label: 'Status'
+    langcode:
+      type: string
+      label: 'Default language'
