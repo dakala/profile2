@@ -21,7 +21,7 @@ class ProfileFormController extends ContentEntityForm {
   public function buildEntity(array $form, array &$form_state) {
     $entity = parent::buildEntity($form, $form_state);
     if ($entity->isNew()) {
-      $entity->setCreated(REQUEST_TIME);
+      $entity->setCreatedTime(REQUEST_TIME);
     }
     return $entity;
   }

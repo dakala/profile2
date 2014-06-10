@@ -8,8 +8,6 @@
 
 namespace Drupal\profile2\Entity;
 
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\profile2\ProfileTypeInterface;

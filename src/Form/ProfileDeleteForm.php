@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\block\Form\CustomBlockDeleteForm.
+ * Contains \Drupal\profile2\Form\ProfileDeleteForm.
  */
 
 namespace Drupal\profile2\Form;

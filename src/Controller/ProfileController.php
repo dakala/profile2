@@ -2,15 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\node\Controller\NodeController.
+ * Contains \Drupal\profile2\Controller\ProfileController.
  */
 
 namespace Drupal\profile2\Controller;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\profile2\ProfileTypeInterface;
-use Drupal\profile2\ProfileInterface;
 
 /**
  * Returns responses for Node routes.

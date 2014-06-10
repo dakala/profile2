@@ -10,10 +10,7 @@ namespace Drupal\profile2\Entity;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Language\Language;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\profile2\ProfileInterface;
-use Drupal\user\UserInterface;
 
 /**
  * Defines the profile entity class.
@@ -51,7 +48,6 @@ use Drupal\user\UserInterface;
  * )
  */
 class Profile extends ContentEntityBase implements ProfileInterface {
-
 
   /**
    * {@inheritdoc}
@@ -178,14 +174,14 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   /**
    * {@inheritdoc}
    */
-  public function getCreated() {
+  public function getCreatedTime() {
     return $this->get('created')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setCreated($timestamp) {
+  public function setCreatedTime($timestamp) {
     $this->set('created', $timestamp);
     return $this;
   }

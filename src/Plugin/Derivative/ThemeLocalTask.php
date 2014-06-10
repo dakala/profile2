@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\system\Plugin\Derivative\ThemeLocalTask.
+ * Contains \Drupal\profile2\Plugin\Derivative\ThemeLocalTask.
  */
 
 namespace Drupal\profile2\Plugin\Derivative;
@@ -28,7 +28,7 @@ class ThemeLocalTask extends DerivativeBase {
         return $field_definition instanceof FieldInstanceConfigInterface;
       });
 
-      if(!$instances) {
+      if (!$instances) {
         continue;
       }
 
