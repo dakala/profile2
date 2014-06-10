@@ -32,8 +32,8 @@ profile2.type_delete:
     _permission: 'administer profile types'
 #    _entity_access: 'profile2_type.delete'
 
-profile2.account_edit_profile:
-  path: '/user/{user}/edit/{type}'
+profile2.account_add_profile:
+  path: '/user/{user}/add/{type}'
   defaults:
     _content: '\Drupal\profile2\Controller\ProfileController::add'
     _title: 'Profile'

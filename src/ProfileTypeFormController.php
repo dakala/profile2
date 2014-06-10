@@ -43,6 +43,11 @@ class ProfileTypeFormController extends EntityForm {
       '#title' => t('Include in user registration form'),
       '#default_value' => $type->registration,
     );
+    $form['multiple'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow multiple profiles'),
+      '#default_value' => $type->multiple,
+    );
     return $form;
   }
 

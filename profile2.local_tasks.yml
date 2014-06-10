@@ -16,8 +16,8 @@ profile2.account_edit:
   parent_id: user.edit
   weight: -100
 
-profile2.account_edit_profile:
-  route_name: profile2.account_edit_profile
-  title: 'profileX'
+profile2.account_add_profile:
+  route_name: profile2.account_add_profile
+  title: 'Add new profile'
   parent_id: user.edit
   derivative: Drupal\profile2\Plugin\Derivative\ThemeLocalTask

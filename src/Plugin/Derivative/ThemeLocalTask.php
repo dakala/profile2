@@ -9,6 +9,7 @@ namespace Drupal\profile2\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DerivativeBase;
 use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\Component\Utility\Unicode;
 
 /**
  * Provides dynamic tabs based on active themes.
@@ -32,12 +33,16 @@ class ThemeLocalTask extends DerivativeBase {
         continue;
       }
 
+      // @todo: Expose profile types that users may create - either they have 0 of non-multiple or multiple.
+
       $this->derivatives[$config_name] = $base_plugin_definition;
-      $this->derivatives[$config_name]['title'] = $config->get('label');
+      $this->derivatives[$config_name]['title'] = \Drupal::translation()
+        ->translate('Add @type profile', array('@type' => Unicode::strtolower($config->get('label'))));
       $this->derivatives[$config_name]['route_parameters'] = array('type' => $config->get('id'));
     }
 
     return $this->derivatives;
   }
+
 
 }

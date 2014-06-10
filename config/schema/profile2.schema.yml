@@ -14,6 +14,9 @@ profile2.type.*:
     registration:
       type: boolean
       label: 'Registration'
+    multiple:
+      type: boolean
+      label: 'Allow multiple profiles'
     weight:
       type: integer
       label: 'Weight'

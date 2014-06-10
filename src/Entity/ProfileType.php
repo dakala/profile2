@@ -72,6 +72,13 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
   public $registration = FALSE;
 
   /**
+   * Whether the profile type allows multiple profiles.
+   *
+   * @var boolean
+   */
+  public $multiple = FALSE;
+
+  /**
    * The weight of the profile type compared to others.
    *
    * @var integer

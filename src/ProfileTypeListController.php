@@ -21,6 +21,7 @@ class ProfileTypeListController extends ConfigEntityListBuilder {
   public function buildHeader() {
     $header['type'] = t('Profile type');
     $header['registration'] = t('Registration');
+    $header['multiple'] = t('Allow multiple profiles');
     return $header + parent::buildHeader();
   }
 
@@ -31,6 +32,7 @@ class ProfileTypeListController extends ConfigEntityListBuilder {
     $row['type'] = \Drupal::linkGenerator()
       ->generateFromUrl($entity->label(), $entity->urlInfo());
     $row['registration'] = $entity->registration ? t('Yes') : t('No');
+    $row['multiple'] = $entity->multiple ? t('Yes') : t('No');
     return $row + parent::buildRow($entity);
   }
 
