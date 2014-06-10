@@ -120,21 +120,14 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    * Overrides Entity::id().
    */
   public function id() {
-    return isset($this->pid) ? $this->pid : NULL;
+    return $this->get('pid')->value;
   }
 
   /**
    * Overrides Entity::label().
    */
-  public function label($langcode = NULL) {
-    // If this profile has a custom label, use it. Otherwise, use the label of
-    // the profile type.
-    if (isset($this->label) && $this->label !== '') {
-      return $this->label;
-    }
-    else {
-      return entity_load('profile2_type', $this->getType())->label($langcode);
-    }
+  public function label() {
+    return $this->get('label')->value;
   }
 
   /**
@@ -200,7 +193,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   /**
    * {@inheritdoc}
    */
-  public function getChanged() {
+  public function getChangedTime() {
     return $this->get('changed')->value;
   }
 
