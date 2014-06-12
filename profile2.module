@@ -11,6 +11,7 @@ use Drupal\profile2\Entity\ProfileType;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Component\Utility\String;
 
 /**
  * Entity URI callback for profiles.
@@ -98,39 +99,38 @@ function profile2_permission() {
 }
 
 /**
- * Implements hook_user_predelete().
+ * Implements hook_user_view().
  */
-//function profile2_user_predelete(User $account) {
-//  if ($profiles = entity_load_multiple_by_properties('profile2', array('uid' => $account->id()))) {
-//    entity_get_controller('profile2')->delete($profiles);
-//  }
-//}
-
 /**
  * Implements hook_user_view().
  */
-//function profile2_user_view(UserInterface $account, EntityViewDisplayInterface $display, $view_mode, $langcode) {
-//  // Only attach profiles for the full account view.
-//  if ($view_mode != 'full') {
-//    return;
-//  }
-//  foreach (entity_load_multiple('profile2_type') as $id => $type) {
-//    $profiles = entity_load_multiple_by_properties('profile2', array(
-//      'uid' => $account->id(),
-//      'type' => $id,
-//    ));
-//    foreach ($profiles as $profile) {
-//      if ($profile->access('view')) {
-//        $build = entity_render_controller('profile2')->view($profile, 'account');
-//        $build += array(
-//          '#prefix' => '<a id="profile-' . $profile->bundle() . '"></a>',
-//        );
-//        $account->content['profile'][$id][$profile->id()] = $build;
-//      }
-//    }
-//  }
-//
-//}
+function profile2_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode, $langcode) {
+  // Only attach profiles for the full account view.
+  if ($view_mode != 'full') {
+    return;
+  }
+  // Position profiles at the bottom of account page.
+  $weight = 100;
+  foreach (\Drupal::configFactory()
+             ->listAll('profile2.type.') as $config_name) {
+    $config = \Drupal::config($config_name);
+
+    $profiles = entity_load_multiple_by_properties('profile2', array(
+      'uid' => $account->id(),
+      'type' => $config->get('id'),
+    ));
+
+    if (isset($profiles)) {
+      $build['profiles']['#weight'] = $weight + $config->get('weight');
+      $build['profiles'][$config->get('id')] = array(
+        '#theme' => 'profile_items',
+        '#profile_items' => $profiles,
+        '#profile_type' => $config->get('label'),
+      );
+    }
+  }
+  $build['#attached']['library'][] = 'profile2/drupal.profile2-items';
+}
 
 /**
  * Implements hook_form_FORM_ID_alter() for user_register_form().
@@ -159,221 +159,6 @@ function profile2_permission() {
 //}
 
 /**
- * Attaches the profile forms of the profiles set in $form_state['profiles'].
- *
- * Modules may alter the profile2 entity form regardless to which form it is
- * attached by making use of hook_form_profile2_form_alter().
- *
- * @param $form
- *   The form to which to attach the profile2 form. For each profile the form
- *   is added to @code $form['profile_' . $profile->type] @endcode. This helper
- *   also adds in a validation and a submit handler caring for the attached
- *   profile forms.
- *
- * @see profile2_user_form_validate()
- * @see profile2_user_form_submit()
- */
-function profile2_attach_form(&$form, &$form_state) {
-//  foreach ($form_state['profiles'] as $bundle => $profile) {
-//    $form['profile'][$bundle]['#tree'] = TRUE;
-//    $form['profile'][$bundle]['#parents'] = array('profile', $bundle);
-//
-//    field_attach_form($profile, $form['profile'][$bundle], $form_state);
-//
-//    if (count(field_info_instances('profile2', $bundle)) == 0) {
-//      $form['profile'][$bundle]['message'] = array(
-//        '#access' => user_access('administer profile types'),
-//        '#markup' => t('No fields have been associated with this profile type. Go to the <a href="!url">Profile types</a> page to add some fields.', array('!url' => url('admin/people/profiles'))),
-//      );
-//    }
-//
-//    // Provide a central place for modules to alter the profile forms, but
-//    // skip that in case the caller cares about invoking the hooks.
-//    if (!isset($form_state['profile2_skip_hook'])) {
-//      $hooks = array();
-//      $hooks[] = 'form_' . $bundle . '_profile2_form';
-//      $hooks[] = 'form_profile2_form';
-//      drupal_alter($hooks, $form['profile'][$bundle], $form_state);
-//    }
-//  }
-}
-
-/**
- * Validation handler for the profile form.
- *
- * @see profile2_attach_form()
- */
-//function profile2_user_form_validate(&$form, &$form_state) {
-//  foreach ($form_state['profiles'] as $bundle => $profile) {
-//    if (isset($form_state['values']['profile'][$bundle])) {
-//      // @see entity_form_field_validate()
-//      $pseudo_entity = entity_create('profile2', array_merge($form_state['values']['profile'][$bundle], array(
-//        'type' => $bundle,
-//      )));
-//      field_attach_form_validate($pseudo_entity, $form['profile'][$bundle], $form_state);
-//    }
-//  }
-//}
-
-/**
- * Submit handler that builds and saves all profiles in the form.
- *
- * @see profile2_attach_form()
- */
-//function profile2_user_form_submit(&$form, &$form_state) {
-//  profile2_form_submit_build_profile($form, $form_state);
-//
-//  foreach ($form_state['profiles'] as $bundle => $profile) {
-//    // During registration set the uid field of the newly created user.
-//    if (empty($profile->uid) && isset($form_state['user']->uid)) {
-//      $profile->uid = $form_state['user']->uid;
-//    }
-//    $profile->save();
-//  }
-//}
-
-/**
- * Submit builder. Extracts the form values and updates the profile entities.
- *
- * @see profile2_attach_form()
- */
-function profile2_form_submit_build_profile(&$form, &$form_state) {
-//  foreach ($form_state['profiles'] as $bundle => $profile) {
-//    // @see entity_form_submit_build_entity()
-//    if (isset($form['profile'][$bundle]['#entity_builders'])) {
-//      foreach ($form['profile'][$bundle]['#entity_builders'] as $function) {
-//        $function('profile2', $profile, $form['profile'][$bundle], $form_state);
-//      }
-//    }
-//    field_attach_extract_form_values($profile, $form['profile'][$bundle], $form_state);
-//  }
-}
-
-/**
- * Helper function for checking profile access.
- */
-function profile2_access(Profile $profile, $op, User $account = NULL) {
-//  if ($op == 'edit') {
-//    $op = ($profile->isNew() ? 'create' : 'update');
-//  }
-//  return $profile->access($op, $account);
-}
-
-/**
- * Implements hook_profile2_access().
- */
-function profile2_profile2_access($op, Profile $profile, User $account) {
-//  if (user_access("$op any $profile->type profile", $account)) {
-//    return TRUE;
-//  }
-//  if (isset($profile->uid) && $profile->uid == $account->uid && user_access("$op own $profile->type profile", $account)) {
-//    return TRUE;
-//  }
-
-  // Do not explicitly deny access so others may still grant access.
-}
-
-/**
- * Implements hook_theme().
- */
-//function profile2_theme() {
-//  return array(
-//    'profile2' => array(
-//      'render element' => 'elements',
-//      'template' => 'profile2',
-//    ),
-//  );
-//}
-
-/**
- * Processes variables for profile2.tpl.php.
- *
- * @param array $variables
- *   An associative array containing:
- *   - elements: An array of elements to display in view mode.
- *   - profile: The profile object.
- *   - view_mode: View mode; e.g., 'full', 'account'...
- *
- * @see profile2.tpl.php
- */
-//function template_preprocess_profile2(&$variables) {
-//  $variables['view_mode'] = $variables['elements']['#view_mode'];
-//  $variables['profile'] = $variables['elements']['#profile2'];
-//  $profile = $variables['profile'];
-//
-//  $variables['name'] = theme('username', array(
-//    'account' => $profile,
-//    'link_attributes' => array('rel' => 'author'),
-//  ));
-//
-//  $uri = $profile->uri();
-//  $variables['url'] = url($uri['path'], $uri['options']);
-//  $variables['title'] = check_plain($profile->label());
-//  $variables['page'] = $variables['view_mode'] == 'full';
-//  $variables['type'] = $profile->bundle();
-//
-//  // Helpful $content variable for templates.
-//  $variables += array('content' => array());
-//  foreach (element_children($variables['elements']) as $key) {
-//    $variables['content'][$key] = $variables['elements'][$key];
-//  }
-//
-//  // Make the field variables available with the appropriate language.
-//  field_attach_preprocess($profile, $variables['content'], $variables);
-//
-//  // Add article ARIA role.
-//  $variables['attributes']['role'] = 'article';
-//
-//  // Gather template classes.
-//  $variables['attributes']['class'][] = 'profile';
-//  $variables['attributes']['class'][] = drupal_html_class('profile-' . $profile->bundle());
-//  if ($variables['view_mode']) {
-//    $variables['attributes']['class'][] = drupal_html_class('view-mode-' . $variables['view_mode']);
-//  }
-//  if (isset($variables['preview'])) {
-//    $variables['attributes']['class'][] = 'preview';
-//  }
-//
-//  $variables['theme_hook_suggestions'][] = 'profile2__' . $profile->bundle();
-//  $variables['theme_hook_suggestions'][] = 'profile2__' . $profile->uid;
-//}
-
-/**
- * Implements hook_form_FORMID_alter().
- *
- * Adds a checkbox for controlling field view access to fields added to
- * profiles.
- */
-function profile2_form_field_ui_field_settings_form_alter(&$form, &$form_state) {
-//  // Only add the field setting if this field is attached to a profile entity
-//  // bundle.
-//  if (isset($form['#field']['bundles']['profile2'])) {
-//    $form['field']['settings']['profile2_private'] = array(
-//      '#type' => 'checkbox',
-//      '#title' => t('Private field'),
-//      '#default_value' => !empty($form['#field']['settings']['profile2_private']),
-//      // Only expose the setting when editing the settings for a field attached
-//      // to a profile entity bundle. For other entity types, we just ensure that
-//      // the existing value is retained.
-//      '#access' => $form['#entity_type'] == 'profile2',
-//      '#description' => t('Only show the field content to the profile owner and administrators.'),
-//    );
-//  }
-}
-
-/**
- * Implements hook_field_access().
- */
-function profile2_field_access($op, $field, $entity_type, $profile, $account) {
-//  if ($entity_type == 'profile2' && $op == 'view' && !empty($field['settings']['profile2_private']) && !user_access('bypass profile access', $account)) {
-//    // Deny view access, if someone else views a private profile field.
-//    if ($account->uid != $profile->uid) {
-//      return FALSE;
-//    }
-//  }
-}
-
-/**
  * Returns a list of all the available profile types.
  *
  * This list can include types that are queued for addition or deletion.
@@ -388,35 +173,23 @@ function profile2_type_get_types() {
 }
 
 /**
- * Implements hook_entity_extra_field_info().
+ * Implements hook_theme().
  */
-function profile2_entity_extra_field_info() {
-//  $extra = array();
-//  $module_language_enabled = \Drupal::moduleHandler()->moduleExists('language');
-//  $description = t('Profile2 module element');
-//
-//  foreach (profile2_type_get_types() as $bundle) {
-//    // Add the 'language' select if Language module is enabled and the bundle
-//    // has multilingual support.
-//    // Visibility of the ordering of the language selector is the same as on the
-//    // node/add form.
-//    if ($module_language_enabled) {
-//      $configuration = language_get_default_configuration('profile2', $bundle->id());
-//      if ($configuration['language_show']) {
-//        $extra['profile2'][$bundle->id()]['form']['langcode'] = array(
-//          'label' => t('Language'),
-//          'description' => $description,
-//          'weight' => 0,
-//        );
-//      }
-//    }
-//    $extra['profile2'][$bundle->id()]['display']['langcode'] = array(
-//      'label' => t('Language'),
-//      'description' => $description,
-//      'weight' => 0,
-//      'visible' => FALSE,
-//    );
-//  }
-//
-//  return $extra;
+function profile2_theme() {
+  return array(
+    'profile_items' => array(
+      'variables' => array('profile_items' => NULL, 'profile_type' => NULL),
+      'template' => 'profile-items',
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for profile templates.
+ */
+function template_preprocess_profile_items(&$variables) {
+  $variables['title'] = String::checkPlain($variables['profile_type']);
+  foreach ($variables['profile_items'] as $profile_item) {
+    $variables['items'][] = entity_view($profile_item, 'default');
+  }
 }

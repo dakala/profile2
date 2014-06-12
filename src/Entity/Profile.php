@@ -21,6 +21,7 @@ use Drupal\profile2\ProfileInterface;
  *   bundle_label = @Translation("Profile"),
  *   controllers = {
  *     "access" = "Drupal\profile2\ProfileAccessController",
+ *     "view_builder" = "Drupal\profile2\ProfileViewBuilder",
  *     "form" = {
  *       "default" = "Drupal\profile2\ProfileFormController",
  *       "add" = "Drupal\profile2\ProfileFormController",

@@ -10,6 +10,7 @@ namespace Drupal\profile2\Plugin\Derivative;
 use Drupal\Component\Plugin\Derivative\DerivativeBase;
 use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\Component\Utility\Unicode;
+use Drupal\user\UserInterface;
 
 /**
  * Provides dynamic tabs based on active themes.
@@ -33,7 +34,19 @@ class ThemeLocalTask extends DerivativeBase {
         continue;
       }
 
-      // @todo: Expose profile types that users may create - either they have 0 of non-multiple or multiple.
+      // Expose profile types that users may create - either they have 0 of non-multiple or multiple.
+      if ($config->get('multiple') === FALSE) {
+        $user = \Drupal::request()->attributes->get('user');
+        if ($user instanceof UserInterface) {
+          $profiles = entity_load_multiple_by_properties('profile2', array(
+            'uid' => $user->id(),
+            'type' => $config->get('id'),
+          ));
+          if (isset($profiles)) {
+            continue;
+          }
+        }
+      }
 
       $this->derivatives[$config_name] = $base_plugin_definition;
       $this->derivatives[$config_name]['title'] = \Drupal::translation()
