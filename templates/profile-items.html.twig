@@ -7,8 +7,9 @@
 
 <h3 class="profile-title">{{ title }}</h3>
 
-{% for item in items %}
+{% for i,item in items %}
     <div class="profile-item">
+        <span class="profile-item-edit">[ {{ edit_links[i] }} ]</span>
         {{ item }}
     </div>
 {% endfor %}
