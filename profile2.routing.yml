@@ -54,3 +54,15 @@ profile2.account_edit_profile:
   requirements:
     _entity_access: 'user.update'
     _permission: 'create profiles'
+
+
+profile2.account_add_profile2:
+  path: '/user/{user}/add/{type}'
+  defaults:
+    _content: '\Drupal\profile2\Controller\ProfileController::addProfile'
+    _title: 'Profile'
+  options:
+    _admin_route: TRUE
+  requirements:
+    _entity_access: 'user.update'
+    _permission: 'create profiles'

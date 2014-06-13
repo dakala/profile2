@@ -14,4 +14,10 @@ profile2.account_add_profile:
   route_name: profile2.account_add_profile
   title: 'Add new profile'
   parent_id: user.edit
-  derivative: Drupal\profile2\Plugin\Derivative\ThemeLocalTask
+  derivative: Drupal\profile2\Plugin\Derivative\ThemeProfileAddLocalTask
+
+profile2.account_edit_profile:
+  route_name: profile2.account_edit_profile
+  title: 'Add new profile'
+  parent_id: user.edit
+  derivative: Drupal\profile2\Plugin\Derivative\ThemeProfileEditLocalTask

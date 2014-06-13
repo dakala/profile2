@@ -32,12 +32,6 @@ use Drupal\profile2\ProfileInterface;
  *   bundle_entity_type = "profile2_type",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
- *   links = {
- *     "canonical" = "profile2.edit",
- *     "delete-form" = "profile2.delete",
- *     "edit-form" = "profile2.edit",
- *     "admin-form" = "profile2.type_edit"
- *   },
  *   fieldable = TRUE,
  *   translatable = TRUE,
  *   entity_keys = {

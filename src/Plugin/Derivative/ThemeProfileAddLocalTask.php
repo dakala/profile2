@@ -15,7 +15,7 @@ use Drupal\user\UserInterface;
 /**
  * Provides dynamic tabs based on active themes.
  */
-class ThemeLocalTask extends DerivativeBase {
+class ThemeProfileAddLocalTask extends DerivativeBase {
 
   /**
    * {@inheritdoc}
