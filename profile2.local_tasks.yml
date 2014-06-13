@@ -1,10 +1,4 @@
 
-profile2.overview_types:
-  title: 'Profile types'
-  route_name: profile2.overview_types
-  base_route: user.admin_account
-  weight: 20
-
 profile2.type_edit:
   title: 'Edit'
   route_name: profile2.type_edit

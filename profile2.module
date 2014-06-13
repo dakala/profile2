@@ -12,6 +12,7 @@ use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Component\Utility\String;
+use Drupal\Core\Url;
 
 /**
  * Entity URI callback for profiles.
@@ -190,6 +191,8 @@ function profile2_theme() {
 function template_preprocess_profile_items(&$variables) {
   $variables['title'] = String::checkPlain($variables['profile_type']);
   foreach ($variables['profile_items'] as $profile_item) {
+    $variables['edit_links'][] = l(t('Edit'), "/user/{$profile_item->getOwnerId()}/edit/{$profile_item->bundle()}/{$profile_item->id()}");
     $variables['items'][] = entity_view($profile_item, 'default');
   }
+
 }

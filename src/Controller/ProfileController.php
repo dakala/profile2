@@ -24,11 +24,11 @@ class ProfileController extends ControllerBase {
    * @return array
    *   A node submission form.
    */
-  public function add($user, $type) {
+  public function addProfile($user, $type) {
     // @todo: edit profile uses this form too.
     // @todo: check access if not current user.
     // @todo: deny access if this profile exists - multiple profiles allowed?
-    
+
     $config = \Drupal::config('profile2.type.' . $type);
     $langcode = $config->get('langcode');
 
@@ -41,6 +41,26 @@ class ProfileController extends ControllerBase {
     $form = $this->entityFormBuilder()->getForm($profile, 'add', array('uid' => $user, 'created' => REQUEST_TIME));
 
     return $form;
+  }
+
+  public function editProfile($user, $type, $id) {
+    // @todo: edit profile uses this form too.
+    // @todo: check access if not current user.
+    // @todo: deny access if this profile exists - multiple profiles allowed?
+
+    $config = \Drupal::config('profile2.type.' . $type);
+    $langcode = $config->get('langcode');
+
+    $profile = $this->entityManager()->getStorage('profile2')->create(array(
+      'uid' => $user,
+      'type' => $config->get('id'),
+      'langcode' => $langcode ? $langcode : $this->languageManager()->getCurrentLanguage()->id,
+    ));
+
+    $form = $this->entityFormBuilder()->getForm($profile, 'edit', array('uid' => $user, 'created' => REQUEST_TIME));
+
+    return $form;
+
   }
 
   /**
