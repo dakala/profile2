@@ -12,6 +12,7 @@ use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides a confirmation form for deleting a profile entity.
@@ -58,8 +59,13 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
+  /**
+   * {@inheritdoc}
+   */
   public function getCancelRoute() {
-    return $this->entity->urlInfo();
+    return new Url('user.view', array(
+      'user' => $this->entity->getOwnerId(),
+    ));
   }
 
   /**
@@ -86,7 +92,11 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
           '%title' => $this->entity->label()
         )));
     Cache::invalidateTags(array('profile2' => TRUE));
-    $form_state['redirect_route']['route_name'] = 'user.edit';
+
+    $form_state['redirect_route'] = array(
+      'route_name' => 'user.view',
+      'route_parameters' => array('user' => $this->entity->getOwnerId()),
+    );
   }
 
 }

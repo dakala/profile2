@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Plugin\Derivative\ThemeLocalTask.
+ * Contains \Drupal\profile2\Plugin\Derivative\ThemeProfileAddLocalTask.
  */
 
 namespace Drupal\profile2\Plugin\Derivative;
@@ -25,6 +25,7 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
     foreach (\Drupal::configFactory()
                ->listAll('profile2.type.') as $config_name) {
       $config = \Drupal::config($config_name);
+
       // Do not expose profile types that do not have any fields attached yet.
       $instances = array_filter(\Drupal::entityManager()
         ->getFieldDefinitions('profile2', $config->get('id')), function ($field_definition) {

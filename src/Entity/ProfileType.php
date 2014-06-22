@@ -37,7 +37,8 @@ use Drupal\profile2\ProfileTypeInterface;
  *   links = {
  *     "add-form" = "profile2.type_add",
  *     "delete-form" = "profile2.type_delete",
- *     "edit-form" = "profile2.type_edit"
+ *     "edit-form" = "profile2.type_edit",
+ *     "admin-form" = "profile2.type_edit",
  *   }
  * )
  */

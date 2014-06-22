@@ -11,7 +11,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\profile2\ProfileTypeInterface;
 
 /**
- * Returns responses for Node routes.
+ * Returns responses for ProfileController routes.
  */
 class ProfileController extends ControllerBase {
 
@@ -19,16 +19,12 @@ class ProfileController extends ControllerBase {
    * Provides the profile submission form.
    *
    * @param \Drupal\profile2\ProfileTypeInterface $type
-   *   The node type entity for the node.
+   *   The profile type entity for the node.
    *
    * @return array
-   *   A node submission form.
+   *   A profile submission form.
    */
   public function addProfile($user, $type) {
-    // @todo: edit profile uses this form too.
-    // @todo: check access if not current user.
-    // @todo: deny access if this profile exists - multiple profiles allowed?
-
     $config = \Drupal::config('profile2.type.' . $type);
     $langcode = $config->get('langcode');
 
@@ -38,15 +34,33 @@ class ProfileController extends ControllerBase {
       'langcode' => $langcode ? $langcode : $this->languageManager()->getCurrentLanguage()->id,
     ));
 
-    $form = $this->entityFormBuilder()->getForm($profile, 'add', array('uid' => $user, 'created' => REQUEST_TIME));
-
-    return $form;
+    return $this->entityFormBuilder()->getForm($profile, 'add', array('uid' => $user, 'created' => REQUEST_TIME));
   }
 
+  /**
+   * Provides profile edit form.
+   *
+   * @param $user
+   * @param $type
+   * @param $id
+   *
+   * @return array
+   */
   public function editProfile($user, $type, $id) {
-    $form = $this->entityFormBuilder()->getForm(profile2_load($id), 'edit', array('changed' => REQUEST_TIME));
-    return $form;
+    return $this->entityFormBuilder()->getForm(profile2_load($id), 'edit', array('changed' => REQUEST_TIME));
+  }
 
+  /**
+   * Provides profile delete form.
+   *
+   * @param $user
+   * @param $type
+   * @param $id
+   *
+   * @return array
+   */
+  public function deleteProfile($user, $type, $id) {
+    return $this->entityFormBuilder()->getForm(profile2_load($id), 'delete');
   }
 
   /**
@@ -59,7 +73,7 @@ class ProfileController extends ControllerBase {
    *   The page title.
    */
   public function addPageTitle(ProfileTypeInterface $profile_type) {
-    // @todo: edit profile uses this form too.
+    // @todo: edit profile uses this form too?
     return $this->t('Create @label', array('@label' => $profile_type->label()));
   }
 

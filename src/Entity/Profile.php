@@ -20,7 +20,6 @@ use Drupal\profile2\ProfileInterface;
  *   label = @Translation("Profile"),
  *   bundle_label = @Translation("Profile"),
  *   controllers = {
- *     "access" = "Drupal\profile2\ProfileAccessController",
  *     "view_builder" = "Drupal\profile2\ProfileViewBuilder",
  *     "form" = {
  *       "default" = "Drupal\profile2\ProfileFormController",
@@ -39,9 +38,14 @@ use Drupal\profile2\ProfileInterface;
  *     "bundle" = "type",
  *     "label" = "label",
  *     "uuid" = "uuid"
- *   }
+ *   },
+ *  links = {
+ *    "canonical" = "profile2.overview_types",
+ *    "admin-form" = "profile2.type_edit"
+ *   },
  * )
  */
+
 class Profile extends ContentEntityBase implements ProfileInterface {
 
   /**
@@ -90,6 +94,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
         'type' => 'string',
         'weight' => -5,
       ))
+      ->setDisplayConfigurable('view', TRUE)
       ->setDisplayOptions('form', array(
         'type' => 'string',
         'weight' => -5,

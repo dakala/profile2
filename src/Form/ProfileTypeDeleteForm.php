@@ -10,6 +10,7 @@ namespace Drupal\profile2\Form;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Database\Connection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides a confirmation form for deleting a Profile type entity.
@@ -47,16 +48,14 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to delete %label?', array('%label' => $this->entity->label()));
+    return $this->t('Are you sure you want to delete %label profile type?', array('%label' => $this->entity->label()));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelRoute() {
-    return array(
-      'route_name' => 'profile2.overview_types',
-    );
+    return new Url('profile2.overview_types');
   }
 
   /**
@@ -88,9 +87,9 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
    */
   public function submit(array $form, array &$form_state) {
     $this->entity->delete();
-    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
     drupal_set_message(t('Profile type %label has been deleted.', array('%label' => $this->entity->label())));
     watchdog('profile2', 'Profile type %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
+    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
   }
 
 }

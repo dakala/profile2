@@ -5,11 +5,14 @@
  */
 #}
 
-<h3 class="profile-title">{{ title }}</h3>
-
-{% for i,item in items %}
-    <div class="profile-item">
-        <span class="profile-item-edit">[ {{ edit_links[i] }} ]</span>
-        {{ item }}
-    </div>
-{% endfor %}
+{% if items %}
+	<h3 class="profile-title">{{ title }}</h3>
+	{% for i,item in items %}
+	    <div class="profile-item">
+	        <span class="profile-item-action-links">
+	            [ {{ edit_links[i] }} ] &nbsp; [ {{ delete_links[i] }} ]
+	        </span>
+	        {{ item }}
+	    </div>
+	{% endfor %}
+{%endif %}

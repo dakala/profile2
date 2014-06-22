@@ -20,7 +20,6 @@ class ProfileViewBuilder extends EntityViewBuilder {
    */
   protected function getBuildDefaults(EntityInterface $entity, $view_mode, $langcode) {
     $defaults = parent::getBuildDefaults($entity, $view_mode, $langcode);
-
     return $defaults;
   }
 

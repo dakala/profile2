@@ -7,7 +7,6 @@ profile2.overview_types:
     _permission: 'administer profile types'
 
 profile2.type_add:
-#  path: '/admin/people/profiles/add'
   path: '/admin/structure/profiles/add'
   defaults:
     _entity_form: 'profile2_type.add'
@@ -22,7 +21,6 @@ profile2.type_edit:
     _title: 'Edit'
   requirements:
     _permission: 'administer profile types'
-#    _entity_access: 'profile2_type.update'
 
 profile2.type_delete:
   path: '/admin/structure/profiles/manage/{profile2_type}/delete'
@@ -31,18 +29,16 @@ profile2.type_delete:
     _title: 'Delete'
   requirements:
     _permission: 'administer profile types'
-#    _entity_access: 'profile2_type.delete'
 
 profile2.account_add_profile:
   path: '/user/{user}/add/{type}'
   defaults:
     _content: '\Drupal\profile2\Controller\ProfileController::addProfile'
-    _title: 'Profile'
+    _title: 'Add new profile'
   options:
     _admin_route: TRUE
   requirements:
-    _entity_access: 'user.update'
-    _permission: 'create profiles'
+    _profile_access_check: 'TRUE'
 
 profile2.account_edit_profile:
   path: '/user/{user}/edit/{type}/{id}'
@@ -52,17 +48,14 @@ profile2.account_edit_profile:
   options:
     _admin_route: TRUE
   requirements:
-    _entity_access: 'user.update'
-    _permission: 'create profiles'
+    _profile_access_check: 'TRUE'
 
-
-profile2.account_add_profile2:
-  path: '/user/{user}/add/{type}'
+profile2.account_delete_profile:
+  path: '/user/{user}/delete/{type}/{id}'
   defaults:
-    _content: '\Drupal\profile2\Controller\ProfileController::addProfile'
-    _title: 'Profile'
+    _content: '\Drupal\profile2\Controller\ProfileController::deleteProfile'
+    _title: 'Delete a profile'
   options:
     _admin_route: TRUE
   requirements:
-    _entity_access: 'user.update'
-    _permission: 'create profiles'
+    _profile_access_check: 'TRUE'

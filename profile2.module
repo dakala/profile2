@@ -14,6 +14,9 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
 
+//use Drupal\Core\Extension\ModuleHandlerInterface;
+//use Drupal\Core\Utility\LinkGeneratorInterface;
+
 /**
  * Entity URI callback for profiles.
  *
@@ -72,26 +75,30 @@ function profile2_permission() {
     ),
   );
 
-  // Generate per profile type permissions.
   foreach (ProfileType::loadMultiple() as $type) {
-    $type_id = $type->id();
     $permissions += array(
-      "view own $type_id profile" => array(
+      "add own {$type->id()} profile" => array(
+        'title' => t('%type: Add own profile', array('%type' => $type->label())),
+      ),
+      "add any {$type->id()} profile" => array(
+        'title' => t('%type: Add any profile', array('%type' => $type->label())),
+      ),
+      "view own {$type->id()} profile" => array(
         'title' => t('%type: View own profile', array('%type' => $type->label())),
       ),
-      "view any $type_id profile" => array(
+      "view any {$type->id()} profile" => array(
         'title' => t('%type: View any profile', array('%type' => $type->label())),
       ),
-      "edit own $type_id profile" => array(
+      "edit own {$type->id()} profile" => array(
         'title' => t('%type: Edit own profile', array('%type' => $type->label())),
       ),
-      "edit any $type_id profile" => array(
+      "edit any {$type->id()} profile" => array(
         'title' => t('%type: Edit any profile', array('%type' => $type->label())),
       ),
-      "delete own $type_id profile" => array(
+      "delete own {$type->id()} profile" => array(
         'title' => t('%type: Delete own profile', array('%type' => $type->label())),
       ),
-      "delete any $type_id profile" => array(
+      "delete any {$type->id()} profile" => array(
         'title' => t('%type: Delete any profile', array('%type' => $type->label())),
       ),
     );
@@ -189,10 +196,22 @@ function profile2_theme() {
  * Implements hook_preprocess_HOOK() for profile templates.
  */
 function template_preprocess_profile_items(&$variables) {
-  $variables['title'] = String::checkPlain($variables['profile_type']);
-  foreach ($variables['profile_items'] as $profile_item) {
-    $variables['edit_links'][] = l(t('Edit'), "/user/{$profile_item->getOwnerId()}/edit/{$profile_item->bundle()}/{$profile_item->id()}");
-    $variables['items'][] = entity_view($profile_item, 'default');
+  if (count($variables['profile_items'])) {
+    $variables['title'] = String::checkPlain($variables['profile_type']);
+    foreach ($variables['profile_items'] as $profile_item) {
+      $variables['items'][] = entity_view($profile_item, 'default');
+      $variables['edit_links'][] = \Drupal::linkGenerator()
+        ->generateFromUrl(t('Edit'), new Url("profile2.account_edit_profile", array(
+          'user' => \Drupal::currentUser()->id(),
+          'type' => $profile_item->bundle(),
+          'id' => $profile_item->id(),
+        )));
+      $variables['delete_links'][] = \Drupal::linkGenerator()
+        ->generateFromUrl(t('Delete'), new Url("profile2.account_delete_profile", array(
+          'user' => \Drupal::currentUser()->id(),
+          'type' => $profile_item->bundle(),
+          'id' => $profile_item->id(),
+        )));
+    }
   }
-
 }

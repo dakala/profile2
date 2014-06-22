@@ -2,15 +2,12 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Plugin\Derivative\ThemeLocalTask.
+ * Contains \Drupal\profile2\Plugin\Derivative\ThemeProfileEditLocalTask.
  */
 
 namespace Drupal\profile2\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DerivativeBase;
-use Drupal\field\FieldInstanceConfigInterface;
-use Drupal\Component\Utility\Unicode;
-use Drupal\user\UserInterface;
 
 /**
  * Provides dynamic tabs based on active themes.

@@ -89,15 +89,15 @@ class ProfileTypeFormController extends EntityForm {
    * Form submission handler to redirect to Manage fields page of Field UI.
    */
   public function redirectToFieldUI(array $form, array &$form_state) {
-    $form_state['redirect_route'] = '<front>';
+    // $form_state['redirect_route'] = '<front>';
 
-//    $form_state['redirect_route'] = array(
-//      'route_name' => 'field_ui.overview_profile2',
-//      'route_parameters' => array(
-//        'profile2_type' => $this->entity->id(),
-//      ),
-//    );
-  }
+    $form_state['redirect_route'] = array(
+     'route_name' => 'field_ui.overview_profile2',
+     'route_parameters' => array(
+       'profile2_type' => $this->entity->id(),
+     ),
+    );
+ }
 
   /**
    * {@inheritdoc}
