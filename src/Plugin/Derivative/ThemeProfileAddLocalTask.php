@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Plugin\Derivative\ThemeProfileAddLocalTask.
+ * Contains \Drupal\profile2\Plugin\Derivative\ThemeLocalTask.
  */
 
 namespace Drupal\profile2\Plugin\Derivative;
@@ -32,7 +32,7 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
         return $field_definition instanceof FieldInstanceConfigInterface;
       });
       // No fields yet.
-      if (!$instances) {
+      if (empty($instances)) {
         continue;
       }
       else {
@@ -45,7 +45,7 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
               'type' => $config->get('id'),
             ));
             // Single profile, none yet.
-            if (!isset($profiles)) {
+            if (empty($profiles)) {
               $configs[] = $config;
             }
           }
