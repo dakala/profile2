@@ -11,6 +11,7 @@ use Drupal\Component\Plugin\Derivative\DerivativeBase;
 use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\user\UserInterface;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Provides dynamic tabs based on active themes.
@@ -65,6 +66,8 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
         $this->derivatives[$config->get('id')]['route_parameters'] = array('type' => $config->get('id'));
       }
     }
+    // Clear the page cache because pages can contain tab information.
+    Cache::invalidateTags(array('content' => TRUE));
 
     return $this->derivatives;
   }

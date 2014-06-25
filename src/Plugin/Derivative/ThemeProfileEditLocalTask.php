@@ -8,6 +8,7 @@
 namespace Drupal\profile2\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DerivativeBase;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Provides dynamic tabs based on active themes.
@@ -35,6 +36,8 @@ class ThemeProfileEditLocalTask extends DerivativeBase {
       'type' => $config->get('id'),
       'id' => $args[4]
     );
+    // Clear the page cache because pages can contain tab information.
+    Cache::invalidateTags(array('content' => TRUE));
 
     return $this->derivatives;
   }
