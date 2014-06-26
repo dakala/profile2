@@ -26,6 +26,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
 use \Drupal\profile2\Controller\ProfileController;
 use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\entity\Entity\EntityFormDisplay;
 
 
 /**
@@ -167,147 +168,62 @@ function profile2_user_view(array &$build, UserInterface $account, EntityViewDis
  *
  */
 function profile2_form_user_register_form_alter(&$form, &$form_state) {
+  $attachedProfileForm = FALSE;
+  $weight = 90;
   foreach (\Drupal::configFactory()
              ->listAll('profile2.type.') as $config_name) {
     $config = \Drupal::config($config_name);
     if ($config->get('registration') === TRUE) {
-
-      if (empty($form_state['profiles'][$config->get('id')])) {
+      $bundle = $config->get('id');
+      if (empty($form_state['profiles'][$bundle])) {
         $langcode = $config->get('langcode');
-        $values = array(
+        $entity = entity_create('profile2', array(
           'type' => $config->get('id'),
           'langcode' => $langcode ? $langcode : \Drupal::languageManager()
             ->getDefaultLanguage()->id
+        ));
+        // Attach profile entity form.
+        $form_state['profiles'][$bundle] = $entity;
+        $form_state['form_display_' . $bundle] = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+        $form['entity_' . $bundle] = array(
+          '#type' => 'details',
+          '#title' => $config->get('label'),
+          '#tree' => TRUE,
+          '#parents' => array('entity_' . $bundle),
+          '#weight' => ++$weight,
+          '#open' => TRUE,
         );
-        // Create pseudo profile entity.
-        $form_state['profiles'][$config->get('id')] = entity_create('profile2', $values);
-      }
+        $form_state['form_display_' . $bundle]->buildForm($entity, $form['entity_' . $bundle], $form_state);
 
-      profile2_attach_form($form, $form_state);
-
-      // Wrap each profile form in a fieldset.
-      $form['profile'][$config->get('id')] += array(
-        '#type' => 'details',
-        '#title' => $config->get('label'),
-        '#weight' => 100,
-        '#open' => TRUE,
-      );
-
-      if (!empty($form_state['profiles'])) {
-        $form['actions']['submit']['#validate'][] = 'profile2_form_user_register_form_validate';
-        $form['actions']['submit']['#submit'][] = 'profile2_form_user_register_form_submit';
+        $attachedProfileForm = TRUE;
       }
     }
   }
-
-  if (!empty($form_state['profiles'])) {
+  if ($attachedProfileForm) {
     $form['actions']['submit']['#validate'][] = 'profile2_form_user_register_form_validate';
     $form['actions']['submit']['#submit'][] = 'profile2_form_user_register_form_submit';
   }
 }
 
 /**
- * Attaches the profile forms of the profiles set in $form_state['profiles'].
- *
- * Modules may alter the profile2 entity form regardless to which form it is
- * attached by making use of hook_form_profile2_form_alter().
- *
- * @param $form
- *   The form to which to attach the profile2 form. For each profile the form
- *   is added to @code $form['profile'][$profile->type] @endcode. This helper
- *   also adds in a validation and a submit handler caring for the attached
- *   profile forms.
- *
- * @see profile2_form_user_register_form_validate()
- * @see profile2_form_user_register_form_submit()
+ * {@inheritdoc]
  */
-function profile2_attach_form(&$form, &$form_state) {
-  foreach ($form_state['profiles'] as $bundle => $profile) {
-    $form['profile'][$bundle]['#tree'] = TRUE;
-    $form['profile'][$bundle]['#parents'] = array('profile', $bundle);
-
-    // Attach fields
-    $field_definitions = \Drupal::entityManager()
-      ->getFieldDefinitions('profile2', $bundle);
-    $instances = array_filter($field_definitions, function ($field_definition) {
-      return $field_definition instanceof FieldInstanceConfigInterface;
-    });
-
-    if (!empty($instances)) {
-      $fields = array_keys($instances);
-      array_push($fields, 'label');
-
-      $profileForm = \Drupal::service('entity.form_builder')->getForm($profile);
-      foreach ($fields as $field) {
-        // Remove unwanted form elements.
-        $entity_elements = array(
-          '#id',
-          '#name',
-          '#field_name',
-          '#value',
-          '#field_parents',
-          '#array_parents',
-          '#parents'
-        );
-        foreach ($entity_elements as $entity_element) {
-          unset($profileForm[$field]['widget'][0]['value'][$entity_element]);
-        }
-        $form['profile'][$bundle][$field] = $profileForm[$field]['widget'][0]['value'];
-      }
-    }
-    else {
-      $form['profile'][$bundle]['message'] = array(
-        '#access' => \Drupal::currentUser()
-          ->hasPermission('administer profile types'),
-        '#markup' => t('No fields have been associated with this profile type. Go to the <a href="!url">Profile types</a> page to add some fields.', array('!url' => url('admin/people/profiles'))),
-      );
-    }
-    // Provide a central place for modules to alter the profile forms, but
-    // skip that in case the caller cares about invoking the hooks.
-    if (!isset($form_state['profile2_skip_hook'])) {
-      $hooks = array();
-      $hooks[] = 'form_' . $bundle . '_profile2_form';
-      $hooks[] = 'form_profile2_form';
-      \Drupal::moduleHandler()
-        ->alter($hooks, $form['profile'][$bundle], $form_state);
-    }
+function profile2_form_user_register_form_validate(array &$form, array &$form_state) {
+  foreach ($form_state['profiles'] as $bundle => $entity) {
+    $form_display = $form_state['form_display_' . $bundle];
+    $form_display->extractFormValues($entity, $form['entity_' . $bundle], $form_state);
+    $form_display->validateFormValues($entity, $form['entity_' . $bundle], $form_state);
   }
 }
 
 /**
- * Validation handler for the profile form.
- *
- * @see profile2_attach_form()
+ * {@inheritdoc]
  */
-function profile2_form_user_register_form_validate($form, &$form_state) {
-  foreach ($form_state['profiles'] as $bundle => $profile) {
-    if (isset($form_state['values']['profile'][$bundle])) {
-      $pseudo_entity = entity_create('profile2', array_merge($form_state['values']['profile'][$bundle], array(
-        'type' => $bundle,
-      )));
-      // @todo:
-      $profileForm = \Drupal::service('entity.form_builder')->getForm($pseudo_entity);
-      $profileForm['#process'][1][0]->validateFormValues($pseudo_entity, $profileForm, $form_state);
-    }
-  }
-}
-
-/**
- * Submit handler that builds and saves all profiles in the form.
- *
- * @see profile2_attach_form()
- */
-function profile2_form_user_register_form_submit($form, &$form_state) {
-  // During registration set the uid field of the newly created user.
+function profile2_form_user_register_form_submit(array &$form, array &$form_state) {
   $account = $form_state['controller']->getEntity();
-  foreach ($form_state['profiles'] as $bundle => $profile) {
-    $profileEntity = entity_create('profile2', array_merge($form_state['values']['profile'][$bundle], array(
-      'type' => $bundle,
-      'uid' => $account->id(),
-    )));
-    $profileEntity->save();
-    // Remove old unsaved profile entity.
-    unset($form_state['profiles'][$bundle]);
+  foreach ($form_state['profiles'] as $bundle => $entity) {
+    $entity->setOwnerId($account->id());
+    $entity->save();
   }
 }
 
