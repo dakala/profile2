@@ -19,6 +19,7 @@ class ThemeProfileEditLocalTask extends DerivativeBase {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
+    // @todo: is there a better way than this?
     $current_path = current_path();
     $args = explode('/', $current_path);
     if ((count($args) == 5) && ($args[0] == 'user') && ($args[2] == 'edit') && drupal_strlen($args[3])) {
