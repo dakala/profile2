@@ -15,19 +15,13 @@
  *
  */
 
-
-use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\profile2\Entity\Profile;
 use Drupal\profile2\Entity\ProfileType;
-use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
-use \Drupal\profile2\Controller\ProfileController;
-use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\entity\Entity\EntityFormDisplay;
-
 
 /**
  * Implements hook_help().
@@ -173,27 +167,26 @@ function profile2_form_user_register_form_alter(&$form, &$form_state) {
   foreach (\Drupal::configFactory()
              ->listAll('profile2.type.') as $config_name) {
     $config = \Drupal::config($config_name);
-    if ($config->get('registration') === TRUE) {
-      $bundle = $config->get('id');
-      if (empty($form_state['profiles'][$bundle])) {
-        $langcode = $config->get('langcode');
+    $profileType = entity_load('profile2_type', $config->get('id'));
+    if ($profileType->registration === TRUE && $profileType->hasFieldInstances() === TRUE) {
+      if (empty($form_state['profiles'][$profileType->id()])) {
         $entity = entity_create('profile2', array(
-          'type' => $config->get('id'),
-          'langcode' => $langcode ? $langcode : \Drupal::languageManager()
+          'type' => $profileType->id(),
+          'langcode' => $profileType->language() ? $profileType->language() : \Drupal::languageManager()
             ->getDefaultLanguage()->id
         ));
         // Attach profile entity form.
-        $form_state['profiles'][$bundle] = $entity;
-        $form_state['form_display_' . $bundle] = EntityFormDisplay::collectRenderDisplay($entity, 'default');
-        $form['entity_' . $bundle] = array(
+        $form_state['profiles'][$profileType->id()] = $entity;
+        $form_state['form_display_' . $profileType->id()] = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+        $form['entity_' . $profileType->id()] = array(
           '#type' => 'details',
-          '#title' => $config->get('label'),
+          '#title' => $profileType->label(),
           '#tree' => TRUE,
-          '#parents' => array('entity_' . $bundle),
+          '#parents' => array('entity_' . $profileType->id()),
           '#weight' => ++$weight,
           '#open' => TRUE,
         );
-        $form_state['form_display_' . $bundle]->buildForm($entity, $form['entity_' . $bundle], $form_state);
+        $form_state['form_display_' . $profileType->id()]->buildForm($entity, $form['entity_' . $profileType->id()], $form_state);
 
         $attachedProfileForm = TRUE;
       }

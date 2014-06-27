@@ -11,6 +11,7 @@ namespace Drupal\profile2\Entity;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\profile2\ProfileTypeInterface;
+use Drupal\field\FieldInstanceConfigInterface;
 
 /**
  * Defines the profile type entity class.
@@ -98,6 +99,30 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    */
   public function getLabel() {
     return $this->get('label')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRegistration() {
+    return $this->get('registration')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasFieldInstances() {
+    return count($this->getFieldInstances()) ? TRUE : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldInstances() {
+    return array_filter(\Drupal::entityManager()
+      ->getFieldDefinitions('profile2', $this->id()), function ($field_definition) {
+      return $field_definition instanceof FieldInstanceConfigInterface;
+    });
   }
 
   /**

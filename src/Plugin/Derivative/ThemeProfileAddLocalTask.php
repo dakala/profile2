@@ -26,14 +26,9 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
     foreach (\Drupal::configFactory()
                ->listAll('profile2.type.') as $config_name) {
       $config = \Drupal::config($config_name);
-
-      // Do not expose profile types that do not have any fields attached yet.
-      $instances = array_filter(\Drupal::entityManager()
-        ->getFieldDefinitions('profile2', $config->get('id')), function ($field_definition) {
-        return $field_definition instanceof FieldInstanceConfigInterface;
-      });
+      $profileType = entity_load('profile2_type', $config->get('id'));
       // No fields yet.
-      if (empty($instances)) {
+      if ($profileType->hasFieldInstances() !== TRUE) {
         continue;
       }
       else {
