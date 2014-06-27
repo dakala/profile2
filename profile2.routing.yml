@@ -1,13 +1,13 @@
 profile2.overview_types:
-  path: '/admin/structure/profiles'
+  path: '/admin/config/people/profiles'
   defaults:
     _entity_list: 'profile2_type'
     _title: 'Profile types'
   requirements:
-    _permission: 'administer profile types'
+    _permission: 'administer account settings'
 
 profile2.type_add:
-  path: '/admin/structure/profiles/add'
+  path: '/admin/config/people/profiles/add'
   defaults:
     _entity_form: 'profile2_type.add'
     _title: 'Add'
@@ -15,7 +15,7 @@ profile2.type_add:
     _permission: 'administer profile types'
 
 profile2.type_edit:
-  path: '/admin/structure/profiles/manage/{profile2_type}'
+  path: '/admin/config/people/profiles/manage/{profile2_type}'
   defaults:
     _entity_form: 'profile2_type.edit'
     _title: 'Edit'
@@ -23,7 +23,7 @@ profile2.type_edit:
     _permission: 'administer profile types'
 
 profile2.type_delete:
-  path: '/admin/structure/profiles/manage/{profile2_type}/delete'
+  path: '/admin/config/people/profiles/manage/{profile2_type}/delete'
   defaults:
     _entity_form: 'profile2_type.delete'
     _title: 'Delete'
