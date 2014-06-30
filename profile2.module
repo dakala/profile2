@@ -5,16 +5,6 @@
  * Support for configurable user profiles.
  */
 
-/**
- * @todo:
- *
- * 1. Help text
- * 2. Registration form
- * 3. Unit tests
- * 4. Upgrade path - migrate from D7
- *
- */
-
 use Drupal\profile2\Entity\Profile;
 use Drupal\profile2\Entity\ProfileType;
 use Drupal\user\UserInterface;
@@ -22,56 +12,25 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
 use Drupal\entity\Entity\EntityFormDisplay;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Implements hook_help().
  */
-//function profile2_help($route_name, Request $request) {
-//  switch ($route_name) {
-//
-//  }
-//}
-
-/**
- * Entity URI callback for profiles.
- *
- * @param Drupal\profile2\Entity\Profile $profile
- *   A profile entity.
- */
-//function profile2_profile_uri(Profile $profile) {
-//  $uri = entity_load('user', $profile->uid)->uri();
-//  $uri['options']['fragment'] = 'profile-' . $profile->bundle();
-//  return $uri;
-//}
-
-/**
- * Entity URI callback for profile types.
- *
- * @param Drupal\profile2\Entity\ProfileType $profile_type
- *   A profile type entity.
- */
-//function profile2_profile_type_uri(ProfileType $profile_type) {
-//  return array(
-//    'path' => 'admin/people/profiles/manage/' . $profile_type->id(),
-//  );
-//}
-
-function profile2_type_load($id, $reset = FALSE) {
-  return entity_load('profile2_type', $id, $reset);
-}
-
-function profile2_load_multiple(array $pids = NULL, $reset = FALSE) {
-  if ($reset) {
-    \Drupal::entityManager()->getStorage('profile2')->resetCache($pids);
+function profile2_help($route_name, Request $request) {
+  switch ($route_name) {
+    case 'help.page.profile2':
+//      @todo:
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Profile module provides a fieldable entity.') . '</p>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Types of profiles') . '</dt>';
+      $output .= '<dd>' . t('TODO:.') . '</dd>';
+      $output .= '<dt>' . t('Creating profiles') . '</dt>';
+      $output .= '<dd>' . t('TODO:.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
   }
-  return Profile::loadMultiple($pids);
-}
-
-function profile2_load($pid = NULL, $reset = FALSE) {
-  if ($reset) {
-    \Drupal::entityManager()->getStorage('profile2')->resetCache(array($pid));
-  }
-  return Profile::load($pid);
 }
 
 /**
@@ -90,31 +49,33 @@ function profile2_permission() {
     ),
   );
 
-  foreach (ProfileType::loadMultiple() as $type) {
+  foreach (ProfileType::loadMultiple() as $profile_type) {
+    $bundle = $profile_type->id();
+    $type = $profile_type->label();
     $permissions += array(
-      "add own {$type->id()} profile" => array(
-        'title' => t('%type: Add own profile', array('%type' => $type->label())),
+      "add own $bundle profile" => array(
+        'title' => t('%type: Add own profile', array('%type' => $type)),
       ),
-      "add any {$type->id()} profile" => array(
-        'title' => t('%type: Add any profile', array('%type' => $type->label())),
+      "add any $bundle profile" => array(
+        'title' => t('%type: Add any profile', array('%type' => $type)),
       ),
-      "view own {$type->id()} profile" => array(
-        'title' => t('%type: View own profile', array('%type' => $type->label())),
+      "view own $bundle profile" => array(
+        'title' => t('%type: View own profile', array('%type' => $type)),
       ),
-      "view any {$type->id()} profile" => array(
-        'title' => t('%type: View any profile', array('%type' => $type->label())),
+      "view any $bundle profile" => array(
+        'title' => t('%type: View any profile', array('%type' => $type)),
       ),
-      "edit own {$type->id()} profile" => array(
-        'title' => t('%type: Edit own profile', array('%type' => $type->label())),
+      "edit own $bundle profile" => array(
+        'title' => t('%type: Edit own profile', array('%type' => $type)),
       ),
-      "edit any {$type->id()} profile" => array(
-        'title' => t('%type: Edit any profile', array('%type' => $type->label())),
+      "edit any $bundle profile" => array(
+        'title' => t('%type: Edit any profile', array('%type' => $type)),
       ),
-      "delete own {$type->id()} profile" => array(
-        'title' => t('%type: Delete own profile', array('%type' => $type->label())),
+      "delete own $bundle profile" => array(
+        'title' => t('%type: Delete own profile', array('%type' => $type)),
       ),
-      "delete any {$type->id()} profile" => array(
-        'title' => t('%type: Delete any profile', array('%type' => $type->label())),
+      "delete any $bundle profile" => array(
+        'title' => t('%type: Delete any profile', array('%type' => $type)),
       ),
     );
   }
@@ -148,7 +109,7 @@ function profile2_user_view(array &$build, UserInterface $account, EntityViewDis
       $build['profiles'][$config->get('id')] = array(
         '#theme' => 'profile_items',
         '#profile_items' => $profiles,
-        '#profile_type' => $config->get('label'),
+        '#label' => $config->get('label'),
       );
     }
   }
@@ -162,44 +123,44 @@ function profile2_user_view(array &$build, UserInterface $account, EntityViewDis
  *
  */
 function profile2_form_user_register_form_alter(&$form, &$form_state) {
-  $attachedProfileForm = FALSE;
+  $attached_profile_form = FALSE;
   $weight = 90;
   foreach (\Drupal::configFactory()
              ->listAll('profile2.type.') as $config_name) {
     $config = \Drupal::config($config_name);
-    $profileType = entity_load('profile2_type', $config->get('id'));
-    if ($profileType->registration === TRUE && $profileType->hasFieldInstances() === TRUE) {
-      if (empty($form_state['profiles'][$profileType->id()])) {
+    $profile_type = entity_load('profile2_type', $config->get('id'));
+    if ($profile_type->registration === TRUE && $profile_type->hasFieldInstances() === TRUE) {
+      if (empty($form_state['profiles'][$profile_type->id()])) {
         $entity = entity_create('profile2', array(
-          'type' => $profileType->id(),
-          'langcode' => $profileType->language() ? $profileType->language() : \Drupal::languageManager()
+          'type' => $profile_type->id(),
+          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()
             ->getDefaultLanguage()->id
         ));
         // Attach profile entity form.
-        $form_state['profiles'][$profileType->id()] = $entity;
-        $form_state['form_display_' . $profileType->id()] = EntityFormDisplay::collectRenderDisplay($entity, 'default');
-        $form['entity_' . $profileType->id()] = array(
+        $form_state['profiles'][$profile_type->id()] = $entity;
+        $form_state['form_display_' . $profile_type->id()] = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+        $form['entity_' . $profile_type->id()] = array(
           '#type' => 'details',
-          '#title' => $profileType->label(),
+          '#title' => $profile_type->label(),
           '#tree' => TRUE,
-          '#parents' => array('entity_' . $profileType->id()),
+          '#parents' => array('entity_' . $profile_type->id()),
           '#weight' => ++$weight,
           '#open' => TRUE,
         );
-        $form_state['form_display_' . $profileType->id()]->buildForm($entity, $form['entity_' . $profileType->id()], $form_state);
+        $form_state['form_display_' . $profile_type->id()]->buildForm($entity, $form['entity_' . $profile_type->id()], $form_state);
 
-        $attachedProfileForm = TRUE;
+        $attached_profile_form = TRUE;
       }
     }
   }
-  if ($attachedProfileForm) {
+  if ($attached_profile_form) {
     $form['actions']['submit']['#validate'][] = 'profile2_form_user_register_form_validate';
     $form['actions']['submit']['#submit'][] = 'profile2_form_user_register_form_submit';
   }
 }
 
 /**
- * {@inheritdoc]
+ * Extra form validation handler for the user registration form.
  */
 function profile2_form_user_register_form_validate(array &$form, array &$form_state) {
   foreach ($form_state['profiles'] as $bundle => $entity) {
@@ -210,7 +171,7 @@ function profile2_form_user_register_form_validate(array &$form, array &$form_st
 }
 
 /**
- * {@inheritdoc]
+ * Extra form submission handler for the user registration form.
  */
 function profile2_form_user_register_form_submit(array &$form, array &$form_state) {
   $account = $form_state['controller']->getEntity();
@@ -218,20 +179,6 @@ function profile2_form_user_register_form_submit(array &$form, array &$form_stat
     $entity->setOwnerId($account->id());
     $entity->save();
   }
-}
-
-/**
- * Returns a list of all the available profile types.
- *
- * This list can include types that are queued for addition or deletion.
- *
- * @return \Drupal\profile2\ProfileTypeInterface[]
- *   An array of profile type entities, keyed by ID.
- *
- * @see profile2_type_load()
- */
-function profile2_type_get_types() {
-  return entity_load_multiple('profile2_type');
 }
 
 /**
@@ -251,7 +198,7 @@ function profile2_theme() {
  */
 function template_preprocess_profile_items(&$variables) {
   if (count($variables['profile_items'])) {
-    $variables['title'] = String::checkPlain($variables['profile_type']);
+    $variables['title'] = String::checkPlain($variables['label']);
     foreach ($variables['profile_items'] as $profile_item) {
       $variables['items'][] = entity_view($profile_item, 'default');
       $variables['edit_links'][] = \Drupal::linkGenerator()

@@ -130,7 +130,7 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
-
+//    @todo:
 //    if (!$update) {
 //      field_attach_create_bundle('profile2', $entity->id());
 //    }
@@ -144,7 +144,7 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
     parent::preDelete($storage, $entities);
-
+//    @todo:
 //    // Delete all profiles of this type.
 //    if ($profiles = entity_load_multiple_by_properties('profile2', array('type' => array_keys($entities)))) {
 //      entity_get_controller('profile2')->delete($profiles);
@@ -156,7 +156,7 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    */
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
     parent::postDelete($storage, $entities);
-
+//    @todo:
     foreach ($entities as $entity) {
 //      field_attach_delete_bundle('profile2', $entity->id());
     }

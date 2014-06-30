@@ -17,7 +17,6 @@ use Drupal\Core\Url;
  */
 class ProfileTypeDeleteForm extends EntityConfirmFormBase {
 
-
   /**
    * The database connection.
    *
