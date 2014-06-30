@@ -8,3 +8,4 @@ configure: profile2.overview_types
 dependencies:
   - user
   - field
+  - entity_reference
