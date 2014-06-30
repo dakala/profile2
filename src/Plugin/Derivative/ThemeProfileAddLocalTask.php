@@ -8,7 +8,6 @@
 namespace Drupal\profile2\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DerivativeBase;
-use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\user\UserInterface;
 use Drupal\Core\Cache\Cache;
