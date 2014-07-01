@@ -10,14 +10,13 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
 use Drupal\entity\Entity\EntityFormDisplay;
-use Symfony\Component\HttpFoundation\Request;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\field\FieldInstanceConfigInterface;
 
 /**
  * Implements hook_help().
  */
-function profile_help($route_name, Request $request) {
+function profile_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.profile':
 //      @todo:

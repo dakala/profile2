@@ -24,9 +24,9 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
    */
   public function getLabel();
 
+  /**
+   * {@inheritdoc}
+   */
   public function getRegistration();
-
-
-
 
 }
