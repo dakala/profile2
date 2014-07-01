@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Form\ProfileDeleteForm.
+ * Contains \Drupal\profile\Form\ProfileDeleteForm.
  */
 
-namespace Drupal\profile2\Form;
+namespace Drupal\profile\Form;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
@@ -80,18 +80,18 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
    */
   public function submit(array $form, array &$form_state) {
     $this->entity->delete();
-    watchdog('profile2', '@type: deleted %title.', array(
+    watchdog('profile', '@type: deleted %title.', array(
         '@type' => $this->entity->bundle(),
         '%title' => $this->entity->label()
       ));
-    $profile_type_storage = $this->entityManager->getStorage('profile2_type');
+    $profile_type_storage = $this->entityManager->getStorage('profile_type');
     $profile_type = $profile_type_storage->load($this->entity->bundle())
       ->label();
     drupal_set_message(t('@type %title has been deleted.', array(
           '@type' => $profile_type,
           '%title' => $this->entity->label()
         )));
-    Cache::invalidateTags(array('profile2' => TRUE));
+    Cache::invalidateTags(array('profile' => TRUE));
 
     $form_state['redirect_route'] = array(
       'route_name' => 'user.view',

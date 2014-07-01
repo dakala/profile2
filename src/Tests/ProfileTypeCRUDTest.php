@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Tests\ProfileTypeCRUDTest.
+ * Contains \Drupal\profile\Tests\ProfileTypeCRUDTest.
  */
 
-namespace Drupal\profile2\Tests;
+namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
 
@@ -14,13 +14,13 @@ use Drupal\simpletest\WebTestBase;
  */
 class ProfileTypeCRUDTest extends WebTestBase {
 
-  public static $modules = array('profile2', 'field_ui', 'text');
+  public static $modules = array('profile', 'field_ui', 'text');
 
   public static function getInfo() {
     return array(
       'name' => 'Profile type CRUD operations',
       'description' => 'Tests basic CRUD functionality of profile types.',
-      'group' => 'Profile2',
+      'group' => 'profile',
     );
   }
 

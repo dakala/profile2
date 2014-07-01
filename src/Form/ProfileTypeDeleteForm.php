@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Form\ProfileTypeDeleteForm.
+ * Contains \Drupal\profile\Form\ProfileTypeDeleteForm.
  */
 
-namespace Drupal\profile2\Form;
+namespace Drupal\profile\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Database\Connection;
@@ -54,7 +54,7 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelRoute() {
-    return new Url('profile2.overview_types');
+    return new Url('profile.overview_types');
   }
 
   /**
@@ -87,8 +87,8 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
   public function submit(array $form, array &$form_state) {
     $this->entity->delete();
     drupal_set_message(t('Profile type %label has been deleted.', array('%label' => $this->entity->label())));
-    watchdog('profile2', 'Profile type %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
-    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
+    watchdog('profile', 'Profile type %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
+    $form_state['redirect_route']['route_name'] = 'profile.overview_types';
   }
 
 }

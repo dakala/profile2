@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Controller\ProfileController.
+ * Contains \Drupal\profile\Controller\ProfileController.
  */
 
-namespace Drupal\profile2\Controller;
+namespace Drupal\profile\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\profile2\ProfileTypeInterface;
+use Drupal\profile\ProfileTypeInterface;
 
 /**
  * Returns responses for ProfileController routes.
@@ -18,17 +18,17 @@ class ProfileController extends ControllerBase {
   /**
    * Provides the profile submission form.
    *
-   * @param \Drupal\profile2\ProfileTypeInterface $type
+   * @param \Drupal\profile\ProfileTypeInterface $type
    *   The profile type entity for the node.
    *
    * @return array
    *   A profile submission form.
    */
   public function addProfile($user, $type) {
-    $config = \Drupal::config('profile2.type.' . $type);
+    $config = \Drupal::config('profile.type.' . $type);
     $langcode = $config->get('langcode');
 
-    $profile = $this->entityManager()->getStorage('profile2')->create(array(
+    $profile = $this->entityManager()->getStorage('profile')->create(array(
       'uid' => $user,
       'type' => $config->get('id'),
       'langcode' => $langcode ? $langcode : $this->languageManager()->getCurrentLanguage()->id,
@@ -47,7 +47,7 @@ class ProfileController extends ControllerBase {
    * @return array
    */
   public function editProfile($user, $type, $id) {
-    return $this->entityFormBuilder()->getForm(profile2_load($id), 'edit', array('changed' => REQUEST_TIME));
+    return $this->entityFormBuilder()->getForm(profile_load($id), 'edit', array('changed' => REQUEST_TIME));
   }
 
   /**
@@ -60,13 +60,13 @@ class ProfileController extends ControllerBase {
    * @return array
    */
   public function deleteProfile($user, $type, $id) {
-    return $this->entityFormBuilder()->getForm(profile2_load($id), 'delete');
+    return $this->entityFormBuilder()->getForm(profile_load($id), 'delete');
   }
 
   /**
-   * The _title_callback for the profile2.account_add_profile route.
+   * The _title_callback for the profile.account_add_profile route.
    *
-   * @param \Drupal\profile2\ProfileTypeInterface $profile_type
+   * @param \Drupal\profile\ProfileTypeInterface $profile_type
    *   The current profile type.
    *
    * @return string

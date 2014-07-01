@@ -1,5 +1,0 @@
-drupal.profile2-items:
-  version: VERSION
-  css:
-    component:
-      css/profile2.base.css: {}

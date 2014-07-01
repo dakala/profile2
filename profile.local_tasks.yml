@@ -1,0 +1,23 @@
+
+profile.type_edit:
+  title: 'Edit'
+  route_name: profile.type_edit
+  base_route: profile.type_edit
+
+profile.account_edit:
+  route_name: user.edit
+  title: 'Edit'
+  parent_id: user.edit
+  weight: -100
+
+profile.account_add_profile:
+  route_name: profile.account_add_profile
+  title: 'Add new profile'
+  parent_id: user.edit
+  derivative: Drupal\profile\Plugin\Derivative\ThemeProfileAddLocalTask
+
+profile.account_edit_profile:
+  route_name: profile.account_edit_profile
+  title: 'Edit a profile'
+  parent_id: user.edit
+  derivative: Drupal\profile\Plugin\Derivative\ThemeProfileEditLocalTask

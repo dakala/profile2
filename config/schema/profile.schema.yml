@@ -1,4 +1,4 @@
-profile2.type.*:
+profile.type.*:
   type: mapping
   label: 'Profile type settings'
   mapping:

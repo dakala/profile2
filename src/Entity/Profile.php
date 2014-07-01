@@ -2,33 +2,33 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Entity\Profile.
+ * Contains \Drupal\profile\Entity\Profile.
  */
 
-namespace Drupal\profile2\Entity;
+namespace Drupal\profile\Entity;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\profile2\ProfileInterface;
+use Drupal\profile\ProfileInterface;
 
 /**
  * Defines the profile entity class.
  *
  * @ContentEntityType(
- *   id = "profile2",
+ *   id = "profile",
  *   label = @Translation("Profile"),
  *   bundle_label = @Translation("Profile"),
  *   controllers = {
- *     "view_builder" = "Drupal\profile2\ProfileViewBuilder",
+ *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
  *     "form" = {
- *       "default" = "Drupal\profile2\ProfileFormController",
- *       "add" = "Drupal\profile2\ProfileFormController",
- *       "edit" = "Drupal\profile2\ProfileFormController",
- *       "delete" = "Drupal\profile2\Form\ProfileDeleteForm",
+ *       "default" = "Drupal\profile\ProfileFormController",
+ *       "add" = "Drupal\profile\ProfileFormController",
+ *       "edit" = "Drupal\profile\ProfileFormController",
+ *       "delete" = "Drupal\profile\Form\ProfileDeleteForm",
  *     },
  *   },
- *   bundle_entity_type = "profile2_type",
+ *   bundle_entity_type = "profile_type",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
  *   fieldable = TRUE,
@@ -40,8 +40,8 @@ use Drupal\profile2\ProfileInterface;
  *     "uuid" = "uuid"
  *   },
  *  links = {
- *    "canonical" = "profile2.overview_types",
- *    "admin-form" = "profile2.type_edit"
+ *    "canonical" = "profile.overview_types",
+ *    "admin-form" = "profile.type_edit"
  *   },
  * )
  */
@@ -67,7 +67,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['type'] = FieldDefinition::create('entity_reference')
       ->setLabel(t('Profile type'))
       ->setDescription(t('The profile type.'))
-      ->setSetting('target_type', 'profile2_type')
+      ->setSetting('target_type', 'profile_type')
       ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
 
     $fields['uid'] = FieldDefinition::create('entity_reference')
@@ -79,27 +79,6 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['langcode'] = FieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The profile language code.'));
-
-    $fields['label'] = FieldDefinition::create('string')
-      ->setLabel(t('Profile description'))
-      ->setDescription(t('A brief description of your profile.'))
-      ->setRequired(TRUE)
-      ->setTranslatable(TRUE)
-      ->setSettings(array(
-        'default_value' => '',
-        'max_length' => 255,
-      ))
-      ->setDisplayOptions('view', array(
-        'label' => 'hidden',
-        'type' => 'string',
-        'weight' => -5,
-      ))
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayOptions('form', array(
-        'type' => 'string',
-        'weight' => -5,
-      ))
-      ->setDisplayConfigurable('form', TRUE);
 
     $fields['created'] = FieldDefinition::create('created')
       ->setLabel(t('Created'))
@@ -117,13 +96,6 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function id() {
     return $this->get('pid')->value;
-  }
-
-  /**
-   * Overrides Entity::label().
-   */
-  public function label() {
-    return $this->get('label')->value;
   }
 
   /**
@@ -153,21 +125,6 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function setOwnerId($uid) {
     $this->set('uid', $uid);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLabel() {
-    return $this->get('label')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setLabel($label) {
-    $this->set('label', $label);
     return $this;
   }
 

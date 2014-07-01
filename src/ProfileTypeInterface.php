@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Entity\ProfileTypeInterface.
+ * Contains \Drupal\profile\Entity\ProfileTypeInterface.
  */
 
-namespace Drupal\profile2;
+namespace Drupal\profile;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
@@ -25,10 +25,6 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
   public function getLabel();
 
   public function getRegistration();
-
-  public function getFieldInstances();
-
-  public function hasFieldInstances();
 
 
 

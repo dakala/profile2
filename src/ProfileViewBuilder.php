@@ -5,7 +5,7 @@
  * Contains \Drupal\aggregator\FeedViewBuilder.
  */
 
-namespace Drupal\profile2;
+namespace Drupal\profile;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
@@ -20,7 +20,7 @@ class ProfileViewBuilder extends EntityViewBuilder {
    */
   protected function getBuildDefaults(EntityInterface $entity, $view_mode, $langcode) {
     $defaults = parent::getBuildDefaults($entity, $view_mode, $langcode);
-    $defaults['#theme'] = 'profile_items';
+    $defaults['#theme'] = 'profile';
     return $defaults;
   }
 

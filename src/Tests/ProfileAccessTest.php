@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Tests\ProfileAccessTest.
+ * Contains \Drupal\profile\Tests\ProfileAccessTest.
  */
 
-namespace Drupal\profile2\Tests;
+namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
 
@@ -14,20 +14,20 @@ use Drupal\simpletest\WebTestBase;
  */
 class ProfileAccessTest extends WebTestBase {
 
-  public static $modules = array('profile2', 'text');
+  public static $modules = array('profile', 'text');
 
   public static function getInfo() {
     return array(
       'name' => 'Profile access',
       'description' => 'Tests profile access handling.',
-      'group' => 'Profile2',
+      'group' => 'profile',
     );
   }
 
   function setUp() {
     parent::setUp();
 
-    $this->type = entity_create('profile2_type', array(
+    $this->type = entity_create('profile_type', array(
       'id' => 'test',
       'label' => 'Test profile',
     ));
@@ -42,7 +42,7 @@ class ProfileAccessTest extends WebTestBase {
     );
     $this->field = field_create_field($this->field);
     $this->instance = array(
-      'entity_type' => 'profile2',
+      'entity_type' => 'profile',
       'field_name' => $this->field['field_name'],
       'bundle' => $this->type->id(),
       'label' => 'Full name',
@@ -51,7 +51,7 @@ class ProfileAccessTest extends WebTestBase {
       ),
     );
     $this->instance = field_create_instance($this->instance);
-    $this->display = entity_get_display('profile2', 'test', 'default')
+    $this->display = entity_get_display('profile', 'test', 'default')
       ->setComponent($this->field['field_name'], array(
         'type' => 'text_default',
       ));

@@ -1,6 +1,6 @@
 services:
-  profile2.profile_access_checker:
-    class: Drupal\profile2\Access\ProfileAccessCheck
+  profile.profile_access_checker:
+    class: Drupal\profile\Access\ProfileAccessCheck
     arguments: ['@current_user']
     tags:
       - { name: access_check, applies_to: _profile_access_check }

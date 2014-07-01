@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by Profile2 module.
+ * Hooks provided by profile module.
  */
 
 /**
@@ -19,7 +19,7 @@
  * @param string $op
  *   The operation being performed. One of 'view', 'edit' (being the same as
  *   'create' or 'update'), or 'delete'.
- * @param Drupal\profile2\Entity\Profile $profile
+ * @param Drupal\profile\Entity\Profile $profile
  *   A profile to check access for.
  * @param Drupal\user\Entity\User $account
  *   The user performing the operation; the currently logged in user by default.
@@ -33,7 +33,7 @@
  *   - NULL or nothing to not affect the operation. If no module explicitly
  *     grants access, access is denied.
  */
-function hook_profile2_access($op, Drupal\profile2\Entity\Profile $profile, Drupal\user\Entity\User $account) {
+function hook_profile_access($op, Drupal\profile\Entity\Profile $profile, Drupal\user\Entity\User $account) {
   // Explicitly deny access for a 'secret' profile type.
   if ($profile->type == 'secret' && !user_access('custom permission')) {
     return FALSE;

@@ -1,5 +1,0 @@
-profile2_type_add:
-  route_name: profile2.type_add
-  title: 'Add profile type'
-  appears_on:
-    - profile2.overview_types

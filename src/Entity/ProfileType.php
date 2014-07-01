@@ -2,44 +2,43 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Entity\ProfileType.
+ * Contains \Drupal\profile\Entity\ProfileType.
  */
 
 
-namespace Drupal\profile2\Entity;
+namespace Drupal\profile\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\profile2\ProfileTypeInterface;
-use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\profile\ProfileTypeInterface;
 
 /**
  * Defines the profile type entity class.
  *
  * @ConfigEntityType(
- *   id = "profile2_type",
+ *   id = "profile_type",
  *   label = @Translation("Profile type"),
  *   controllers = {
  *     "form" = {
- *       "default" = "Drupal\profile2\ProfileTypeFormController",
- *       "add" = "Drupal\profile2\ProfileTypeFormController",
- *       "edit" = "Drupal\profile2\ProfileTypeFormController",
- *       "delete" = "Drupal\profile2\Form\ProfileTypeDeleteForm"
+ *       "default" = "Drupal\profile\ProfileTypeFormController",
+ *       "add" = "Drupal\profile\ProfileTypeFormController",
+ *       "edit" = "Drupal\profile\ProfileTypeFormController",
+ *       "delete" = "Drupal\profile\Form\ProfileTypeDeleteForm"
  *     },
- *     "list_builder" = "Drupal\profile2\ProfileTypeListController"
+ *     "list_builder" = "Drupal\profile\ProfileTypeListController"
  *   },
  *   admin_permission = "administer profile types",
  *   config_prefix = "type",
- *   bundle_of = "profile2",
+ *   bundle_of = "profile",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label"
  *   },
  *   links = {
- *     "add-form" = "profile2.type_add",
- *     "delete-form" = "profile2.type_delete",
- *     "edit-form" = "profile2.type_edit",
- *     "admin-form" = "profile2.type_edit",
+ *     "add-form" = "profile.type_add",
+ *     "delete-form" = "profile.type_delete",
+ *     "edit-form" = "profile.type_edit",
+ *     "admin-form" = "profile.type_edit",
  *   }
  * )
  */
@@ -111,31 +110,14 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasFieldInstances() {
-    return count($this->getFieldInstances()) ? TRUE : FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFieldInstances() {
-    return array_filter(\Drupal::entityManager()
-      ->getFieldDefinitions('profile2', $this->id()), function ($field_definition) {
-      return $field_definition instanceof FieldInstanceConfigInterface;
-    });
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 //    @todo:
 //    if (!$update) {
-//      field_attach_create_bundle('profile2', $entity->id());
+//      field_attach_create_bundle('profile', $entity->id());
 //    }
 //    elseif ($entity->original->id() != $entity->id()) {
-//      field_attach_rename_bundle('profile2', $entity->original->id(), $entity->id());
+//      field_attach_rename_bundle('profile', $entity->original->id(), $entity->id());
 //    }
   }
 
@@ -146,8 +128,8 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
     parent::preDelete($storage, $entities);
 //    @todo:
 //    // Delete all profiles of this type.
-//    if ($profiles = entity_load_multiple_by_properties('profile2', array('type' => array_keys($entities)))) {
-//      entity_get_controller('profile2')->delete($profiles);
+//    if ($profiles = entity_load_multiple_by_properties('profile', array('type' => array_keys($entities)))) {
+//      entity_get_controller('profile')->delete($profiles);
 //    }
   }
 
@@ -158,7 +140,7 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
     parent::postDelete($storage, $entities);
 //    @todo:
     foreach ($entities as $entity) {
-//      field_attach_delete_bundle('profile2', $entity->id());
+//      field_attach_delete_bundle('profile', $entity->id());
     }
   }
 

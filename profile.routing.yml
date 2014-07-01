@@ -1,59 +1,59 @@
-profile2.overview_types:
+profile.overview_types:
   path: '/admin/config/people/profiles'
   defaults:
-    _entity_list: 'profile2_type'
+    _entity_list: 'profile_type'
     _title: 'Profile types'
   requirements:
     _permission: 'administer account settings'
 
-profile2.type_add:
+profile.type_add:
   path: '/admin/config/people/profiles/add'
   defaults:
-    _entity_form: 'profile2_type.add'
+    _entity_form: 'profile_type.add'
     _title: 'Add'
   requirements:
     _permission: 'administer profile types'
 
-profile2.type_edit:
-  path: '/admin/config/people/profiles/manage/{profile2_type}'
+profile.type_edit:
+  path: '/admin/config/people/profiles/manage/{profile_type}'
   defaults:
-    _entity_form: 'profile2_type.edit'
+    _entity_form: 'profile_type.edit'
     _title: 'Edit'
   requirements:
     _permission: 'administer profile types'
 
-profile2.type_delete:
-  path: '/admin/config/people/profiles/manage/{profile2_type}/delete'
+profile.type_delete:
+  path: '/admin/config/people/profiles/manage/{profile_type}/delete'
   defaults:
-    _entity_form: 'profile2_type.delete'
+    _entity_form: 'profile_type.delete'
     _title: 'Delete'
   requirements:
     _permission: 'administer profile types'
 
-profile2.account_add_profile:
+profile.account_add_profile:
   path: '/user/{user}/add/{type}'
   defaults:
-    _content: '\Drupal\profile2\Controller\ProfileController::addProfile'
+    _content: '\Drupal\profile\Controller\ProfileController::addProfile'
     _title: 'Add new profile'
   options:
     _admin_route: TRUE
   requirements:
     _profile_access_check: 'TRUE'
 
-profile2.account_edit_profile:
+profile.account_edit_profile:
   path: '/user/{user}/edit/{type}/{id}'
   defaults:
-    _content: '\Drupal\profile2\Controller\ProfileController::editProfile'
+    _content: '\Drupal\profile\Controller\ProfileController::editProfile'
     _title: 'Edit a profile'
   options:
     _admin_route: TRUE
   requirements:
     _profile_access_check: 'TRUE'
 
-profile2.account_delete_profile:
+profile.account_delete_profile:
   path: '/user/{user}/delete/{type}/{id}'
   defaults:
-    _content: '\Drupal\profile2\Controller\ProfileController::deleteProfile'
+    _content: '\Drupal\profile\Controller\ProfileController::deleteProfile'
     _title: 'Delete a profile'
   options:
     _admin_route: TRUE

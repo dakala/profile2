@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Tests\ProfileFieldAccessTest.
+ * Contains \Drupal\profile\Tests\ProfileFieldAccessTest.
  */
 
-namespace Drupal\profile2\Tests;
+namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
 
@@ -14,20 +14,20 @@ use Drupal\simpletest\WebTestBase;
  */
 class ProfileFieldAccessTest extends WebTestBase {
 
-  public static $modules = array('profile2', 'text', 'field_ui');
+  public static $modules = array('profile', 'text', 'field_ui');
 
   public static function getInfo() {
     return array(
       'name' => 'Field access',
       'description' => 'Tests profile field access functionality.',
-      'group' => 'Profile2',
+      'group' => 'profile',
     );
   }
 
   function setUp() {
     parent::setUp();
 
-    $this->type = entity_create('profile2_type', array(
+    $this->type = entity_create('profile_type', array(
       'id' => 'personal',
       'label' => 'Personal data',
       'weight' => 0,
@@ -39,8 +39,8 @@ class ProfileFieldAccessTest extends WebTestBase {
     $this->admin_user = $this->drupalCreateUser(array(
       'access user profiles',
       'administer profile types',
-      'administer profile2 fields',
-      'administer profile2 display',
+      'administer profile fields',
+      'administer profile display',
       'bypass profile access',
     ));
     $user_permissions = array(
@@ -70,7 +70,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     $this->drupalPost("admin/people/profiles/manage/$id/fields", $edit, t('Save'));
 
     $edit = array(
-      'field[settings][profile2_private]' => 1,
+      'field[settings][profile_private]' => 1,
     );
     $this->drupalPost(NULL, $edit, t('Save field settings'));
 

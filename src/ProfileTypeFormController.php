@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\ProfileTypeFormController.
+ * Contains \Drupal\profile\ProfileTypeFormController.
  */
 
-namespace Drupal\profile2;
+namespace Drupal\profile;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
@@ -35,7 +35,7 @@ class ProfileTypeFormController extends EntityForm {
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#machine_name' => array(
-        'exists' => 'profile2_type_load',
+        'exists' => 'profile_type_load',
       ),
     );
     $form['registration'] = array(
@@ -82,7 +82,7 @@ class ProfileTypeFormController extends EntityForm {
     else {
       drupal_set_message(t('%label profile type has been created.', array('%label' => $type->label())));
     }
-    $form_state['redirect_route']['route_name'] = 'profile2.overview_types';
+    $form_state['redirect_route']['route_name'] = 'profile.overview_types';
   }
 
   /**
@@ -92,9 +92,9 @@ class ProfileTypeFormController extends EntityForm {
     // $form_state['redirect_route'] = '<front>';
 
     $form_state['redirect_route'] = array(
-     'route_name' => 'field_ui.overview_profile2',
+     'route_name' => 'field_ui.overview_profile',
      'route_parameters' => array(
-       'profile2_type' => $this->entity->id(),
+       'profile_type' => $this->entity->id(),
      ),
     );
  }
@@ -104,9 +104,9 @@ class ProfileTypeFormController extends EntityForm {
    */
   public function delete(array $form, array &$form_state) {
     $form_state['redirect_route'] = array(
-      'route_name' => 'profile2.type_delete',
+      'route_name' => 'profile.type_delete',
       'route_parameters' => array(
-        'profile2_type' => $this->entity->id(),
+        'profile_type' => $this->entity->id(),
       ),
     );
   }

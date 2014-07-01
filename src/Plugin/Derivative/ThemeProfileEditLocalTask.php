@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Plugin\Derivative\ThemeProfileEditLocalTask.
+ * Contains \Drupal\profile\Plugin\Derivative\ThemeProfileEditLocalTask.
  */
 
-namespace Drupal\profile2\Plugin\Derivative;
+namespace Drupal\profile\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DerivativeBase;
 use Drupal\Core\Cache\Cache;
@@ -23,7 +23,7 @@ class ThemeProfileEditLocalTask extends DerivativeBase {
     $current_path = current_path();
     $args = explode('/', $current_path);
     if ((count($args) == 5) && ($args[0] == 'user') && ($args[2] == 'edit') && drupal_strlen($args[3])) {
-      $config = \Drupal::config('profile2.type.' . $args[3]);
+      $config = \Drupal::config('profile.type.' . $args[3]);
     }
 
     if (!isset($config) || !$config instanceof \Drupal\Core\Config\Config) {

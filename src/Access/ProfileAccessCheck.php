@@ -2,18 +2,18 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Access\ProfileAccessCheck.
+ * Contains \Drupal\profile\Access\ProfileAccessCheck.
  */
-namespace Drupal\profile2\Access;
+namespace Drupal\profile\Access;
 
 use Drupal\Core\Access\AccessCheckInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\profile2\ProfileTypeInterface;
+use Drupal\profile\ProfileTypeInterface;
 
 /**
- * Checks access for displaying configuration translation page.
+ * Checks access to add, edit and delete profiles.
  */
 class ProfileAccessCheck implements AccessCheckInterface {
   /**

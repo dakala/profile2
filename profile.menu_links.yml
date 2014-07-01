@@ -1,5 +1,5 @@
-profile2.overview_types:
+profile.overview_types:
   title: 'Profile types'
   description: 'Manage profiles for users, including fields.'
-  route_name: profile2.overview_types
+  route_name: profile.overview_types
   parent: user.admin_index

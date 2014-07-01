@@ -8,7 +8,7 @@
 /**
  * Implements hook_schema().
  */
-function profile2_schema() {
+function profile_schema() {
   $schema['profile'] = array(
     'description' => 'Stores profile items.',
     'fields' => array(
@@ -41,13 +41,6 @@ function profile2_schema() {
         'description' => 'The {language}.langcode of this profile.',
         'type' => 'varchar',
         'length' => 12,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'label' => array(
-        'description' => 'A human-readable label for this profile.',
-        'type' => 'varchar',
-        'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),

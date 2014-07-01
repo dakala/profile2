@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\ProfileFormController.
+ * Contains \Drupal\profile\ProfileFormController.
  */
 
-namespace Drupal\profile2;
+namespace Drupal\profile;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityForm;
@@ -31,7 +31,7 @@ class ProfileFormController extends ContentEntityForm {
    */
   public function save(array $form, array &$form_state) {
     $profile = $this->entity;
-    $profile_type = entity_load('profile2_type', $profile->getType());
+    $profile_type = entity_load('profile_type', $profile->getType());
     switch ($profile->save()) {
       case SAVED_NEW:
         drupal_set_message(t('%label profile has been created.', array('%label' => $profile_type->label())));

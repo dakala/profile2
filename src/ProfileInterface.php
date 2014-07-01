@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\ProfileInterface.
+ * Contains \Drupal\profile\ProfileInterface.
  */
 
-namespace Drupal\profile2;
+namespace Drupal\profile;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;

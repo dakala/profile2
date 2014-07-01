@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Tests\ProfileCRUDTest.
+ * Contains \Drupal\profile\Tests\ProfileCRUDTest.
  */
 
-namespace Drupal\profile2\Tests;
+namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\DrupalUnitTestBase;
 
@@ -14,13 +14,13 @@ use Drupal\simpletest\DrupalUnitTestBase;
  */
 class ProfileCRUDTest extends DrupalUnitTestBase {
 
-  public static $modules = array('system', 'field', 'field_sql_storage', 'user', 'profile2');
+  public static $modules = array('system', 'field', 'field_sql_storage', 'user', 'profile');
 
   public static function getInfo() {
     return array(
       'name' => 'Profile CRUD operations',
       'description' => 'Tests basic CRUD functionality of profiles.',
-      'group' => 'Profile2',
+      'group' => 'profile',
     );
   }
 
@@ -28,7 +28,7 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
     parent::setUp();
     $this->installSchema('system', 'url_alias');
     $this->installSchema('system', 'sequences');
-    $this->enableModules(array('field', 'user', 'profile2'));
+    $this->enableModules(array('field', 'user', 'profile'));
   }
 
   /**
@@ -40,7 +40,7 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
       1 => array('label' => $this->randomName()),
     );
     foreach ($types_data as $id => $values) {
-      $types[$id] = entity_create('profile2_type', array('id' => $id) + $values);
+      $types[$id] = entity_create('profile_type', array('id' => $id) + $values);
       $types[$id]->save();
     }
     $this->user1 = entity_create('user', array(
@@ -55,7 +55,7 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
     $this->user2->save();
 
     // Create a new profile.
-    $profile = entity_create('profile2', $expected = array(
+    $profile = entity_create('profile', $expected = array(
       'type' => $types[0]->id(),
       'uid' => $this->user1->id(),
     ));
@@ -74,7 +74,7 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
     $this->assertIdentical($profile->changed, REQUEST_TIME);
 
     // List profiles for the user and verify that the new profile appears.
-    $list = entity_load_multiple_by_properties('profile2', array(
+    $list = entity_load_multiple_by_properties('profile', array(
       'uid' => $this->user1->uid,
     ));
     $this->assertEqual($list, array(
@@ -82,7 +82,7 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
     ));
 
     // Reload and update the profile.
-    $profile = entity_load('profile2', $profile->id());
+    $profile = entity_load('profile', $profile->id());
     $profile->changed -= 1000;
     $original = clone $profile;
     $status = $profile->save();
@@ -94,27 +94,27 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
 
     // Create a second profile.
     $user1_profile1 = $profile;
-    $profile = entity_create('profile2', array(
+    $profile = entity_create('profile', array(
       'type' => $types[1]->id(),
       'uid' => $this->user1->id(),
     ));
     $status = $profile->save();
     $this->assertIdentical($status, SAVED_NEW);
-    $user1_profile2 = $profile;
+    $user1_profile = $profile;
 
     // List profiles for the user and verify that both profiles appear.
-    $list = entity_load_multiple_by_properties('profile2', array(
+    $list = entity_load_multiple_by_properties('profile', array(
       'uid' => $this->user1->uid,
     ));
     $this->assertEqual($list, array(
       $user1_profile1->id() => $user1_profile1,
-      $user1_profile2->id() => $user1_profile2,
+      $user1_profile->id() => $user1_profile,
     ));
 
     // Delete the second profile and verify that the first still exists.
-    $user1_profile2->delete();
-    $this->assertFalse(entity_load('profile2', $user1_profile2->id()));
-    $list = entity_load_multiple_by_properties('profile2', array(
+    $user1_profile->delete();
+    $this->assertFalse(entity_load('profile', $user1_profile->id()));
+    $list = entity_load_multiple_by_properties('profile', array(
       'uid' => $this->user1->uid,
     ));
     $this->assertEqual($list, array(
@@ -122,15 +122,15 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
     ));
 
     // Create a new second profile.
-    $user1_profile2 = entity_create('profile2', array(
+    $user1_profile = entity_create('profile', array(
       'type' => $types[1]->id(),
       'uid' => $this->user1->id(),
     ));
-    $status = $user1_profile2->save();
+    $status = $user1_profile->save();
     $this->assertIdentical($status, SAVED_NEW);
 
     // Create a profile for the second user.
-    $user2_profile1 = entity_create('profile2', array(
+    $user2_profile1 = entity_create('profile', array(
       'type' => $types[0]->id(),
       'uid' => $this->user2->id(),
     ));
@@ -140,13 +140,13 @@ class ProfileCRUDTest extends DrupalUnitTestBase {
     // Delete the first user and verify that all of its profiles are deleted.
     $this->user1->delete();
     $this->assertFalse(entity_load('user', $this->user1->id()));
-    $list = entity_load_multiple_by_properties('profile2', array(
+    $list = entity_load_multiple_by_properties('profile', array(
       'uid' => $this->user1->uid,
     ));
     $this->assertEqual($list, array());
 
     // List profiles for the second user and verify that they still exist.
-    $list = entity_load_multiple_by_properties('profile2', array(
+    $list = entity_load_multiple_by_properties('profile', array(
       'uid' => $this->user2->uid,
     ));
     $this->assertEqual($list, array(

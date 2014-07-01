@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\ProfileTypeListController.
+ * Contains \Drupal\profile\ProfileTypeListController.
  */
 
-namespace Drupal\profile2;
+namespace Drupal\profile;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;

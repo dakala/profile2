@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\profile2\Tests\ProfileAttachTest.
+ * Contains \Drupal\profile\Tests\ProfileAttachTest.
  */
 
-namespace Drupal\profile2\Tests;
+namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
 
@@ -14,20 +14,20 @@ use Drupal\simpletest\WebTestBase;
  */
 class ProfileAttachTest extends WebTestBase {
 
-  public static $modules = array('profile2', 'text');
+  public static $modules = array('profile', 'text');
 
   public static function getInfo() {
     return array(
       'name' => 'Profile form attachment',
       'description' => 'Tests attaching of profile entity forms to other forms.',
-      'group' => 'Profile2',
+      'group' => 'profile',
     );
   }
 
   function setUp() {
     parent::setUp();
 
-    $this->type = entity_create('profile2_type', array(
+    $this->type = entity_create('profile_type', array(
       'id' => 'test',
       'label' => 'Test profile',
       'weight' => 0,
@@ -43,7 +43,7 @@ class ProfileAttachTest extends WebTestBase {
     );
     $this->field = field_create_field($this->field);
     $this->instance = array(
-      'entity_type' => 'profile2',
+      'entity_type' => 'profile',
       'field_name' => $this->field['field_name'],
       'bundle' => $this->type->id(),
       'label' => 'Full name',
@@ -53,7 +53,7 @@ class ProfileAttachTest extends WebTestBase {
       ),
     );
     $this->instance = field_create_instance($this->instance);
-    $this->display = entity_get_display('profile2', 'test', 'default')
+    $this->display = entity_get_display('profile', 'test', 'default')
       ->setComponent($this->field['field_name'], array(
         'type' => 'text_default',
       ));
@@ -98,7 +98,7 @@ class ProfileAttachTest extends WebTestBase {
     $this->assertTrue($new_user->status, 'New account is active after registration.');
 
     // Verify that a new profile was created for the new user ID.
-    $profiles = entity_load_multiple_by_properties('profile2', array(
+    $profiles = entity_load_multiple_by_properties('profile', array(
       'uid' => $new_user->id(),
       'type' => $this->type->id(),
     ));
