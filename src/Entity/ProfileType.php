@@ -8,7 +8,6 @@
 
 namespace Drupal\profile\Entity;
 
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\profile\ProfileTypeInterface;
 
@@ -106,43 +105,5 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
   public function getRegistration() {
     return $this->get('registration')->value;
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    parent::postSave($storage, $update);
-//    @todo:
-//    if (!$update) {
-//      field_attach_create_bundle('profile', $entity->id());
-//    }
-//    elseif ($entity->original->id() != $entity->id()) {
-//      field_attach_rename_bundle('profile', $entity->original->id(), $entity->id());
-//    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function preDelete(EntityStorageInterface $storage, array $entities) {
-    parent::preDelete($storage, $entities);
-//    @todo:
-//    // Delete all profiles of this type.
-//    if ($profiles = entity_load_multiple_by_properties('profile', array('type' => array_keys($entities)))) {
-//      entity_get_controller('profile')->delete($profiles);
-//    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function postDelete(EntityStorageInterface $storage, array $entities) {
-    parent::postDelete($storage, $entities);
-//    @todo:
-    foreach ($entities as $entity) {
-//      field_attach_delete_bundle('profile', $entity->id());
-    }
-  }
-
 
 }
