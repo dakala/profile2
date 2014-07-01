@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Implements hook_help().
  */
-function profile2_help($route_name, Request $request) {
+function profile2_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.profile2':
 //      @todo:
