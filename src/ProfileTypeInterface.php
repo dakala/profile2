@@ -15,17 +15,13 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface ProfileTypeInterface extends ConfigEntityInterface {
 
   /**
-   * {@inheritdoc}
-   */
-  public function id();
-
-  /**
-   * {@inheritdoc}
+   * Returns the label of the profile type.
    */
   public function getLabel();
 
   /**
-   * {@inheritdoc}
+   * Return the registration flag for allowing creation of profile type
+   * at user registration.
    */
   public function getRegistration();
 
