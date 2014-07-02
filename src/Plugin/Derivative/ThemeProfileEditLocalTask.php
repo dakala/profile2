@@ -8,6 +8,7 @@
 namespace Drupal\profile\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Config\Config;
 
 /**
  * Provides dynamic routes to edit profiles.
@@ -18,26 +19,26 @@ class ThemeProfileEditLocalTask extends DeriverBase {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    // @todo: is there a better way than this?
-    $current_path = current_path();
-    $args = explode('/', $current_path);
-    if ((count($args) == 5) && ($args[0] == 'user') && ($args[2] == 'edit') && drupal_strlen($args[3])) {
-      $config = \Drupal::config('profile.type.' . $args[3]);
+    if (\Drupal::routeMatch()
+        ->getRouteName() == 'profile.account_edit_profile'
+    ) {
+      $params = \Drupal::routeMatch()->getParameters()->all();
+      if (isset($params['type']) && $params['id']) {
+        $config = \Drupal::config('profile.type.' . $params['type']);
+      }
     }
 
-    if (!isset($config) || !$config instanceof \Drupal\Core\Config\Config) {
-      return;
+    if ($config instanceof Config) {
+      $this->derivatives[$config->get('id')] = $base_plugin_definition;
+      $this->derivatives[$config->get('id')]['title'] = \Drupal::translation()
+        ->translate('Edit @type profile', array('@type' => $config->get('label')));
+      $this->derivatives[$config->get('id')]['route_parameters'] = array(
+        'type' => $config->get('id'),
+        'id' => $params['id']
+      );
     }
 
-    $this->derivatives[$config->get('id')] = $base_plugin_definition;
-    $this->derivatives[$config->get('id')]['title'] = \Drupal::translation()
-      ->translate('Edit @type profile', array('@type' => $config->get('label')));
-    $this->derivatives[$config->get('id')]['route_parameters'] = array(
-      'type' => $config->get('id'),
-      'id' => $args[4]
-    );
-
-    return $this->derivatives;
+    return parent::getDerivativeDefinitions($base_plugin_definition);
   }
 
 }
