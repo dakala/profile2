@@ -47,7 +47,7 @@ class ProfileController extends ControllerBase {
    * @return array
    */
   public function editProfile($user, $type, $id) {
-    return $this->entityFormBuilder()->getForm(profile_load($id), 'edit', array('changed' => REQUEST_TIME));
+    return $this->entityFormBuilder()->getForm(entity_load('profile', $id), 'edit', array('changed' => REQUEST_TIME));
   }
 
   /**
@@ -60,7 +60,7 @@ class ProfileController extends ControllerBase {
    * @return array
    */
   public function deleteProfile($user, $type, $id) {
-    return $this->entityFormBuilder()->getForm(profile_load($id), 'delete');
+    return $this->entityFormBuilder()->getForm(entity_load('profile', $id), 'delete');
   }
 
   /**
