@@ -117,7 +117,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    * {@inheritdoc}
    */
   public function getOwnerId() {
-    return $this->get('uid')->value;
+    return $this->get('uid')->target_id;
   }
 
   /**
