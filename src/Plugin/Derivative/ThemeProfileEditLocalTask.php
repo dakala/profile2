@@ -7,13 +7,13 @@
 
 namespace Drupal\profile\Plugin\Derivative;
 
-use Drupal\Component\Plugin\Derivative\DerivativeBase;
+use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Cache\Cache;
 
 /**
  * Provides dynamic tabs based on active themes.
  */
-class ThemeProfileEditLocalTask extends DerivativeBase {
+class ThemeProfileEditLocalTask extends DeriverBase {
 
   /**
    * {@inheritdoc}
@@ -39,6 +39,9 @@ class ThemeProfileEditLocalTask extends DerivativeBase {
     );
     // Clear the page cache because pages can contain tab information.
     Cache::invalidateTags(array('content' => TRUE));
+
+
+
 
     return $this->derivatives;
   }

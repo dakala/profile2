@@ -7,17 +7,16 @@
 
 namespace Drupal\profile\Plugin\Derivative;
 
-use Drupal\Component\Plugin\Derivative\DerivativeBase;
+use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Component\Utility\Unicode;
 use Drupal\user\UserInterface;
 use Drupal\Core\Cache\Cache;
-use Drupal\profile\Entity\ProfileType;
 use Drupal\field\FieldInstanceConfigInterface;
 
 /**
  * Provides dynamic tabs based on active themes.
  */
-class ThemeProfileAddLocalTask extends DerivativeBase {
+class ThemeProfileAddLocalTask extends DeriverBase {
 
   /**
    * {@inheritdoc}
@@ -32,7 +31,6 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
         ->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
         return $field_definition instanceof FieldInstanceConfigInterface;
       });
-
       // No fields yet.
       if (!count($instances)) {
         continue;
@@ -70,8 +68,6 @@ class ThemeProfileAddLocalTask extends DerivativeBase {
         $this->derivatives[$id]['route_parameters'] = array('type' => $id);
       }
     }
-    // Clear the page cache because pages can contain tab information.
-    Cache::invalidateTags(array('content' => TRUE));
 
     return $this->derivatives;
   }

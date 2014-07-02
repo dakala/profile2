@@ -12,11 +12,12 @@ use Drupal\Core\Url;
 use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  */
-function profile_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function profile_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.profile':
       $output = '<h3>' . t('About') . '</h3>';
@@ -80,9 +81,6 @@ function profile_permission() {
   return $permissions;
 }
 
-/**
- * Implements hook_user_view().
- */
 /**
  * Implements hook_user_view().
  */
