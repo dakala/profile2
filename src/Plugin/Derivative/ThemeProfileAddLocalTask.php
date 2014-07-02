@@ -10,11 +10,10 @@ namespace Drupal\profile\Plugin\Derivative;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Component\Utility\Unicode;
 use Drupal\user\UserInterface;
-use Drupal\Core\Cache\Cache;
 use Drupal\field\FieldInstanceConfigInterface;
 
 /**
- * Provides dynamic tabs based on active themes.
+ * Provides dynamic routes to add profiles.
  */
 class ThemeProfileAddLocalTask extends DeriverBase {
 
