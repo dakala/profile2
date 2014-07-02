@@ -7,12 +7,12 @@
 
 namespace Drupal\profile\Form;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
+use Drupal\profile\Entity\ProfileType;
 
 /**
  * Provides a confirmation form for deleting a profile entity.
@@ -53,7 +53,7 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return t('Are you sure you want to delete %title?', array('%title' => $this->entity->label()));
+    return t('Are you sure you want to delete this profile?');
   }
 
   /**
@@ -79,19 +79,10 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submit(array $form, array &$form_state) {
+    $profile_type = ProfileType::load($this->entity->bundle());
     $this->entity->delete();
-    watchdog('profile', '@type: deleted %title.', array(
-        '@type' => $this->entity->bundle(),
-        '%title' => $this->entity->label()
-      ));
-    $profile_type_storage = $this->entityManager->getStorage('profile_type');
-    $profile_type = $profile_type_storage->load($this->entity->bundle())
-      ->label();
-    drupal_set_message(t('@type %title has been deleted.', array(
-          '@type' => $profile_type,
-          '%title' => $this->entity->label()
-        )));
-    Cache::invalidateTags(array('profile' => TRUE));
+    watchdog('profile', '@type profile deleted.', array('@type' => $profile_type->id()));
+    drupal_set_message(t('@type profile deleted.', array('@type' => $profile_type->label())));
 
     $form_state['redirect_route'] = array(
       'route_name' => 'user.view',

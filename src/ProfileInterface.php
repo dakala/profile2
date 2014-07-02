@@ -15,4 +15,5 @@ use Drupal\Core\Entity\EntityChangedInterface;
  */
 interface ProfileInterface extends ContentEntityInterface, EntityChangedInterface {
 
+  public function getOwnerId();
 }
