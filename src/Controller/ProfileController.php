@@ -9,6 +9,7 @@ namespace Drupal\profile\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\profile\ProfileTypeInterface;
+use Drupal\profile\Entity\Profile;
 
 /**
  * Returns responses for ProfileController routes.
@@ -47,7 +48,7 @@ class ProfileController extends ControllerBase {
    * @return array
    */
   public function editProfile($user, $type, $id) {
-    return $this->entityFormBuilder()->getForm(entity_load('profile', $id), 'edit', array('changed' => REQUEST_TIME));
+     return $this->entityFormBuilder()->getForm(Profile::load($id), 'edit', array('changed' => REQUEST_TIME));
   }
 
   /**
@@ -60,7 +61,7 @@ class ProfileController extends ControllerBase {
    * @return array
    */
   public function deleteProfile($user, $type, $id) {
-    return $this->entityFormBuilder()->getForm(entity_load('profile', $id), 'delete');
+    return $this->entityFormBuilder()->getForm(Profile::load($id), 'delete');
   }
 
   /**
