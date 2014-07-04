@@ -87,4 +87,9 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    */
   public function setRevisionAuthorId($uid);
 
+  /**
+   * Returns a label for the profile.
+   */
+  public function label();
+
 }

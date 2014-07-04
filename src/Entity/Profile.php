@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\profile\ProfileInterface;
+use Drupal\profile\ProfileTypeInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -110,6 +111,14 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function id() {
     return $this->get('pid')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function label() {
+    $profile_type = ProfileType::load($this->bundle());
+    return t('@type profile of user @uid', array('@type' => $profile_type->label(), '@uid' => $this->getOwnerId()));
   }
 
   /**
