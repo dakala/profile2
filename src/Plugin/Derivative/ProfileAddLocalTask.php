@@ -15,7 +15,7 @@ use Drupal\field\FieldInstanceConfigInterface;
 /**
  * Provides dynamic routes to add profiles.
  */
-class ThemeProfileAddLocalTask extends DeriverBase {
+class ProfileAddLocalTask extends DeriverBase {
 
   /**
    * {@inheritdoc}
@@ -57,7 +57,7 @@ class ThemeProfileAddLocalTask extends DeriverBase {
         }
       }
     }
-
+    
     if (count($configs)) {
       foreach ($configs as $config) {
         $id = $config->get('id');

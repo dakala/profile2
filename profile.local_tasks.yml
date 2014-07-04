@@ -14,10 +14,10 @@ profile.account_add_profile:
   route_name: profile.account_add_profile
   title: 'Add new profile'
   parent_id: user.edit
-  deriver: Drupal\profile\Plugin\Derivative\ThemeProfileAddLocalTask
+  deriver: Drupal\profile\Plugin\Derivative\ProfileAddLocalTask
 
 profile.account_edit_profile:
   route_name: profile.account_edit_profile
   title: 'Edit a profile'
   parent_id: user.edit
-  deriver: Drupal\profile\Plugin\Derivative\ThemeProfileEditLocalTask
+  deriver: Drupal\profile\Plugin\Derivative\ProfileEditLocalTask
