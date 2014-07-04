@@ -18,13 +18,13 @@ use Drupal\profile\ProfileTypeInterface;
  *   id = "profile_type",
  *   label = @Translation("Profile type"),
  *   controllers = {
+ *     "list_builder" = "Drupal\profile\ProfileTypeListController"
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileTypeFormController",
  *       "add" = "Drupal\profile\ProfileTypeFormController",
  *       "edit" = "Drupal\profile\ProfileTypeFormController",
  *       "delete" = "Drupal\profile\Form\ProfileTypeDeleteForm"
  *     },
- *     "list_builder" = "Drupal\profile\ProfileTypeListController"
  *   },
  *   admin_permission = "administer profile types",
  *   config_prefix = "type",
