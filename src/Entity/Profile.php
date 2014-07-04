@@ -23,7 +23,7 @@ use Drupal\user\UserInterface;
  *   bundle_label = @Translation("Profile"),
  *   controllers = {
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
- *     "list_builder" = "Drupal\profile\ProfileListController"
+ *     "list_builder" = "Drupal\profile\ProfileListController",
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileFormController",
  *       "add" = "Drupal\profile\ProfileFormController",

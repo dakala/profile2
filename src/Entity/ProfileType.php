@@ -18,7 +18,7 @@ use Drupal\profile\ProfileTypeInterface;
  *   id = "profile_type",
  *   label = @Translation("Profile type"),
  *   controllers = {
- *     "list_builder" = "Drupal\profile\ProfileTypeListController"
+ *     "list_builder" = "Drupal\profile\ProfileTypeListController",
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileTypeFormController",
  *       "add" = "Drupal\profile\ProfileTypeFormController",
