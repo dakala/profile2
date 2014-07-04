@@ -118,7 +118,12 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function label() {
     $profile_type = ProfileType::load($this->bundle());
-    return t('@type profile of user @uid', array('@type' => $profile_type->label(), '@uid' => $this->getOwnerId()));
+    return
+      t('@type profile of @username (uid: @uid)',
+      array(
+        '@type' => $profile_type->label(),
+        '@username' => $this->getOwner()->getUsername(),
+        '@uid' => $this->getOwnerId()));
   }
 
   /**
