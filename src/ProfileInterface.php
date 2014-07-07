@@ -92,4 +92,25 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    */
   public function label();
 
+  /**
+   * Returns the node published status indicator.
+   *
+   * Unpublished profiles are only visible to their authors and to administrators.
+   *
+   * @return bool
+   *   TRUE if the profile is active.
+   */
+  public function isActive();
+
+  /**
+   * Sets the published status of a profile.
+   *
+   * @param bool $actvie
+   *   TRUE to set this profile to active, FALSE to set it to inactive.
+   *
+   * @return \Drupal\profile\ProfileInterface
+   *   The called profile entity.
+   */
+  public function setActive($active);
+
 }

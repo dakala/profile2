@@ -71,6 +71,7 @@ class ProfileListController extends EntityListBuilder {
         'data' => $this->t('Owner'),
         'class' => array(RESPONSIVE_PRIORITY_LOW),
       ),
+      'status' => $this->t('Status'),
       'changed' => array(
         'data' => $this->t('Updated'),
         'class' => array(RESPONSIVE_PRIORITY_LOW),
@@ -100,21 +101,23 @@ class ProfileListController extends EntityListBuilder {
     $options += ($langcode != LanguageInterface::LANGCODE_NOT_SPECIFIED && isset($languages[$langcode]) ? array('language' => $languages[$langcode]) : array());
     $uri->setOptions($options);
     $row['label']['data'] = array(
-      '#type' => 'link',
-      '#title' => $entity->label(),
-      '#suffix' => ' ' . drupal_render($mark),
-    ) + $uri->toRenderArray();
+        '#type' => 'link',
+        '#title' => $entity->label(),
+        '#suffix' => ' ' . drupal_render($mark),
+      ) + $uri->toRenderArray();
     $row['type'] = $entity->getType()->id();
     $row['owner']['data'] = array(
       '#theme' => 'username',
       '#account' => $entity->getOwner(),
     );
+    $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('not active');
     $row['changed'] = $this->dateService->format($entity->getChangedTime(), 'short');
     $language_manager = \Drupal::languageManager();
     if ($language_manager->isMultilingual()) {
       $row['language_name'] = $language_manager->getLanguageName($langcode);
     }
-    $route_params = array('user' => $entity->getOwnerId(), 'type'=> $entity->bundle(), 'id' => $entity->id());
+
+    $route_params = array('user' => $entity->getOwnerId(), 'type' => $entity->bundle(), 'id' => $entity->id());
     $links['edit'] = array(
       'title' => t('Edit'),
       'route_name' => 'profile.account_edit_profile',
@@ -128,42 +131,12 @@ class ProfileListController extends EntityListBuilder {
 
     $row[] = array(
       'data' => array(
-          '#type' => 'operations',
-          '#links' => $links,
+        '#type' => 'operations',
+        '#links' => $links,
       ),
     );
 
-    //$row['operations']['data'] = $this->buildOperations($entity);
-
     return $row + parent::buildRow($entity);
   }
-
-  /**
-   * {@inheritdoc}
-   */
-//    public function getOperations(EntityInterface $entity) {
-//      $operations = parent::getOperations($entity);
-//      // Place the edit operation after the operations added by field_ui.module
-//      // which have the weights 15, 20, 25.
-//      if (isset($operations['edit'])) {
-//          $operations['edit'] = array(
-//                  'title' => t('Edit'),
-//                  'weight' => 30,
-//              ) + $entity->urlInfo('edit-form')->toArray();
-//      }
-//      if (isset($operations['delete'])) {
-//          $operations['delete'] = array(
-//                  'title' => t('Delete'),
-//                  'weight' => 35,
-//              ) + $entity->urlInfo('delete-form')->toArray();
-//      }
-//      // Sort the operations to normalize link order.
-//      uasort($operations, array(
-//          'Drupal\Component\Utility\SortArray',
-//          'sortByWeightElement'
-//      ));
-//
-//      return $operations;
-//  }
 
 }

@@ -92,6 +92,12 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setDescription(t('The profile language code.'))
       ->setRevisionable(TRUE);
 
+    $fields['status'] = FieldDefinition::create('boolean')
+      ->setLabel(t('Active status'))
+      ->setDescription(t('A boolean indicating whether the profile is active.'))
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE);
+
     $fields['created'] = FieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the profile was created.'))
@@ -121,10 +127,11 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $profile_type = ProfileType::load($this->bundle());
     return
       t('@type profile of @username (uid: @uid)',
-      array(
-        '@type' => $profile_type->label(),
-        '@username' => $this->getOwner()->getUsername(),
-        '@uid' => $this->getOwnerId()));
+        array(
+          '@type' => $profile_type->label(),
+          '@username' => $this->getOwner()->getUsername(),
+          '@uid' => $this->getOwnerId()
+        ));
   }
 
   /**
@@ -221,6 +228,21 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function setRevisionAuthorId($uid) {
     $this->set('revision_uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isActive() {
+    return (bool) $this->get('status')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setActive($active) {
+    $this->set('status', $active ? PROFILE_ACTIVE : PROFILE_NOT_ACTIVE);
     return $this;
   }
 
