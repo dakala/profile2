@@ -104,7 +104,7 @@ class ProfileListController extends EntityListBuilder {
       '#title' => $entity->label(),
       '#suffix' => ' ' . drupal_render($mark),
     ) + $uri->toRenderArray();
-    $row['type'] = String::checkPlain(node_get_type_label($entity));
+    $row['type'] = $entity->getType()->id();
     $row['owner']['data'] = array(
       '#theme' => 'username',
       '#account' => $entity->getOwner(),
@@ -114,21 +114,56 @@ class ProfileListController extends EntityListBuilder {
     if ($language_manager->isMultilingual()) {
       $row['language_name'] = $language_manager->getLanguageName($langcode);
     }
-    $row['operations']['data'] = $this->buildOperations($entity);
+    $route_params = array('user' => $entity->getOwnerId(), 'type'=> $entity->bundle(), 'id' => $entity->id());
+    $links['edit'] = array(
+      'title' => t('Edit'),
+      'route_name' => 'profile.account_edit_profile',
+      'route_parameters' => $route_params,
+    );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'route_name' => 'profile.account_delete_profile',
+      'route_parameters' => $route_params,
+    );
+
+    $row[] = array(
+      'data' => array(
+          '#type' => 'operations',
+          '#links' => $links,
+      ),
+    );
+
+    //$row['operations']['data'] = $this->buildOperations($entity);
+
     return $row + parent::buildRow($entity);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultOperations(EntityInterface $entity) {
-    $operations = parent::getDefaultOperations($entity);
-
-    $destination = drupal_get_destination();
-    foreach ($operations as $key => $operation) {
-      $operations[$key]['query'] = $destination;
-    }
-    return $operations;
-  }
+//    public function getOperations(EntityInterface $entity) {
+//      $operations = parent::getOperations($entity);
+//      // Place the edit operation after the operations added by field_ui.module
+//      // which have the weights 15, 20, 25.
+//      if (isset($operations['edit'])) {
+//          $operations['edit'] = array(
+//                  'title' => t('Edit'),
+//                  'weight' => 30,
+//              ) + $entity->urlInfo('edit-form')->toArray();
+//      }
+//      if (isset($operations['delete'])) {
+//          $operations['delete'] = array(
+//                  'title' => t('Delete'),
+//                  'weight' => 35,
+//              ) + $entity->urlInfo('delete-form')->toArray();
+//      }
+//      // Sort the operations to normalize link order.
+//      uasort($operations, array(
+//          'Drupal\Component\Utility\SortArray',
+//          'sortByWeightElement'
+//      ));
+//
+//      return $operations;
+//  }
 
 }
