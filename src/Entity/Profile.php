@@ -131,7 +131,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    * {@inheritdoc}
    */
   public function getType() {
-    return $this->get('type')->value;
+    return $this->get('type')->entity;
   }
 
   /**
