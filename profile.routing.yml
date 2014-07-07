@@ -1,13 +1,21 @@
-profile.overview_types:
+profile.overview_profiles:
   path: '/admin/config/people/profiles'
+  defaults:
+    _entity_list: 'profile'
+    _title: 'Profiles'
+  requirements:
+    _permission: 'administer profiles'
+
+profile.overview_types:
+  path: '/admin/config/people/profiles/types'
   defaults:
     _entity_list: 'profile_type'
     _title: 'Profile types'
   requirements:
-    _permission: 'administer account settings'
+    _permission: 'administer profile types'
 
 profile.type_add:
-  path: '/admin/config/people/profiles/add'
+  path: '/admin/config/people/profiles/types/add'
   defaults:
     _entity_form: 'profile_type.add'
     _title: 'Add'
@@ -15,7 +23,7 @@ profile.type_add:
     _permission: 'administer profile types'
 
 profile.type_edit:
-  path: '/admin/config/people/profiles/manage/{profile_type}'
+  path: '/admin/config/people/profiles/types/manage/{profile_type}'
   defaults:
     _entity_form: 'profile_type.edit'
     _title: 'Edit'
@@ -23,7 +31,7 @@ profile.type_edit:
     _permission: 'administer profile types'
 
 profile.type_delete:
-  path: '/admin/config/people/profiles/manage/{profile_type}/delete'
+  path: '/admin/config/people/profiles/types/manage/{profile_type}/delete'
   defaults:
     _entity_form: 'profile_type.delete'
     _title: 'Delete'

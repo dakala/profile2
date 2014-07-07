@@ -10,6 +10,16 @@ profile.account_edit:
   parent_id: user.edit
   weight: -100
 
+profile.overview_profiles_tab:
+  route_name: profile.overview_profiles
+  base_route: profile.overview_profiles
+  title: 'Profiles'
+
+profile.overview_types_tab:
+  route_name: profile.overview_types
+  base_route: profile.overview_profiles
+  title: 'Profile types'
+
 profile.account_add_profile:
   route_name: profile.account_add_profile
   title: 'Add new profile'

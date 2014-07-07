@@ -57,7 +57,7 @@ class ProfileAddLocalTask extends DeriverBase {
         }
       }
     }
-    
+
     if (count($configs)) {
       foreach ($configs as $config) {
         $id = $config->get('id');

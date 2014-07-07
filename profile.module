@@ -41,6 +41,10 @@ function profile_permission() {
       'title' => t('Administer profile types'),
       'restrict access' => TRUE,
     ),
+    'administer profiles' => array(
+      'title' => t('Administer profiles'),
+      'restrict access' => TRUE,
+    ),
     'bypass profile access' => array(
       'title' => t('Bypass profile access'),
       'description' => t('View and edit all user profiles, including private field values.'),
