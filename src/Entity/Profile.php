@@ -8,7 +8,7 @@
 namespace Drupal\profile\Entity;
 
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\profile\ProfileInterface;
 use Drupal\profile\ProfileTypeInterface;
@@ -57,54 +57,54 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
 
-    $fields['pid'] = FieldDefinition::create('integer')
+    $fields['pid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Profile ID'))
       ->setDescription(t('The profile ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The profile UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['vid'] = FieldDefinition::create('integer')
+    $fields['vid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Revision ID'))
       ->setDescription(t('The profile revision ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['type'] = FieldDefinition::create('entity_reference')
+    $fields['type'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Profile type'))
       ->setDescription(t('The profile type.'))
       ->setSetting('target_type', 'profile_type')
       ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('User ID'))
       ->setDescription(t('The user ID of the user associated with the profile.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setTranslatable(TRUE);
 
-    $fields['langcode'] = FieldDefinition::create('language')
+    $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The profile language code.'))
       ->setRevisionable(TRUE);
 
-    $fields['status'] = FieldDefinition::create('boolean')
+    $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
       ->setDescription(t('A boolean indicating whether the profile is active.'))
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE);
 
-    $fields['created'] = FieldDefinition::create('created')
+    $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the profile was created.'))
       ->setRevisionable(TRUE)
       ->setTranslatable(TRUE);
 
-    $fields['changed'] = FieldDefinition::create('changed')
+    $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the profile was last edited.'))
       ->setRevisionable(TRUE)

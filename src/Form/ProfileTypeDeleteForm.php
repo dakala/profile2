@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Database\Connection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a confirmation form for deleting a Profile type entity.
@@ -53,7 +54,7 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelRoute() {
+  public function getCancelUrl() {
     return new Url('profile.overview_types');
   }
 
@@ -67,7 +68,7 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $num_profiles = $this->database->query("SELECT COUNT(*) FROM {profile} WHERE type = :type", array(':type' => $this->entity->id()))
       ->fetchField();
     if ($num_profiles) {
@@ -84,11 +85,11 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     $this->entity->delete();
     drupal_set_message(t('Profile type %label has been deleted.', array('%label' => $this->entity->label())));
     watchdog('profile', 'Profile type %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
-    $form_state['redirect_route']['route_name'] = 'profile.overview_types';
+    $form_state->setRedirect('profile.overview_types');
   }
 
 }

@@ -13,6 +13,7 @@ use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Denotes that the profile is not active.
@@ -133,7 +134,7 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
  * Add available profile forms to the user registration form.
  *
  */
-function profile_form_user_register_form_alter(&$form, &$form_state) {
+function profile_form_user_register_form_alter(&$form, FormStateInterface $form_state) {
   $attached_profile_form = FALSE;
   $weight = 90;
   foreach (\Drupal::configFactory()
@@ -181,7 +182,7 @@ function profile_form_user_register_form_alter(&$form, &$form_state) {
 /**
  * Extra form validation handler for the user registration form.
  */
-function profile_form_user_register_form_validate(array &$form, array &$form_state) {
+function profile_form_user_register_form_validate(array &$form, FormStateInterface $form_state) {
   foreach ($form_state['profiles'] as $bundle => $entity) {
     $form_display = $form_state['form_display_' . $bundle];
     $form_display->extractFormValues($entity, $form['entity_' . $bundle], $form_state);
@@ -192,7 +193,7 @@ function profile_form_user_register_form_validate(array &$form, array &$form_sta
 /**
  * Extra form submission handler for the user registration form.
  */
-function profile_form_user_register_form_submit(array &$form, array &$form_state) {
+function profile_form_user_register_form_submit(array &$form, FormStateInterface $form_state) {
   $account = $form_state['controller']->getEntity();
   foreach ($form_state['profiles'] as $bundle => $entity) {
     $entity->setOwnerId($account->id());
