@@ -8,7 +8,7 @@
 namespace Drupal\profile;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Datetime\Date;
+use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -26,9 +26,9 @@ class ProfileListController extends EntityListBuilder {
   /**
    * The date service.
    *
-   * @var \Drupal\Core\Datetime\Date
+   * @var \Drupal\Core\Datetime\DateFormatter
    */
-  protected $dateService;
+  protected $dateFormatter;
 
   /**
    * Constructs a new ProfileListController object.
@@ -37,13 +37,13 @@ class ProfileListController extends EntityListBuilder {
    *   The entity type definition.
    * @param \Drupal\Core\Entity\EntityStorageInterface $storage
    *   The entity storage class.
-   * @param \Drupal\Core\Datetime\Date $date_service
-   *   The date service.
+   * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
+   *   The date formatter service.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, Date $date_service) {
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatter $date_formatter) {
     parent::__construct($entity_type, $storage);
 
-    $this->dateService = $date_service;
+    $this->dateFormatter = $date_formatter;
   }
 
   /**
@@ -53,7 +53,7 @@ class ProfileListController extends EntityListBuilder {
     return new static(
       $entity_type,
       $container->get('entity.manager')->getStorage($entity_type->id()),
-      $container->get('date')
+      $container->get('date.formatter')
     );
   }
 
@@ -111,7 +111,7 @@ class ProfileListController extends EntityListBuilder {
       '#account' => $entity->getOwner(),
     );
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('not active');
-    $row['changed'] = $this->dateService->format($entity->getChangedTime(), 'short');
+    $row['changed'] = $this->dateFormatter->format($entity->getChangedTime(), 'short');
     $language_manager = \Drupal::languageManager();
     if ($language_manager->isMultilingual()) {
       $row['language_name'] = $language_manager->getLanguageName($langcode);
