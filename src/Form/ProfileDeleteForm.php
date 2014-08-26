@@ -82,7 +82,11 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
   public function submit(array $form, FormStateInterface $form_state) {
     $profile_type = ProfileType::load($this->entity->bundle());
     $this->entity->delete();
-    watchdog('profile', '@type profile deleted.', array('@type' => $profile_type->id()));
+
+    \Drupal::service('logger.factory')
+      ->get('profile')
+      ->log(WATCHDOG_NOTICE, '@type profile deleted.', array('@type' => $profile_type->id()));
+
     drupal_set_message(t('@type profile deleted.', array('@type' => $profile_type->label())));
 
     $form_state->setRedirect('user.view', array('user' => $this->entity->getOwnerId()));

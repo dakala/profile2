@@ -87,8 +87,13 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
    */
   public function submit(array $form, FormStateInterface $form_state) {
     $this->entity->delete();
+
+    \Drupal::service('logger.factory')
+      ->get('profile')
+      ->log(WATCHDOG_NOTICE, 'Profile type %label has been deleted.', array('@type' => $this->entity->label()));
+
     drupal_set_message(t('Profile type %label has been deleted.', array('%label' => $this->entity->label())));
-    watchdog('profile', 'Profile type %label has been deleted.', array('%label' => $this->entity->label()), WATCHDOG_NOTICE);
+
     $form_state->setRedirect('profile.overview_types');
   }
 

@@ -9,6 +9,7 @@ namespace Drupal\profile;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Form controller for profile type forms.
@@ -18,7 +19,7 @@ class ProfileTypeFormController extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  function form(array $form, array &$form_state) {
+  function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $type = $this->entity;
 
@@ -54,17 +55,14 @@ class ProfileTypeFormController extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  protected function actions(array $form, array &$form_state) {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
-    if (\Drupal::moduleHandler()
-        ->moduleExists('field_ui') && $this->getEntity($form_state)->isNew()
+    if (\Drupal::moduleHandler()->moduleExists('field_ui') &&
+      $this->getEntity()->isNew()
     ) {
       $actions['save_continue'] = $actions['submit'];
       $actions['save_continue']['#value'] = t('Save and manage fields');
-      $actions['save_continue']['#submit'][] = array(
-        $this,
-        'redirectToFieldUI'
-      );
+      $actions['save_continue']['#submit'][] = array($this, 'redirectToFieldUI');
     }
     return $actions;
   }
@@ -72,7 +70,7 @@ class ProfileTypeFormController extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $type = $this->entity;
     $status = $type->save();
 
@@ -82,33 +80,25 @@ class ProfileTypeFormController extends EntityForm {
     else {
       drupal_set_message(t('%label profile type has been created.', array('%label' => $type->label())));
     }
-    $form_state['redirect_route']['route_name'] = 'profile.overview_types';
+    $form_state->setRedirect('profile.overview_types');
   }
 
   /**
    * Form submission handler to redirect to Manage fields page of Field UI.
    */
-  public function redirectToFieldUI(array $form, array &$form_state) {
-    // $form_state['redirect_route'] = '<front>';
-
-    $form_state['redirect_route'] = array(
-     'route_name' => 'field_ui.overview_profile',
-     'route_parameters' => array(
-       'profile_type' => $this->entity->id(),
-     ),
-    );
- }
+  public function redirectToFieldUI(array $form, FormStateInterface $form_state) {
+    $form_state->setRedirect('field_ui.overview_profile', array(
+      'profile_type' => $this->entity->id()
+    ));
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function delete(array $form, array &$form_state) {
-    $form_state['redirect_route'] = array(
-      'route_name' => 'profile.type_delete',
-      'route_parameters' => array(
-        'profile_type' => $this->entity->id(),
-      ),
-    );
+  public function delete(array $form, FormStateInterface $form_state) {
+    $form_state->setRedirect('profile.type_delete', array(
+      'profile_type' => $this->entity->id()
+    ));
   }
 
 }

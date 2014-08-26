@@ -9,6 +9,7 @@ namespace Drupal\profile;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\profile\Entity\ProfileType;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Form controller for profile forms.
@@ -18,7 +19,7 @@ class ProfileFormController extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function buildEntity(array $form, array &$form_state) {
+  public function buildEntity(array $form, FormStateInterface $form_state) {
     $entity = parent::buildEntity($form, $form_state);
     if ($entity->isNew()) {
       $entity->setCreatedTime(REQUEST_TIME);
@@ -29,7 +30,7 @@ class ProfileFormController extends ContentEntityForm {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::actions().
    */
-  protected function actions(array $form, array &$form_state) {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $element = parent::actions($form, $form_state);
     $profile = $this->entity;
 
@@ -56,7 +57,10 @@ class ProfileFormController extends ContentEntityForm {
         $element['deactivate']['#value'] = !$profile->isActive() ? t('Save and keep inactive') : t('Save and make inactive');
       }
       $element['deactivate']['#weight'] = 10;
-      array_unshift($element['deactivate']['#submit'], array($this, 'deactivate'));
+      array_unshift($element['deactivate']['#submit'], array(
+          $this,
+          'deactivate'
+        ));
 
       // If already deactivated, the 'activate' button is primary.
       if ($profile->isActive()) {
@@ -86,7 +90,7 @@ class ProfileFormController extends ContentEntityForm {
    * @param $form_state
    *   A reference to a keyed array containing the current state of the form.
    */
-  public function activate(array $form, array &$form_state) {
+  public function activate(array $form, FormStateInterface $form_state) {
     $profile = $this->entity;
     $profile->setActive(TRUE);
     return $profile;
@@ -100,7 +104,7 @@ class ProfileFormController extends ContentEntityForm {
    * @param $form_state
    *   A reference to a keyed array containing the current state of the form.
    */
-  public function deactivate(array $form, array &$form_state) {
+  public function deactivate(array $form, FormStateInterface $form_state) {
     $profile = $this->entity;
     $profile->setActive(FALSE);
     return $profile;
@@ -109,7 +113,7 @@ class ProfileFormController extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $profile_type = ProfileType::load($this->entity->bundle());
     switch ($this->entity->save()) {
       case SAVED_NEW:
@@ -120,12 +124,9 @@ class ProfileFormController extends ContentEntityForm {
         break;
     }
 
-    $form_state['redirect_route'] = array(
-      'route_name' => 'user.view',
-      'route_parameters' => array(
-        'user' => $this->entity->getOwnerId(),
-      ),
-    );
+    $form_state->setRedirect('user.view', array(
+      'user' => $this->entity->getOwnerId(),
+    ));
   }
 
 }
