@@ -10,6 +10,9 @@ namespace Drupal\profile;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\profile\Entity\ProfileType;
+use Drupal\profile\ProfileTypeInterface;
+
 
 /**
  * Form controller for profile type forms.
@@ -36,7 +39,7 @@ class ProfileTypeFormController extends EntityForm {
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#machine_name' => array(
-        'exists' => 'profile_type_load',
+        'exists' => array($this, 'exists'),
       ),
     );
     $form['registration'] = array(
@@ -62,7 +65,10 @@ class ProfileTypeFormController extends EntityForm {
     ) {
       $actions['save_continue'] = $actions['submit'];
       $actions['save_continue']['#value'] = t('Save and manage fields');
-      $actions['save_continue']['#submit'][] = array($this, 'redirectToFieldUI');
+      $actions['save_continue']['#submit'][] = array(
+        $this,
+        'redirectToFieldUI'
+      );
     }
     return $actions;
   }
@@ -99,6 +105,17 @@ class ProfileTypeFormController extends EntityForm {
     $form_state->setRedirect('profile.type_delete', array(
       'profile_type' => $this->entity->id()
     ));
+  }
+
+  /**
+   * Check whether the profile type exists.
+   *
+   * @param $id
+   * @return bool
+   */
+  public function exists($id) {
+    $profile_type = ProfileType::load($id);
+    return !empty($profile_type);
   }
 
 }
