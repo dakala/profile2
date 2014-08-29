@@ -11,8 +11,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\profile\ProfileInterface;
-use Drupal\profile\ProfileTypeInterface;
 use Drupal\user\UserInterface;
+
 
 /**
  * Defines the profile entity class.
@@ -41,11 +41,10 @@ use Drupal\user\UserInterface;
  *     "id" = "pid",
  *     "revision" = "vid",
  *     "bundle" = "type",
- *     "label" = "label",
  *     "uuid" = "uuid"
  *   },
  *  links = {
- *    "canonical" = "profile.overview_types",
+ *    "canonical" = "entity.profile.canonical",
  *    "admin-form" = "profile.type_edit"
  *   },
  * )

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\aggregator\FeedViewBuilder.
+ * Contains \Drupal\profile\ProfileViewBuilder.
  */
 
 namespace Drupal\profile;

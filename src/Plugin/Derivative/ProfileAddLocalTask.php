@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\profile\Plugin\Derivative\ThemeLocalTask.
+ * Contains \Drupal\profile\Plugin\Derivative\ProfileAddLocalTask.
  */
 
 namespace Drupal\profile\Plugin\Derivative;

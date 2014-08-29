@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\node\NodeListBuilder.
+ * Contains \Drupal\profile\ProfileListController.
  */
 
 namespace Drupal\profile;
@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ProfileListController extends EntityListBuilder {
 
   /**
-   * The date service.
+   * The date formatter service.
    *
    * @var \Drupal\Core\Datetime\DateFormatter
    */
