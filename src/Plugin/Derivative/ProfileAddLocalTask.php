@@ -9,8 +9,8 @@ namespace Drupal\profile\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Component\Utility\Unicode;
-use Drupal\user\UserInterface;
 use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Provides dynamic routes to add profiles.
@@ -23,6 +23,10 @@ class ProfileAddLocalTask extends DeriverBase {
   public function getDerivativeDefinitions($base_plugin_definition) {
     $configs = array();
     $user = \Drupal::request()->attributes->get('user');
+    if (!$user instanceof UserInterface) {
+      return;
+    }
+
     foreach (\Drupal::configFactory()
                ->listAll('profile.type.') as $config_name) {
       $config = \Drupal::config($config_name);
@@ -36,19 +40,18 @@ class ProfileAddLocalTask extends DeriverBase {
         continue;
       }
       else {
+
         // Expose profile types that users may create - either they have 0 of non-multiple or multiple.
         if ($config->get('multiple') === FALSE) {
-          if ($user instanceof UserInterface) {
-            $profiles = \Drupal::entityManager()
-              ->getStorage('profile')
-              ->loadByProperties(array(
-                'uid' => $user->id(),
-                'type' => $config->get('id'),
-              ));
-            // Single profile, none yet.
-            if (!count($profiles)) {
-              $configs[] = $config;
-            }
+          $profiles = \Drupal::entityManager()
+            ->getStorage('profile')
+            ->loadByProperties(array(
+              'uid' => $user->id(),
+              'type' => $config->get('id'),
+            ));
+          // Single profile, none yet.
+          if (!count($profiles)) {
+            $configs[] = $config;
           }
         }
         else {
@@ -64,11 +67,13 @@ class ProfileAddLocalTask extends DeriverBase {
         $this->derivatives[$id] = $base_plugin_definition;
         $this->derivatives[$id]['title'] = \Drupal::translation()
           ->translate('Add @type profile', array('@type' => Unicode::strtolower($config->get('label'))));
-        $this->derivatives[$id]['route_parameters'] = array('user' => $user->id(), 'type' => $id);
+        $this->derivatives[$id]['route_parameters'] = array(
+          'user' => $user->id(),
+          'type' => $id
+        );
       }
+      return $this->derivatives;
     }
-
-    return $this->derivatives;
   }
 
 }
