@@ -39,7 +39,7 @@ profile.type_delete:
     _permission: 'administer profile types'
 
 profile.account_add_profile:
-  path: '/user/{user}/add/{type}'
+  path: '/user/{user}/edit/{type}'
   defaults:
     _content: '\Drupal\profile\Controller\ProfileController::addProfile'
     _title: 'Add new profile'
