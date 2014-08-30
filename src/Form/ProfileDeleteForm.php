@@ -64,7 +64,7 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('user.view', array(
+    return new Url('entity.user.canonical', array(
       'user' => $this->entity->getOwnerId(),
     ));
   }
@@ -89,7 +89,7 @@ class ProfileDeleteForm extends ContentEntityConfirmFormBase {
 
     drupal_set_message(t('@type profile deleted.', array('@type' => $profile_type->label())));
 
-    $form_state->setRedirect('user.view', array('user' => $this->entity->getOwnerId()));
+    $form_state->setRedirect('entity.user.canonical', array('user' => $this->entity->getOwnerId()));
   }
 
 }

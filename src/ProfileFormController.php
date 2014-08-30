@@ -124,7 +124,7 @@ class ProfileFormController extends ContentEntityForm {
         break;
     }
 
-    $form_state->setRedirect('user.view', array(
+    $form_state->setRedirect('entity.user.canonical', array(
       'user' => $this->entity->getOwnerId(),
     ));
   }

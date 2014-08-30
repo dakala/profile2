@@ -1,15 +1,4 @@
-
-profile.type_edit:
-  title: 'Edit'
-  route_name: profile.type_edit
-  base_route: profile.type_edit
-
-profile.account_edit:
-  route_name: user.edit
-  title: 'Edit'
-  parent_id: user.edit
-  weight: -100
-
+# Tabs on the profile admin page
 profile.overview_profiles_tab:
   route_name: profile.overview_profiles
   base_route: profile.overview_profiles
@@ -20,14 +9,23 @@ profile.overview_types_tab:
   base_route: profile.overview_profiles
   title: 'Profile types'
 
+# Secondary tabs on main account edit page
+# Duplicate user edit tab
+profile.user.edit_form:
+  route_name: entity.user.edit_form
+  title: 'User account'
+  parent_id: entity.user.edit_form
+  weight: -100
+
+# Add tabs for each profile type
 profile.account_add_profile:
-  route_name: profile.account_add_profile
   title: 'Add new profile'
-  parent_id: user.edit
+  route_name: profile.account_add_profile
+  parent_id: entity.user.edit_form
   deriver: Drupal\profile\Plugin\Derivative\ProfileAddLocalTask
 
 profile.account_edit_profile:
-  route_name: profile.account_edit_profile
   title: 'Edit a profile'
-  parent_id: user.edit
+  route_name: profile.account_edit_profile
+  parent_id: entity.user.edit_form
   deriver: Drupal\profile\Plugin\Derivative\ProfileEditLocalTask

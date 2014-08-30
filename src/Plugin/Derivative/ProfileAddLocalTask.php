@@ -22,6 +22,7 @@ class ProfileAddLocalTask extends DeriverBase {
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     $configs = array();
+    $user = \Drupal::request()->attributes->get('user');
     foreach (\Drupal::configFactory()
                ->listAll('profile.type.') as $config_name) {
       $config = \Drupal::config($config_name);
@@ -37,7 +38,6 @@ class ProfileAddLocalTask extends DeriverBase {
       else {
         // Expose profile types that users may create - either they have 0 of non-multiple or multiple.
         if ($config->get('multiple') === FALSE) {
-          $user = \Drupal::request()->attributes->get('user');
           if ($user instanceof UserInterface) {
             $profiles = \Drupal::entityManager()
               ->getStorage('profile')
@@ -64,7 +64,7 @@ class ProfileAddLocalTask extends DeriverBase {
         $this->derivatives[$id] = $base_plugin_definition;
         $this->derivatives[$id]['title'] = \Drupal::translation()
           ->translate('Add @type profile', array('@type' => Unicode::strtolower($config->get('label'))));
-        $this->derivatives[$id]['route_parameters'] = array('type' => $id);
+        $this->derivatives[$id]['route_parameters'] = array('user' => $user->id(), 'type' => $id);
       }
     }
 
