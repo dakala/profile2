@@ -23,9 +23,3 @@ profile.account_add_profile:
   route_name: profile.account_add_profile
   parent_id: entity.user.edit_form
   deriver: Drupal\profile\Plugin\Derivative\ProfileAddLocalTask
-
-profile.account_edit_profile:
-  title: 'Edit a profile'
-  route_name: profile.account_edit_profile
-  parent_id: entity.user.edit_form
-  deriver: Drupal\profile\Plugin\Derivative\ProfileEditLocalTask
