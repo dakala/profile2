@@ -40,7 +40,6 @@ class ProfileAddLocalTask extends DeriverBase {
         continue;
       }
       else {
-
         // Expose profile types that users may create - either they have 0 of non-multiple or multiple.
         if ($config->get('multiple') === FALSE) {
           $profiles = \Drupal::entityManager()
@@ -61,7 +60,7 @@ class ProfileAddLocalTask extends DeriverBase {
       }
     }
 
-    if (count($configs)) {
+    if (count($configs && $user instanceof UserInterface)) {
       foreach ($configs as $config) {
         $id = $config->get('id');
         $this->derivatives[$id] = $base_plugin_definition;
@@ -72,7 +71,8 @@ class ProfileAddLocalTask extends DeriverBase {
           'type' => $id
         );
       }
-      return $this->derivatives;
+      
+      return parent::getDerivativeDefinitions($base_plugin_definition);
     }
   }
 
