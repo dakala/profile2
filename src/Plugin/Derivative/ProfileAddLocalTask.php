@@ -21,7 +21,6 @@ class ProfileAddLocalTask extends DeriverBase {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    $configs = array();
     $user = \Drupal::request()->attributes->get('user');
     if (!$user instanceof UserInterface) {
       return;
@@ -40,6 +39,7 @@ class ProfileAddLocalTask extends DeriverBase {
         continue;
       }
       else {
+        $display = FALSE;
         // Expose profile types that users may create - either they have 0 of non-multiple or multiple.
         if ($config->get('multiple') === FALSE) {
           $profiles = \Drupal::entityManager()
@@ -50,30 +50,28 @@ class ProfileAddLocalTask extends DeriverBase {
             ));
           // Single profile, none yet.
           if (!count($profiles)) {
-            $configs[] = $config;
+            $display = TRUE;
           }
         }
         else {
           // Multiple profiles allowed.
-          $configs[] = $config;
+          $display = TRUE;
+        }
+
+        if ($display) {
+          $id = $config->get('id');
+          $this->derivatives[$id] = $base_plugin_definition;
+          $this->derivatives[$id]['title'] = \Drupal::translation()
+            ->translate('Add @type profile', array('@type' => Unicode::strtolower($config->get('label'))));
+          $this->derivatives[$id]['route_parameters'] = array(
+            'user' => $user->id(),
+            'type' => $id
+          );
         }
       }
     }
-
-    if (count($configs && $user instanceof UserInterface)) {
-      foreach ($configs as $config) {
-        $id = $config->get('id');
-        $this->derivatives[$id] = $base_plugin_definition;
-        $this->derivatives[$id]['title'] = \Drupal::translation()
-          ->translate('Add @type profile', array('@type' => Unicode::strtolower($config->get('label'))));
-        $this->derivatives[$id]['route_parameters'] = array(
-          'user' => $user->id(),
-          'type' => $id
-        );
-      }
-      
-      return parent::getDerivativeDefinitions($base_plugin_definition);
-    }
+    
+    return parent::getDerivativeDefinitions($base_plugin_definition);
   }
 
 }
