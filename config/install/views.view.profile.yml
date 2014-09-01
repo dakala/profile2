@@ -643,7 +643,22 @@ display:
       title: Profiles
       header: {  }
       footer: {  }
-      empty: {  }
+      empty:
+        area_text_custom:
+          id: area_text_custom
+          table: views
+          field: area_text_custom
+          relationship: none
+          group_type: group
+          admin_label: ''
+          dependencies:
+            module:
+              - views
+          empty: true
+          tokenize: false
+          content: 'No profiles available.'
+          plugin_id: text_custom
+          provider: views
       relationships:
         uid:
           id: uid
