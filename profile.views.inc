@@ -60,7 +60,7 @@ function profile_views_data() {
       'id' => 'standard',
     ),
     'filter' => array(
-      'id' => 'string',
+      'id' => 'bundle',
     ),
   );
 
