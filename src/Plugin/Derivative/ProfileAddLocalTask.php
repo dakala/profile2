@@ -70,7 +70,7 @@ class ProfileAddLocalTask extends DeriverBase {
         }
       }
     }
-    
+
     return parent::getDerivativeDefinitions($base_plugin_definition);
   }
 

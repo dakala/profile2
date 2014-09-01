@@ -64,7 +64,7 @@ class ProfileListController extends EntityListBuilder {
     $header = array(
       'label' => $this->t('Label'),
       'type' => array(
-        'data' => $this->t('Profile type'),
+        'data' => $this->t('Type'),
         'class' => array(RESPONSIVE_PRIORITY_MEDIUM),
       ),
       'owner' => array(

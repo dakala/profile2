@@ -38,7 +38,8 @@ class Label extends FieldPluginBase {
    */
   public function render(ResultRow $values) {
     if ($entity = $this->getEntity($values)) {
-      return $this->renderLink($entity, $values) . ' ' . drupal_render($this->getMark($entity));
+      $mark = $this->getMark($entity);
+      return $this->renderLink($entity, $values) . ' ' . drupal_render($mark);
     }
   }
 

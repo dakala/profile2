@@ -1,7 +1,6 @@
 profile.overview_profiles:
   path: '/admin/config/people/profiles'
   defaults:
-    _entity_list: 'profile'
     _title: 'Profiles'
   requirements:
     _permission: 'administer profiles'
@@ -75,3 +74,10 @@ entity.profile.canonical:
     _title_callback: '\Drupal\profile\Controller\ProfileViewController::title'
   requirements:
     _entity_access: 'profile.view'
+
+profile.multiple_delete_confirm:
+  path: '/admin/content/profile/delete'
+  defaults:
+    _form: '\Drupal\profile\Form\DeleteMultiple'
+  requirements:
+    _permission: 'administer profiles'
