@@ -6,15 +6,14 @@
  */
 
 use Drupal\user\UserInterface;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
-use Drupal\entity\Entity\EntityFormDisplay;
 use Drupal\profile\Entity\ProfileType;
-use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\field\FieldConfigInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
-
 /**
  * Denotes that the profile is not active.
  */
@@ -44,59 +43,6 @@ function profile_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_permission().
- */
-function profile_permission() {
-  $permissions = array(
-    'administer profile types' => array(
-      'title' => t('Administer profile types'),
-      'restrict access' => TRUE,
-    ),
-    'administer profiles' => array(
-      'title' => t('Administer profiles'),
-      'restrict access' => TRUE,
-    ),
-    'bypass profile access' => array(
-      'title' => t('Bypass profile access'),
-      'description' => t('View and edit all user profiles, including private field values.'),
-      'restrict access' => TRUE,
-    ),
-  );
-
-  foreach (ProfileType::loadMultiple() as $profile_type) {
-    $bundle = $profile_type->id();
-    $type = $profile_type->label();
-    $permissions += array(
-      "add own $bundle profile" => array(
-        'title' => t('%type: Add own profile', array('%type' => $type)),
-      ),
-      "add any $bundle profile" => array(
-        'title' => t('%type: Add any profile', array('%type' => $type)),
-      ),
-      "view own $bundle profile" => array(
-        'title' => t('%type: View own profile', array('%type' => $type)),
-      ),
-      "view any $bundle profile" => array(
-        'title' => t('%type: View any profile', array('%type' => $type)),
-      ),
-      "edit own $bundle profile" => array(
-        'title' => t('%type: Edit own profile', array('%type' => $type)),
-      ),
-      "edit any $bundle profile" => array(
-        'title' => t('%type: Edit any profile', array('%type' => $type)),
-      ),
-      "delete own $bundle profile" => array(
-        'title' => t('%type: Delete own profile', array('%type' => $type)),
-      ),
-      "delete any $bundle profile" => array(
-        'title' => t('%type: Delete any profile', array('%type' => $type)),
-      ),
-    );
-  }
-  return $permissions;
-}
-
-/**
  * Implements hook_user_view().
  */
 function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode, $langcode) {
@@ -106,15 +52,16 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
   }
   // Position profiles at the bottom of account page.
   $weight = 100;
-  foreach (\Drupal::configFactory()
-             ->listAll('profile.type.') as $config_name) {
+  foreach (\Drupal::configFactory()->listAll('profile.type.') as $config_name) {
     $config = \Drupal::config($config_name);
 
-    $profiles = \Drupal::entityManager()->getStorage('profile')->loadByProperties(array(
-      'uid' => $account->id(),
-      'type' => $config->get('id'),
-      'status' => PROFILE_ACTIVE
-    ));
+    $profiles = \Drupal::entityManager()
+      ->getStorage('profile')
+      ->loadByProperties(array(
+        'uid' => $account->id(),
+        'type' => $config->get('id'),
+        'status' => PROFILE_ACTIVE
+      ));
 
     if (count($profiles)) {
       $build['profiles']['#weight'] = $weight + $config->get('weight');
@@ -137,15 +84,12 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
 function profile_form_user_register_form_alter(&$form, FormStateInterface $form_state) {
   $attached_profile_form = FALSE;
   $weight = 90;
-  foreach (\Drupal::configFactory()
-             ->listAll('profile.type.') as $config_name) {
+  foreach (\Drupal::configFactory()->listAll('profile.type.') as $config_name) {
     $config = \Drupal::config($config_name);
-
     $profile_type = ProfileType::load($config->get('id'));
 
-    $instances = array_filter(\Drupal::entityManager()
-      ->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
-      return $field_definition instanceof FieldInstanceConfigInterface;
+    $instances = array_filter(\Drupal::entityManager()->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
+      return $field_definition instanceof FieldConfigInterface;
     });
 
     if ($profile_type->registration === TRUE && count($instances)) {
@@ -153,12 +97,12 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
       if (empty($form_state['profiles'][$id])) {
         $entity = entity_create('profile', array(
           'type' => $id,
-          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()
-            ->getDefaultLanguage()->id
+          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->id
         ));
+
         // Attach profile entity form.
         $form_state['profiles'][$id] = $entity;
-        $form_state['form_display_' . $id] = EntityFormDisplay::collectRenderDisplay($entity, 'default');
+        $form_state['form_display_' . $id] = EntityViewDisplay::collectRenderDisplay($entity, 'default');
         $form['entity_' . $id] = array(
           '#type' => 'details',
           '#title' => $profile_type->label(),
@@ -221,14 +165,12 @@ function template_preprocess_profile_items(&$variables) {
     $variables['title'] = String::checkPlain($variables['type']);
     foreach ($variables['profile_items'] as $profile_item) {
       $variables['items'][] = entity_view($profile_item, 'default');
-      $variables['edit_links'][] = \Drupal::linkGenerator()
-        ->generateFromUrl(t('Edit'), new Url("profile.account_edit_profile", array(
+      $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("profile.account_edit_profile", array(
           'user' => \Drupal::currentUser()->id(),
           'type' => $profile_item->bundle(),
           'id' => $profile_item->id(),
         )));
-      $variables['delete_links'][] = \Drupal::linkGenerator()
-        ->generateFromUrl(t('Delete'), new Url("profile.account_delete_profile", array(
+      $variables['delete_links'][] = \Drupal::l(t('Delete'), new Url("profile.account_delete_profile", array(
           'user' => \Drupal::currentUser()->id(),
           'type' => $profile_item->bundle(),
           'id' => $profile_item->id(),
