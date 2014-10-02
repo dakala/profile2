@@ -21,7 +21,7 @@ use Drupal\user\UserInterface;
  *   id = "profile",
  *   label = @Translation("Profile"),
  *   bundle_label = @Translation("Profile"),
- *   controllers = {
+ *   handlers = {
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
  *     "list_builder" = "Drupal\profile\ProfileListController",
  *     "form" = {

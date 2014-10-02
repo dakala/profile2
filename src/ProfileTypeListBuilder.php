@@ -13,7 +13,7 @@ use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 /**
  * List controller for profile types.
  */
-class ProfileTypeListController extends ConfigEntityListBuilder {
+class ProfileTypeListBuilder extends ConfigEntityListBuilder {
 
   /**
    * {@inheritdoc}
@@ -29,8 +29,8 @@ class ProfileTypeListController extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['type'] = \Drupal::linkGenerator()
-      ->generateFromUrl($entity->label(), $entity->urlInfo());
+//    $row['type'] = \Drupal::linkGenerator()->generateFromUrl($entity->label(), $entity->urlInfo());
+    $row['type'] = $entity->getType();
     $row['registration'] = $entity->registration ? t('Yes') : t('No');
     $row['multiple'] = $entity->multiple ? t('Yes') : t('No');
     return $row + parent::buildRow($entity);
