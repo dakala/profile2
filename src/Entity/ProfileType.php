@@ -17,7 +17,7 @@ use Drupal\profile\ProfileTypeInterface;
  * @ConfigEntityType(
  *   id = "profile_type",
  *   label = @Translation("Profile type"),
- *   controllers = {
+ *   handlers = {
  *     "list_builder" = "Drupal\profile\ProfileTypeListBuilder",
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileTypeFormController",

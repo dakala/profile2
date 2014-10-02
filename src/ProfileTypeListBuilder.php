@@ -29,8 +29,7 @@ class ProfileTypeListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-//    $row['type'] = \Drupal::linkGenerator()->generateFromUrl($entity->label(), $entity->urlInfo());
-    $row['type'] = $entity->getType();
+    $row['type'] = $entity->link();
     $row['registration'] = $entity->registration ? t('Yes') : t('No');
     $row['multiple'] = $entity->multiple ? t('Yes') : t('No');
     return $row + parent::buildRow($entity);

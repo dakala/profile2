@@ -32,6 +32,7 @@ use Drupal\user\UserInterface;
  *     },
  *   },
  *   bundle_entity_type = "profile_type",
+ *   field_ui_base_route = "profile.type_edit",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
  *   revision_table = "profile_revision",
