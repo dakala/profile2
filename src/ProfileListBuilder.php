@@ -7,7 +7,6 @@
 
 namespace Drupal\profile;
 
-use Drupal\Component\Utility\String;
 use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
@@ -21,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @see \Drupal\profile\Entity\Profile
  */
-class ProfileListController extends EntityListBuilder {
+class ProfileListBuilder extends EntityListBuilder {
 
   /**
    * The date formatter service.
