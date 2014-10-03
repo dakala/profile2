@@ -35,6 +35,7 @@ use Drupal\user\UserInterface;
  *   field_ui_base_route = "profile.type_edit",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
+ *   data_table = "profile_field_data",
  *   revision_table = "profile_revision",
  *   fieldable = TRUE,
  *   translatable = TRUE,
