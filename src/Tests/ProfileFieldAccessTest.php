@@ -73,7 +73,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     // Fill in a field value.
     $this->drupalLogin($this->web_user);
     $uid = $this->web_user->id();
-    $secret = $this->randomName();
+    $secret = $this->randomMachineName();
     $edit = array(
       'field_secret[und][0][value]' => $secret,
     );

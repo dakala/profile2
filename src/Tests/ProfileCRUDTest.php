@@ -30,21 +30,21 @@ class ProfileCRUDTest extends KernelTestBase {
    */
   function testCRUD() {
     $types_data = array(
-      0 => array('label' => $this->randomName()),
-      1 => array('label' => $this->randomName()),
+      0 => array('label' => $this->randomMachineName()),
+      1 => array('label' => $this->randomMachineName()),
     );
     foreach ($types_data as $id => $values) {
       $types[$id] = entity_create('profile_type', array('id' => $id) + $values);
       $types[$id]->save();
     }
     $this->user1 = entity_create('user', array(
-      'name' => $this->randomName(),
-      'mail' => $this->randomName() . '@example.com',
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
     ));
     $this->user1->save();
     $this->user2 = entity_create('user', array(
-      'name' => $this->randomName(),
-      'mail' => $this->randomName() . '@example.com',
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
     ));
     $this->user2->save();
 
