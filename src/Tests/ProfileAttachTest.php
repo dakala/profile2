@@ -72,7 +72,7 @@ class ProfileAttachTest extends WebTestBase {
 
     // Allow registration without administrative approval and log in user
     // directly after registering.
-    config('user.settings')
+    \Drupal::config('user.settings')
       ->set('register', USER_REGISTER_VISITORS)
       ->set('verify_mail', 0)
       ->save();
