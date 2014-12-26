@@ -7,22 +7,16 @@
 
 namespace Drupal\profile\Tests;
 
-use Drupal\simpletest\DrupalUnitTestBase;
+use Drupal\simpletest\KernelTestBase;
 
 /**
  * Tests basic CRUD functionality of profiles.
+ *
+ * @group profile
  */
-class ProfileCRUDTest extends DrupalUnitTestBase {
+class ProfileCRUDTest extends KernelTestBase {
 
   public static $modules = array('system', 'field', 'field_sql_storage', 'user', 'profile');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile CRUD operations',
-      'description' => 'Tests basic CRUD functionality of profiles.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();

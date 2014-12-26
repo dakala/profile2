@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests profile field access functionality.
+ *
+ * @group profile
  */
 class ProfileFieldAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text', 'field_ui');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Field access',
-      'description' => 'Tests profile field access functionality.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
