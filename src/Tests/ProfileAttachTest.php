@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests attaching of profile entity forms to other forms.
+ *
+ * @group profile
  */
 class ProfileAttachTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile form attachment',
-      'description' => 'Tests attaching of profile entity forms to other forms.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();

@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests profile access handling.
+ *
+ * @group profile
  */
 class ProfileAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile access',
-      'description' => 'Tests profile access handling.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();

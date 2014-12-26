@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests basic CRUD functionality of profile types.
+ *
+ * @group profile
  */
 class ProfileTypeCRUDTest extends WebTestBase {
 
   public static $modules = array('profile', 'field_ui', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile type CRUD operations',
-      'description' => 'Tests basic CRUD functionality of profile types.',
-      'group' => 'profile',
-    );
-  }
 
   /**
    * Tests CRUD operations for profile types through the UI.
