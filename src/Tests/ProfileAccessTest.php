@@ -8,21 +8,17 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Tests profile access handling.
+ *
+ * @group profile
  */
 class ProfileAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile access',
-      'description' => 'Tests profile access handling.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -36,23 +32,28 @@ class ProfileAccessTest extends WebTestBase {
 
     $this->field = array(
       'field_name' => 'profile_fullname',
+      'entity_type' => 'profile',
       'type' => 'text',
       'cardinality' => 1,
       'translatable' => FALSE,
     );
-    $this->field = field_create_field($this->field);
+    $this->field = FieldStorageConfig::create($this->field);
+    $this->field->save();
+
     $this->instance = array(
-      'entity_type' => 'profile',
-      'field_name' => $this->field['field_name'],
+      'entity_type' => $this->field->entity_type,
+      'field_name' => $this->field->field_name,
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'widget' => array(
         'type' => 'text_textfield',
       ),
     );
-    $this->instance = field_create_instance($this->instance);
+    $this->instance = FieldConfig::create($this->instance);
+    $this->instance->save();
+
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field['field_name'], array(
+      ->setComponent($this->field->field_name, array(
         'type' => 'text_default',
       ));
     $this->display->save();
@@ -73,12 +74,12 @@ class ProfileAccessTest extends WebTestBase {
    */
   function testAdminOnlyProfiles() {
     $id = $this->type->id();
-    $field_name = $this->field['field_name'];
+    $field_name = $this->field->field_name;
 
     // Create a test user account.
     $web_user = $this->drupalCreateUser(array('access user profiles'));
     $uid = $web_user->id();
-    $value = $this->randomName();
+    $value = $this->randomMachineName();
 
     // Administratively enter profile field values for the new account.
     $this->drupalLogin($this->admin_user);
@@ -104,7 +105,7 @@ class ProfileAccessTest extends WebTestBase {
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("edit own $id profile"));
 
     // Verify that the user is able to edit the own profile.
-    $value = $this->randomName();
+    $value = $this->randomMachineName();
     $edit = array(
       "{$field_name}[und][0][value]" => $value,
     );
