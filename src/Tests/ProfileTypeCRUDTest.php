@@ -8,6 +8,7 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\Component\Utility\Unicode;
 
 /**
  * Tests basic CRUD functionality of profile types.
@@ -28,7 +29,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $this->drupalGet('admin/people/profiles');
     $this->clickLink(t('Add profile type'));
     $this->assertUrl('admin/people/profiles/add');
-    $id = drupal_strtolower($this->randomMachineName());
+    $id = Unicode::strtolower($this->randomMachineName());
     $label = $this->randomString();
     $edit = array(
       'id' => $id,
@@ -54,7 +55,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
 
     // Add a field to the profile type.
     $this->drupalGet("admin/people/profiles/manage/$id/fields");
-    $field_name = drupal_strtolower($this->randomMachineName());
+    $field_name = Unicode::strtolower($this->randomMachineName());
     $field_label = $this->randomString();
     $edit = array(
       'fields[_add_new_field][label]' => $field_name,
@@ -69,7 +70,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
 
     // Rename the profile type ID.
     $this->drupalGet("admin/people/profiles/manage/$id/edit");
-    $new_id = drupal_strtolower($this->randomMachineName());
+    $new_id = Unicode::strtolower($this->randomMachineName());
     $edit = array(
       'id' => $new_id,
     );
