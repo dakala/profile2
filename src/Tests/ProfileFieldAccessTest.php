@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests profile field access functionality.
+ *
+ * @group profile
  */
 class ProfileFieldAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text', 'field_ui');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Field access',
-      'description' => 'Tests profile field access functionality.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -79,7 +73,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     // Fill in a field value.
     $this->drupalLogin($this->web_user);
     $uid = $this->web_user->id();
-    $secret = $this->randomName();
+    $secret = $this->randomMachineName();
     $edit = array(
       'field_secret[und][0][value]' => $secret,
     );

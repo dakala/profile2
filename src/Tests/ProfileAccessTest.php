@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests profile access handling.
+ *
+ * @group profile
  */
 class ProfileAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile access',
-      'description' => 'Tests profile access handling.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -78,7 +72,7 @@ class ProfileAccessTest extends WebTestBase {
     // Create a test user account.
     $web_user = $this->drupalCreateUser(array('access user profiles'));
     $uid = $web_user->id();
-    $value = $this->randomName();
+    $value = $this->randomMachineName();
 
     // Administratively enter profile field values for the new account.
     $this->drupalLogin($this->admin_user);
@@ -104,7 +98,7 @@ class ProfileAccessTest extends WebTestBase {
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("edit own $id profile"));
 
     // Verify that the user is able to edit the own profile.
-    $value = $this->randomName();
+    $value = $this->randomMachineName();
     $edit = array(
       "{$field_name}[und][0][value]" => $value,
     );
