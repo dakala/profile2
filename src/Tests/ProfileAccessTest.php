@@ -8,6 +8,8 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Tests profile access handling.
@@ -30,23 +32,28 @@ class ProfileAccessTest extends WebTestBase {
 
     $this->field = array(
       'field_name' => 'profile_fullname',
+      'entity_type' => 'profile',
       'type' => 'text',
       'cardinality' => 1,
       'translatable' => FALSE,
     );
-    $this->field = field_create_field($this->field);
+    $this->field = FieldStorageConfig::create($this->field);
+    $this->field->save();
+
     $this->instance = array(
-      'entity_type' => 'profile',
-      'field_name' => $this->field['field_name'],
+      'entity_type' => $this->field->entity_type,
+      'field_name' => $this->field->field_name,
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'widget' => array(
         'type' => 'text_textfield',
       ),
     );
-    $this->instance = field_create_instance($this->instance);
+    $this->instance = FieldConfig::create($this->instance);
+    $this->instance->save();
+
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field['field_name'], array(
+      ->setComponent($this->field->field_name, array(
         'type' => 'text_default',
       ));
     $this->display->save();
@@ -67,7 +74,7 @@ class ProfileAccessTest extends WebTestBase {
    */
   function testAdminOnlyProfiles() {
     $id = $this->type->id();
-    $field_name = $this->field['field_name'];
+    $field_name = $this->field->field_name;
 
     // Create a test user account.
     $web_user = $this->drupalCreateUser(array('access user profiles'));

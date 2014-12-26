@@ -8,6 +8,8 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Tests attaching of profile entity forms to other forms.
@@ -32,13 +34,16 @@ class ProfileAttachTest extends WebTestBase {
     $this->field = array(
       'field_name' => 'profile_fullname',
       'type' => 'text',
+      'entity_type' => 'profile',
       'cardinality' => 1,
       'translatable' => FALSE,
     );
-    $this->field = field_create_field($this->field);
+    $this->field = FieldStorageConfig::create($this->field);
+    $this->field->save();
+
     $this->instance = array(
-      'entity_type' => 'profile',
-      'field_name' => $this->field['field_name'],
+      'entity_type' => $this->field->entity_type,
+      'field_name' => $this->field->field_name,
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'required' => TRUE,
@@ -46,9 +51,11 @@ class ProfileAttachTest extends WebTestBase {
         'type' => 'text_textfield',
       ),
     );
-    $this->instance = field_create_instance($this->instance);
+    $this->instance = FieldConfig::create($this->instance);
+    $this->instance->save();
+
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field['field_name'], array(
+      ->setComponent($this->field->field_name, array(
         'type' => 'text_default',
       ));
     $this->display->save();
@@ -61,7 +68,7 @@ class ProfileAttachTest extends WebTestBase {
    */
   function testUserRegisterForm() {
     $id = $this->type->id();
-    $field_name = $this->field['field_name'];
+    $field_name = $this->field->field_name;
 
     // Allow registration without administrative approval and log in user
     // directly after registering.
@@ -81,7 +88,7 @@ class ProfileAttachTest extends WebTestBase {
       'pass[pass2]' => $pass_raw,
     );
     $this->drupalPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('@name field is required.', array('@name' => $this->instance['label'])));
+    $this->assertRaw(t('@name field is required.', array('@name' => $this->instance->label)));
 
     // Verify that we can register.
     $edit["profile[$id][$field_name][und][0][value]"] = $this->randomMachineName();
