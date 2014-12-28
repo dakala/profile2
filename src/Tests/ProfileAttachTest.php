@@ -8,21 +8,17 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Tests attaching of profile entity forms to other forms.
+ *
+ * @group profile
  */
 class ProfileAttachTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile form attachment',
-      'description' => 'Tests attaching of profile entity forms to other forms.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -38,13 +34,16 @@ class ProfileAttachTest extends WebTestBase {
     $this->field = array(
       'field_name' => 'profile_fullname',
       'type' => 'text',
+      'entity_type' => 'profile',
       'cardinality' => 1,
       'translatable' => FALSE,
     );
-    $this->field = field_create_field($this->field);
+    $this->field = FieldStorageConfig::create($this->field);
+    $this->field->save();
+
     $this->instance = array(
-      'entity_type' => 'profile',
-      'field_name' => $this->field['field_name'],
+      'entity_type' => $this->field->entity_type,
+      'field_name' => $this->field->field_name,
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'required' => TRUE,
@@ -52,9 +51,11 @@ class ProfileAttachTest extends WebTestBase {
         'type' => 'text_textfield',
       ),
     );
-    $this->instance = field_create_instance($this->instance);
+    $this->instance = FieldConfig::create($this->instance);
+    $this->instance->save();
+
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field['field_name'], array(
+      ->setComponent($this->field->field_name, array(
         'type' => 'text_default',
       ));
     $this->display->save();
@@ -67,30 +68,30 @@ class ProfileAttachTest extends WebTestBase {
    */
   function testUserRegisterForm() {
     $id = $this->type->id();
-    $field_name = $this->field['field_name'];
+    $field_name = $this->field->field_name;
 
     // Allow registration without administrative approval and log in user
     // directly after registering.
-    config('user.settings')
+    \Drupal::config('user.settings')
       ->set('register', USER_REGISTER_VISITORS)
       ->set('verify_mail', 0)
       ->save();
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('view own test profile'));
 
     // Verify that the additional profile field is attached and required.
-    $name = $this->randomName();
-    $pass_raw = $this->randomName();
+    $name = $this->randomMachineName();
+    $pass_raw = $this->randomMachineName();
     $edit = array(
       'name' => $name,
-      'mail' => $this->randomName() . '@example.com',
+      'mail' => $this->randomMachineName() . '@example.com',
       'pass[pass1]' => $pass_raw,
       'pass[pass2]' => $pass_raw,
     );
     $this->drupalPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('@name field is required.', array('@name' => $this->instance['label'])));
+    $this->assertRaw(t('@name field is required.', array('@name' => $this->instance->label)));
 
     // Verify that we can register.
-    $edit["profile[$id][$field_name][und][0][value]"] = $this->randomName();
+    $edit["profile[$id][$field_name][und][0][value]"] = $this->randomMachineName();
     $this->drupalPost(NULL, $edit, t('Create new account'));
     $this->assertText(t('Registration successful. You are now logged in.'));
 
