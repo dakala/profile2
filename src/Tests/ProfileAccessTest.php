@@ -86,7 +86,7 @@ class ProfileAccessTest extends WebTestBase {
     $edit = array(
       "{$field_name}[und][0][value]" => $value,
     );
-    $this->drupalPost("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
 
     // Verify that the administrator can see the profile.
     $this->drupalGet("user/$uid");
@@ -109,7 +109,7 @@ class ProfileAccessTest extends WebTestBase {
     $edit = array(
       "{$field_name}[und][0][value]" => $value,
     );
-    $this->drupalPost("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
     $this->assertText(t('Your profile has been saved.'));
 
     // Verify that the own profile is still not visible on the account page.
@@ -129,8 +129,8 @@ class ProfileAccessTest extends WebTestBase {
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("delete own $id profile"));
 
     // Verify that the user can delete the own profile.
-    $this->drupalPost("user/$uid/edit/$id", array(), t('Delete'));
-    $this->drupalPost(NULL, array(), t('Delete'));
+    $this->drupalPostForm("user/$uid/edit/$id", array(), t('Delete'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertRaw(t('Your %label profile has been deleted.', array('%label' => $this->type->label())));
     $this->assertUrl("user/$uid");
 

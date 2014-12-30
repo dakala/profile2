@@ -87,12 +87,12 @@ class ProfileAttachTest extends WebTestBase {
       'pass[pass1]' => $pass_raw,
       'pass[pass2]' => $pass_raw,
     );
-    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->drupalPostForm('user/register', $edit, t('Create new account'));
     $this->assertRaw(t('@name field is required.', array('@name' => $this->instance->label)));
 
     // Verify that we can register.
     $edit["profile[$id][$field_name][und][0][value]"] = $this->randomMachineName();
-    $this->drupalPost(NULL, $edit, t('Create new account'));
+    $this->drupalPostForm(NULL, $edit, t('Create new account'));
     $this->assertText(t('Registration successful. You are now logged in.'));
 
     $new_user = user_load_by_name($name);

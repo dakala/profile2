@@ -35,7 +35,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
       'id' => $id,
       'label' => $label,
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/people/profiles');
     $this->assertRaw(t('%label profile type has been created.', array('%label' => $label)));
     $this->assertLinkByHref("admin/people/profiles/manage/$id/edit");
@@ -49,7 +49,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $edit = array(
       'registration' => 1,
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/people/profiles');
     $this->assertRaw(t('%label profile type has been updated.', array('%label' => $label)));
 
@@ -63,9 +63,9 @@ class ProfileTypeCRUDTest extends WebTestBase {
       'fields[_add_new_field][type]' => 'text',
       'fields[_add_new_field][widget_type]' => 'text_textfield',
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
-    $this->drupalPost(NULL, array(), t('Save field settings'));
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, array(), t('Save field settings'));
+    $this->drupalPostForm(NULL, array(), t('Save settings'));
     $this->assertUrl("admin/people/profiles/manage/$id/fields");
 
     // Rename the profile type ID.
@@ -74,7 +74,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $edit = array(
       'id' => $new_id,
     );
-    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/people/profiles');
     $this->assertRaw(t('%label profile type has been updated.', array('%label' => $label)));
     $this->assertLinkByHref("admin/people/profiles/manage/$new_id/edit");
