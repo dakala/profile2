@@ -148,6 +148,7 @@ function profile_form_user_register_form_submit(array &$form, FormStateInterface
   if (!empty($profiles)) {
     foreach ($profiles as $bundle => $entity) {
       $entity->setOwnerId($account->id());
+      $entity->setActive(TRUE);
       $entity->save();
     }
   }
