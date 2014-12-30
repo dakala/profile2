@@ -96,7 +96,7 @@ class ProfileAttachTest extends WebTestBase {
     $this->assertText(t('Registration successful. You are now logged in.'));
 
     $new_user = user_load_by_name($name);
-    $this->assertTrue($new_user->status, 'New account is active after registration.');
+    $this->assertTrue($new_user->isActive(), 'New account is active after registration.');
 
     // Verify that a new profile was created for the new user ID.
     $profiles = entity_load_multiple_by_properties('profile', array(
