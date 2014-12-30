@@ -6,8 +6,8 @@
  */
 
 use Drupal\user\UserInterface;
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
 use Drupal\profile\Entity\ProfileType;
@@ -94,15 +94,17 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
 
     if ($profile_type->registration === TRUE && count($instances)) {
       $id = $profile_type->id();
-      if (empty($form_state['profiles'][$id])) {
+      $property = ['profiles',$id];
+      $profile = $form_state->get($property);
+      if (empty($profile)) {
         $entity = entity_create('profile', array(
           'type' => $id,
           'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->id
         ));
 
         // Attach profile entity form.
-        $form_state['profiles'][$id] = $entity;
-        $form_state['form_display_' . $id] = EntityViewDisplay::collectRenderDisplay($entity, 'default');
+        $form_state->set($property, $entity);
+        $form_state->set('form_display_' . $id, EntityFormDisplay::collectRenderDisplay($entity, 'default'));
         $form['entity_' . $id] = array(
           '#type' => 'details',
           '#title' => $profile_type->label(),
@@ -111,7 +113,7 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
           '#weight' => ++$weight,
           '#open' => TRUE,
         );
-        $form_state['form_display_' . $id]->buildForm($entity, $form['entity_' . $id], $form_state);
+        $form_state->get('form_display_' . $id)->buildForm($entity, $form['entity_' . $id], $form_state);
 
         $attached_profile_form = TRUE;
       }
@@ -127,10 +129,13 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
  * Extra form validation handler for the user registration form.
  */
 function profile_form_user_register_form_validate(array &$form, FormStateInterface $form_state) {
-  foreach ($form_state['profiles'] as $bundle => $entity) {
-    $form_display = $form_state['form_display_' . $bundle];
-    $form_display->extractFormValues($entity, $form['entity_' . $bundle], $form_state);
-    $form_display->validateFormValues($entity, $form['entity_' . $bundle], $form_state);
+  $profiles = $form_state->get('profiles');
+  if (!empty($profiles)) {
+    foreach ($profiles as $bundle => $entity) {
+      $form_display = $form_state->get('form_display_' . $bundle);
+      $form_display->extractFormValues($entity, $form['entity_' . $bundle], $form_state);
+      $form_display->validateFormValues($entity, $form['entity_' . $bundle], $form_state);
+    }
   }
 }
 
@@ -138,10 +143,13 @@ function profile_form_user_register_form_validate(array &$form, FormStateInterfa
  * Extra form submission handler for the user registration form.
  */
 function profile_form_user_register_form_submit(array &$form, FormStateInterface $form_state) {
-  $account = $form_state['controller']->getEntity();
-  foreach ($form_state['profiles'] as $bundle => $entity) {
-    $entity->setOwnerId($account->id());
-    $entity->save();
+  $account = $form_state->getFormObject()->getEntity();
+  $profiles = $form_state->get('profiles');
+  if (!empty($profiles)) {
+    foreach ($profiles as $bundle => $entity) {
+      $entity->setOwnerId($account->id());
+      $entity->save();
+    }
   }
 }
 
