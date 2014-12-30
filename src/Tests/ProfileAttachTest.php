@@ -60,6 +60,12 @@ class ProfileAttachTest extends WebTestBase {
       ));
     $this->display->save();
 
+    $this->form = entity_get_form_display('profile', 'test', 'default')
+      ->setComponent($this->field->field_name, array(
+        'type' => 'string_textfield',
+      ));
+    $this->form->save();
+
     $this->checkPermissions(array(), TRUE);
   }
 
@@ -91,7 +97,7 @@ class ProfileAttachTest extends WebTestBase {
     $this->assertRaw(format_string('@name field is required.', array('@name' => $this->instance->label)));
 
     // Verify that we can register.
-    $edit["profile[$id][$field_name][und][0][value]"] = $this->randomMachineName();
+    $edit["entity_" . $id . "[$field_name][0][value]"] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Create new account'));
     $this->assertText(format_string('Registration successful. You are now logged in.'));
 
@@ -104,11 +110,11 @@ class ProfileAttachTest extends WebTestBase {
       'type' => $this->type->id(),
     ));
     $profile = reset($profiles);
-    $this->assertEqual($profile->{$field_name}[LANGUAGE_NOT_SPECIFIED][0]['value'], $edit["profile[$id][$field_name][und][0][value]"], 'Field value found in loaded profile.');
+    $this->assertEqual($profile->get($field_name)->value, $edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found in loaded profile.');
 
     // Verify that the profile field value appears on the user account page.
     $this->drupalGet('user');
-    $this->assertText($edit["profile[$id][$field_name][und][0][value]"], 'Field value found on user account page.');
+    $this->assertText($edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found on user account page.');
   }
 
 }
