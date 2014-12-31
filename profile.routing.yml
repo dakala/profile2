@@ -57,15 +57,15 @@ entity.profile.edit_form:
   requirements:
     _entity_access: 'profile.update'
 
-profile.account_delete_profile:
-  path: '/user/{user}/delete/{type}/{id}'
+entity.profile.delete_form:
+  path: '/user/{user}/delete/{type}/{profile}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileController::deleteProfile'
+    _entity_form: 'profile.delete'
     _title: 'Delete a profile'
+  requirements:
+    _entity_access: 'profile.delete'
   options:
     _admin_route: TRUE
-  requirements:
-    _profile_access_check: 'TRUE'
 
 entity.profile.canonical:
   path: '/profile/{profile}'
