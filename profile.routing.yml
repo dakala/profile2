@@ -47,15 +47,15 @@ profile.account_add_profile:
   requirements:
     _profile_access_check: 'TRUE'
 
-profile.account_edit_profile:
-  path: '/user/{user}/edit/{type}/{id}'
+entity.profile.edit_form:
+  path: '/user/{user}/edit/{type}/{profile}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileController::editProfile'
+    _entity_form: 'profile.default'
     _title: 'Edit a profile'
   options:
     _admin_route: TRUE
   requirements:
-    _profile_access_check: 'TRUE'
+    _entity_access: 'profile.update'
 
 profile.account_delete_profile:
   path: '/user/{user}/delete/{type}/{id}'

@@ -11,8 +11,8 @@ profile.overview_types_tab:
 
 # Secondary tabs on main account edit page
 # Duplicate user edit tab
-profile.user.edit_form:
-  route_name: entity.user.edit_form
+entity.profile.edit_form:
+  route_name: entity.profile.edit_form
   title: 'User account'
   parent_id: entity.user.edit_form
   weight: -100

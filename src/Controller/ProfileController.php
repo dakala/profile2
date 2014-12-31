@@ -39,19 +39,6 @@ class ProfileController extends ControllerBase {
   }
 
   /**
-   * Provides profile edit form.
-   *
-   * @param $user
-   * @param $type
-   * @param $id
-   *
-   * @return array
-   */
-  public function editProfile($user, $type, $id) {
-     return $this->entityFormBuilder()->getForm(Profile::load($id), 'edit', array('changed' => REQUEST_TIME));
-  }
-
-  /**
    * Provides profile delete form.
    *
    * @param $user

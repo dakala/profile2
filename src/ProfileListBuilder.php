@@ -119,7 +119,7 @@ class ProfileListBuilder extends EntityListBuilder {
     $route_params = array('user' => $entity->getOwnerId(), 'type' => $entity->bundle(), 'id' => $entity->id());
     $links['edit'] = array(
       'title' => t('Edit'),
-      'route_name' => 'profile.account_edit_profile',
+      'route_name' => 'entity.profile.edit_form',
       'route_parameters' => $route_params,
     );
     $links['delete'] = array(
