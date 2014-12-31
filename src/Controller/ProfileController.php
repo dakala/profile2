@@ -52,7 +52,7 @@ class ProfileController extends ControllerBase {
   }
 
   /**
-   * The _title_callback for the profile.account_add_profile route.
+   * The _title_callback for the entity.profile.add_form route.
    *
    * @param \Drupal\profile\ProfileTypeInterface $profile_type
    *   The current profile type.

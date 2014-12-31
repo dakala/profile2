@@ -18,8 +18,8 @@ entity.profile.edit_form:
   weight: -100
 
 # Add tabs for each profile type
-profile.account_add_profile:
+entity.profile.add_form:
   title: 'Add new profile'
-  route_name: profile.account_add_profile
+  route_name: entity.profile.add_form
   parent_id: entity.user.edit_form
   deriver: Drupal\profile\Plugin\Derivative\ProfileAddLocalTask

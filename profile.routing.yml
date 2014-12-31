@@ -37,10 +37,10 @@ profile.type_delete:
   requirements:
     _permission: 'administer profile types'
 
-profile.account_add_profile:
+entity.profile.add_form:
   path: '/user/{user}/edit/{type}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileController::addProfile'
+    _controller: '\Drupal\profile\Controller\ProfileController::addProfile'
     _title: 'Add new profile'
   options:
     _admin_route: TRUE
