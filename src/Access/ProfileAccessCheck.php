@@ -6,6 +6,7 @@
  */
 namespace Drupal\profile\Access;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessCheckInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
@@ -43,7 +44,7 @@ class ProfileAccessCheck implements AccessCheckInterface {
   /**
    * {@inheritdoc}
    */
-  public function access(Route $route, Request $request) {
+  public function access(Request $request, Route $route) {
     $frags = explode('/', $route->getPath());
     if ((!count($frags) > 3) && (!in_array($frags[3], array(
         'add',
@@ -51,7 +52,7 @@ class ProfileAccessCheck implements AccessCheckInterface {
         'delete'
       )))
     ) {
-      return static::DENY;
+      return AccessResult::forbidden();
     }
 
     $profile_type = $request->attributes->get('type');
@@ -59,9 +60,9 @@ class ProfileAccessCheck implements AccessCheckInterface {
       $anyPermission = sprintf("%s any %s profile", $frags[3], $profile_type->id());
       $ownPermission = sprintf("%s own %s profile", $frags[3], $profile_type->id());
       return ($this->account->hasPermission($anyPermission) || $this->account->hasPermission($ownPermission)) ?
-        static::ALLOW : static::DENY;
+        AccessResult::allowed() : AccessResult::forbidden();
     }
 
-    return static::ALLOW;
+    return AccessResult::allowed();
   }
 }
