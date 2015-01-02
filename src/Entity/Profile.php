@@ -23,6 +23,7 @@ use Drupal\user\UserInterface;
  *   bundle_label = @Translation("Profile"),
  *   handlers = {
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
+ *     "views_data" = "Drupal\profile\ProfileViewsData",
  *     "list_builder" = "Drupal\profile\ProfileListBuilder",
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileFormController",
@@ -86,6 +87,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setDescription(t('The user ID of the user associated with the profile.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default')
       ->setTranslatable(TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
