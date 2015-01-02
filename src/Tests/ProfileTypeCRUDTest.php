@@ -26,9 +26,9 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $this->drupalLogin($this->root_user);
 
     // Create a new profile type.
-    $this->drupalGet('admin/people/profiles');
+    $this->drupalGet('admin/config/people/profiles/types');
     $this->clickLink(t('Add profile type'));
-    $this->assertUrl('admin/people/profiles/add');
+    $this->assertUrl('admin/config/people/profiles/types/add');
     $id = Unicode::strtolower($this->randomMachineName());
     $label = $this->randomString();
     $edit = array(
@@ -36,53 +36,58 @@ class ProfileTypeCRUDTest extends WebTestBase {
       'label' => $label,
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertUrl('admin/people/profiles');
+    $this->assertUrl('admin/config/people/profiles/types');
     $this->assertRaw(format_string('%label profile type has been created.', array('%label' => $label)));
-    $this->assertLinkByHref("admin/people/profiles/manage/$id/edit");
-    $this->assertLinkByHref("admin/people/profiles/manage/$id/fields");
-    $this->assertLinkByHref("admin/people/profiles/manage/$id/display");
-    $this->assertLinkByHref("admin/people/profiles/manage/$id/delete");
+    $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id");
+    $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id/fields");
+    $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id/display");
+    $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id/delete");
 
     // Edit the new profile type.
-    $this->drupalGet("admin/people/profiles/manage/$id/edit");
+    $this->drupalGet("admin/config/people/profiles/types/manage/$id");
     $this->assertRaw(format_string('Edit %label profile type', array('%label' => $label)));
     $edit = array(
       'registration' => 1,
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertUrl('admin/people/profiles');
+    $this->assertUrl('admin/config/people/profiles/types');
     $this->assertRaw(format_string('%label profile type has been updated.', array('%label' => $label)));
 
     // Add a field to the profile type.
-    $this->drupalGet("admin/people/profiles/manage/$id/fields");
+    $this->drupalGet("admin/config/people/profiles/types/manage/$id/fields/add-field");
     $field_name = Unicode::strtolower($this->randomMachineName());
     $field_label = $this->randomString();
     $edit = array(
-      'fields[_add_new_field][label]' => $field_name,
-      'fields[_add_new_field][field_name]' => $field_name,
-      'fields[_add_new_field][type]' => 'text',
-      'fields[_add_new_field][widget_type]' => 'text_textfield',
+      'new_storage_type' => 'string',
+      'label' => $field_label,
+      'field_name' => $field_name,
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(), t('Save field settings'));
     $this->drupalPostForm(NULL, array(), t('Save settings'));
-    $this->assertUrl("admin/people/profiles/manage/$id/fields");
+    $this->assertUrl("admin/config/people/profiles/types/manage/$id/fields", array(
+      'query' => array(
+        'field_config' => "profile.$id.field_$field_name",
+        'destinations[0]' => "admin/config/people/profiles/types/manage/$id/fields/add-field",
+      )
+    ));
+    $this->assertRaw(format_string('Saved %label configuration.', array('%label' => $field_label)));
 
     // Rename the profile type ID.
-    $this->drupalGet("admin/people/profiles/manage/$id/edit");
+    $this->drupalGet("admin/config/people/profiles/types/manage/$id");
     $new_id = Unicode::strtolower($this->randomMachineName());
     $edit = array(
       'id' => $new_id,
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertUrl('admin/people/profiles');
+    $this->assertUrl('admin/config/people/profiles/types');
     $this->assertRaw(format_string('%label profile type has been updated.', array('%label' => $label)));
-    $this->assertLinkByHref("admin/people/profiles/manage/$new_id/edit");
-    $this->assertNoLinkByHref("admin/people/profiles/manage/$id/edit");
+    $this->assertLinkByHref("admin/config/people/profiles/types/manage/$new_id");
+    $this->assertNoLinkByHref("admin/config/people/profiles/types/manage/$id");
     $id = $new_id;
 
     // Verify that the field is still associated with it.
-    $this->drupalGet("admin/people/profiles/manage/$id/fields");
+    $this->drupalGet("admin/config/people/profiles/types/manage/$id/fields");
     // @todo D8 core: This assertion fails for an unknown reason. Database
     //   contains the right values, so field_attach_rename_bundle() works
     //   correctly. The pre-existing field does not appear on the Manage

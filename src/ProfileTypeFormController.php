@@ -10,8 +10,8 @@ namespace Drupal\profile;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Utility\String;
 use Drupal\profile\Entity\ProfileType;
-use Drupal\profile\ProfileTypeInterface;
 
 
 /**
@@ -25,6 +25,13 @@ class ProfileTypeFormController extends EntityForm {
   function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $type = $this->entity;
+
+    if ($this->operation == 'add') {
+      $form['#title'] = String::checkPlain($this->t('Add profile type'));
+    }
+    else {
+      $form['#title'] = $this->t('Edit %label profile type', array('%label' => $type->label()));
+    }
 
     $form['label'] = array(
       '#title' => t('Label'),
