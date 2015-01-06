@@ -208,16 +208,20 @@ function template_preprocess_profile_items(&$variables) {
     $variables['title'] = String::checkPlain($variables['type']);
     foreach ($variables['profile_items'] as $profile_item) {
       $variables['items'][] = entity_view($profile_item, 'default');
-      $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("entity.profile.edit_form", array(
+      if ($profile_item->access('update')) {
+        $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("entity.profile.edit_form", array(
           'user' => \Drupal::currentUser()->id(),
           'type' => $profile_item->bundle(),
           'profile' => $profile_item->id(),
         )));
-      $variables['delete_links'][] = \Drupal::l(t('Delete'), new Url("entity.profile.delete_form", array(
+      }
+      if ($profile_item->access('delete')) {
+        $variables['delete_links'][] = \Drupal::l(t('Delete'), new Url("entity.profile.delete_form", array(
           'user' => \Drupal::currentUser()->id(),
           'type' => $profile_item->bundle(),
           'profile' => $profile_item->id(),
         )));
+      }
     }
   }
 }
