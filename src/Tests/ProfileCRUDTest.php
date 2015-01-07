@@ -59,7 +59,13 @@ class ProfileCRUDTest extends KernelTestBase {
     $this->assertIdentical($profile->id(), NULL);
     $this->assertTrue($profile->uuid());
     $this->assertIdentical($profile->getType(), $expected['type']);
-    $this->assertIdentical($profile->label(), $types['profile_type_0']->label());
+    $this->assertIdentical($profile->label(), t('@type profile of @username (uid: @uid)',
+      array(
+        '@type' => $types['profile_type_0']->label(),
+        '@username' => $this->user1->getUsername(),
+        '@uid' => $this->user1->id(),
+      ))
+    );
     $this->assertIdentical($profile->getOwnerId(), $this->user1->id());
     $this->assertIdentical($profile->getCreatedTime(), REQUEST_TIME);
     $this->assertIdentical($profile->getChangedTime(), REQUEST_TIME);
