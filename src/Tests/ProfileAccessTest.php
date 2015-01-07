@@ -90,7 +90,7 @@ class ProfileAccessTest extends WebTestBase {
     // Administratively enter profile field values for the new account.
     $this->drupalLogin($this->admin_user);
     $edit = array(
-      "{$field_name}[und][0][value]" => $value,
+      "{$field_name}[0][value]" => $value,
     );
     $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
 
@@ -113,7 +113,7 @@ class ProfileAccessTest extends WebTestBase {
     // Verify that the user is able to edit the own profile.
     $value = $this->randomMachineName();
     $edit = array(
-      "{$field_name}[und][0][value]" => $value,
+      "{$field_name}[0][value]" => $value,
     );
     $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
     $this->assertText(format_string('Your profile has been saved.'));
