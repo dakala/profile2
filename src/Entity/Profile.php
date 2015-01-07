@@ -48,7 +48,9 @@ use Drupal\user\UserInterface;
  *   },
  *  links = {
  *    "canonical" = "entity.profile.canonical",
- *    "admin-form" = "profile.type_edit"
+ *    "admin-form" = "profile.type_edit",
+ *    "edit-form" = "entity.profile.edit_form",
+ *    "delete-form" = "entity.profile.delete_form"
  *   },
  * )
  */

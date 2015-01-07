@@ -58,7 +58,7 @@ entity.profile.edit_form:
     _entity_access: 'profile.update'
 
 entity.profile.delete_form:
-  path: '/user/{user}/delete/{type}/{profile}'
+  path: '/profile/{profile}/delete'
   defaults:
     _entity_form: 'profile.delete'
     _title: 'Delete a profile'
