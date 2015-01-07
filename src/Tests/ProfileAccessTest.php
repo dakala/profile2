@@ -115,6 +115,11 @@ class ProfileAccessTest extends WebTestBase {
     $this->drupalGet("user/$uid/edit/$id/$profile_id");
     $this->assertResponse(403);
 
+    // Check edit link isn't displayed.
+    $this->assertNoLinkByHref("user/$uid/edit/$id/$profile_id");
+    // Check delete link isn't displayed.
+    $this->assertNoLinkByHref("user/$uid/delete/$id/$profile_id");
+
     // Allow users to edit own profiles.
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("edit own $id profile"));
 
