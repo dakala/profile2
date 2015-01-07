@@ -58,6 +58,12 @@ class ProfileAccessTest extends WebTestBase {
       ));
     $this->display->save();
 
+    $this->form = entity_get_form_display('profile', 'test', 'default')
+      ->setComponent($this->field->field_name, array(
+        'type' => 'string_textfield',
+      ));
+    $this->form->save();
+
     $this->checkPermissions(array(), TRUE);
 
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access user profiles'));
