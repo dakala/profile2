@@ -94,17 +94,25 @@ class ProfileAccessTest extends WebTestBase {
     );
     $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
 
+    $profiles = entity_load_multiple_by_properties('profile', array(
+      'uid' => $uid,
+      'type' => $this->type->id(),
+    ));
+    $profile = reset($profiles);
+    $profile_id = $profile->id();
+
     // Verify that the administrator can see the profile.
     $this->drupalGet("user/$uid");
     $this->assertText($this->type->label());
     $this->assertText($value);
+    $this->drupalLogout();
 
-    // Verify that the user can not access or edit the profile.
+    // Verify that the user can not access, create or edit the profile.
     $this->drupalLogin($web_user);
     $this->drupalGet("user/$uid");
     $this->assertNoText($this->type->label());
     $this->assertNoText($value);
-    $this->drupalGet("user/$uid/edit/$id");
+    $this->drupalGet("user/$uid/edit/$id/$profile_id");
     $this->assertResponse(403);
 
     // Allow users to edit own profiles.
