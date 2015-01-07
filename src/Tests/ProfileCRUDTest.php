@@ -16,13 +16,16 @@ use Drupal\simpletest\KernelTestBase;
  */
 class ProfileCRUDTest extends KernelTestBase {
 
-  public static $modules = array('system', 'field', 'field_sql_storage', 'user', 'profile');
+  public static $modules = array('system', 'field', 'entity_reference', 'field_sql_storage', 'user', 'profile');
 
   function setUp() {
     parent::setUp();
     $this->installSchema('system', 'url_alias');
     $this->installSchema('system', 'sequences');
-    $this->enableModules(array('field', 'user', 'profile'));
+    $this->installSchema('user', 'users_data');
+    $this->installEntitySchema('user');
+    $this->installEntitySchema('profile');
+    $this->enableModules(array('field', 'entity_reference', 'user', 'profile'));
   }
 
   /**
