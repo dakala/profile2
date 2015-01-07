@@ -128,8 +128,8 @@ class ProfileAccessTest extends WebTestBase {
     $edit = array(
       "{$field_name}[0][value]" => $value,
     );
-    $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
-    $this->assertText(format_string('Your profile has been saved.'));
+    $this->drupalPostForm("user/$uid/edit/$id/$profile_id", $edit, t('Save'));
+    $this->assertText(format_string('profile has been updated.'));
 
     // Verify that the own profile is still not visible on the account page.
     $this->drupalGet("user/$uid");
@@ -148,9 +148,10 @@ class ProfileAccessTest extends WebTestBase {
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("delete own $id profile"));
 
     // Verify that the user can delete the own profile.
-    $this->drupalPostForm("user/$uid/edit/$id", array(), t('Delete'));
+    $this->drupalGet("user/$uid/edit/$id/$profile_id");
+    $this->clickLink(t('Delete'));
     $this->drupalPostForm(NULL, array(), t('Delete'));
-    $this->assertRaw(format_string('Your %label profile has been deleted.', array('%label' => $this->type->label())));
+    $this->assertRaw(format_string('@label profile deleted.', array('@label' => $this->type->label())));
     $this->assertUrl("user/$uid");
 
     // Verify that the profile is gone.
