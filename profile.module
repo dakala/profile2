@@ -8,6 +8,7 @@
 use Drupal\user\UserInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Url;
 use Drupal\Core\Access\AccessResult;
@@ -128,6 +129,18 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
     }
   }
   $build['#attached']['library'][] = 'profile/drupal.profile-items';
+}
+
+/**
+ * Implements hook_user_delete().
+ */
+function profile_user_delete(EntityInterface $entity) {
+  $list = entity_load_multiple_by_properties('profile', array(
+    'uid' => $entity->id(),
+  ));
+  foreach($list as $profile) {
+    $profile->delete();
+  }
 }
 
 /**
