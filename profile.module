@@ -51,8 +51,20 @@ function profile_profile_access(ProfileInterface $profile, $op, $account) {
   $type = $profile->bundle();
 
   switch ($op) {
+    case 'view':
+      if ($account->hasPermission('view any ' . $type . ' profile', $account)) {
+        return AccessResult::allowed()->cachePerRole();
+      }
+      else {
+        return AccessResult::allowedIfHasPermission($account, 'view own ' . $type . ' profile');
+      }
     case 'create':
-      return AccessResult::allowedIfHasPermission($account, 'add ' . $type . ' profile');
+      if ($account->hasPermission('add any ' . $type . ' profile', $account)) {
+        return AccessResult::allowed()->cachePerRole();
+      }
+      else {
+        return AccessResult::allowedIfHasPermission($account, 'add own ' . $type . ' profile');
+      }
 
     case 'update':
       if ($account->hasPermission('edit any ' . $type . ' profile', $account)) {
@@ -98,12 +110,21 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
       ));
 
     if (count($profiles)) {
-      $build['profiles']['#weight'] = $weight + $config->get('weight');
-      $build['profiles'][$config->get('id')] = array(
-        '#theme' => 'profile_items',
-        '#profile_items' => $profiles,
-        '#type' => $config->get('label'),
-      );
+      // Only display profiles user has access.
+      foreach($profiles as $key => $profile) {
+        if (!$profile->access('view')) {
+          unset($profiles[$key]);
+        }
+      }
+
+      if (count($profiles)) {
+        $build['profiles']['#weight'] = $weight + $config->get('weight');
+        $build['profiles'][$config->get('id')] = array(
+          '#theme' => 'profile_items',
+          '#profile_items' => $profiles,
+          '#type' => $config->get('label'),
+        );
+      }
     }
   }
   $build['#attached']['library'][] = 'profile/drupal.profile-items';
