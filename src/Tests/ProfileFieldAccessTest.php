@@ -56,12 +56,11 @@ class ProfileFieldAccessTest extends WebTestBase {
 
     // Create a private profile field.
     $edit = array(
-      'fields[_add_new_field][label]' => 'Secret',
-      'fields[_add_new_field][field_name]' => 'secret',
-      'fields[_add_new_field][type]' => 'text',
-      'fields[_add_new_field][widget_type]' => 'text_textfield',
+      'new_storage_type' => 'string',
+      'label' => 'Secret',
+      'field_name' => 'secret',
     );
-    $this->drupalPostForm("admin/people/profiles/manage/$id/fields", $edit, t('Save'));
+    $this->drupalPostForm("admin/config/people/profiles/types/manage/$id/fields/add-field", $edit, t('Save and continue'));
 
     $edit = array(
       'field[settings][profile_private]' => 1,
@@ -75,7 +74,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     $uid = $this->web_user->id();
     $secret = $this->randomMachineName();
     $edit = array(
-      'field_secret[und][0][value]' => $secret,
+      'field_secret[0][value]' => $secret,
     );
     $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
 
