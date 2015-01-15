@@ -44,6 +44,7 @@ use Drupal\user\UserInterface;
  *     "id" = "pid",
  *     "revision" = "vid",
  *     "bundle" = "type",
+ *     "langcode" = "langcode",
  *     "uuid" = "uuid"
  *   },
  *  links = {
