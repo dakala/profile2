@@ -32,7 +32,7 @@ class ProfileController extends ControllerBase {
     $profile = $this->entityManager()->getStorage('profile')->create(array(
       'uid' => $user,
       'type' => $config->get('id'),
-      'langcode' => $langcode ? $langcode : $this->languageManager()->getCurrentLanguage()->id,
+      'langcode' => $langcode ? $langcode : $this->languageManager()->getCurrentLanguage()->getId(),
     ));
 
     return $this->entityFormBuilder()->getForm($profile, 'add', array('uid' => $user, 'created' => REQUEST_TIME));
