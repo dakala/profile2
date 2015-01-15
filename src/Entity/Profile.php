@@ -33,7 +33,7 @@ use Drupal\user\UserInterface;
  *     },
  *   },
  *   bundle_entity_type = "profile_type",
- *   field_ui_base_route = "profile.type_edit",
+ *   field_ui_base_route = "entity.profile_type.edit_form",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
  *   data_table = "profile_field_data",
@@ -49,7 +49,7 @@ use Drupal\user\UserInterface;
  *   },
  *  links = {
  *    "canonical" = "entity.profile.canonical",
- *    "admin-form" = "profile.type_edit",
+ *    "admin-form" = "entity.profile_type.edit_form",
  *    "edit-form" = "entity.profile.edit_form",
  *    "delete-form" = "entity.profile.delete_form"
  *   },
