@@ -39,19 +39,6 @@ class ProfileController extends ControllerBase {
   }
 
   /**
-   * Provides profile edit form.
-   *
-   * @param $user
-   * @param $type
-   * @param $id
-   *
-   * @return array
-   */
-  public function editProfile($user, $type, $id) {
-     return $this->entityFormBuilder()->getForm(Profile::load($id), 'edit', array('changed' => REQUEST_TIME));
-  }
-
-  /**
    * Provides profile delete form.
    *
    * @param $user
@@ -65,7 +52,7 @@ class ProfileController extends ControllerBase {
   }
 
   /**
-   * The _title_callback for the profile.account_add_profile route.
+   * The _title_callback for the entity.profile.add_form route.
    *
    * @param \Drupal\profile\ProfileTypeInterface $profile_type
    *   The current profile type.

@@ -8,6 +8,7 @@
 namespace Drupal\profile\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Unpublishes a profile.
@@ -26,6 +27,17 @@ class UnpublishProfile extends ActionBase {
   public function execute($entity = NULL) {
     $entity->status = PROFILE_NOT_ACTIVE;
     $entity->save();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    /** @var \Drupal\node\NodeInterface $object */
+    $access = $object->access('update', $account, TRUE)
+      ->andIf($object->status->access('edit', $account, TRUE));
+
+    return $return_as_object ? $access : $access->isAllowed();
   }
 
 }

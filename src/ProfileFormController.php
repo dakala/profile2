@@ -115,6 +115,11 @@ class ProfileFormController extends ContentEntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $profile_type = ProfileType::load($this->entity->bundle());
+
+    // Active profile for non administers if profile is new.
+    if (!\Drupal::currentUser()->hasPermission('administer profiles') && $this->entity->isNew()) {
+      $this->entity->setActive(TRUE);
+    }
     switch ($this->entity->save()) {
       case SAVED_NEW:
         drupal_set_message(t('%label profile has been created.', array('%label' => $profile_type->label())));

@@ -309,7 +309,7 @@ display:
           provider: user
         status:
           id: status
-          table: profile
+          table: profile_field_data
           field: status
           relationship: none
           group_type: group
@@ -362,7 +362,7 @@ display:
           provider: views
         changed:
           id: changed
-          table: profile
+          table: profile_field_data
           field: changed
           relationship: none
           group_type: group
@@ -662,7 +662,7 @@ display:
       relationships:
         uid:
           id: uid
-          table: profile
+          table: profile_field_data
           field: uid
           relationship: none
           group_type: group

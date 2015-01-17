@@ -60,6 +60,12 @@ class ProfileAttachTest extends WebTestBase {
       ));
     $this->display->save();
 
+    $this->form = entity_get_form_display('profile', 'test', 'default')
+      ->setComponent($this->field->field_name, array(
+        'type' => 'string_textfield',
+      ));
+    $this->form->save();
+
     $this->checkPermissions(array(), TRUE);
   }
 
@@ -87,16 +93,16 @@ class ProfileAttachTest extends WebTestBase {
       'pass[pass1]' => $pass_raw,
       'pass[pass2]' => $pass_raw,
     );
-    $this->drupalPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('@name field is required.', array('@name' => $this->instance->label)));
+    $this->drupalPostForm('user/register', $edit, t('Create new account'));
+    $this->assertRaw(format_string('@name field is required.', array('@name' => $this->instance->label)));
 
     // Verify that we can register.
-    $edit["profile[$id][$field_name][und][0][value]"] = $this->randomMachineName();
-    $this->drupalPost(NULL, $edit, t('Create new account'));
-    $this->assertText(t('Registration successful. You are now logged in.'));
+    $edit["entity_" . $id . "[$field_name][0][value]"] = $this->randomMachineName();
+    $this->drupalPostForm(NULL, $edit, t('Create new account'));
+    $this->assertText(format_string('Registration successful. You are now logged in.'));
 
     $new_user = user_load_by_name($name);
-    $this->assertTrue($new_user->status, 'New account is active after registration.');
+    $this->assertTrue($new_user->isActive(), 'New account is active after registration.');
 
     // Verify that a new profile was created for the new user ID.
     $profiles = entity_load_multiple_by_properties('profile', array(
@@ -104,11 +110,11 @@ class ProfileAttachTest extends WebTestBase {
       'type' => $this->type->id(),
     ));
     $profile = reset($profiles);
-    $this->assertEqual($profile->{$field_name}[LANGUAGE_NOT_SPECIFIED][0]['value'], $edit["profile[$id][$field_name][und][0][value]"], 'Field value found in loaded profile.');
+    $this->assertEqual($profile->get($field_name)->value, $edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found in loaded profile.');
 
     // Verify that the profile field value appears on the user account page.
     $this->drupalGet('user');
-    $this->assertText($edit["profile[$id][$field_name][und][0][value]"], 'Field value found on user account page.');
+    $this->assertText($edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found on user account page.');
   }
 
 }

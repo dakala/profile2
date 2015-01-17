@@ -37,35 +37,35 @@ profile.type_delete:
   requirements:
     _permission: 'administer profile types'
 
-profile.account_add_profile:
+entity.profile.add_form:
   path: '/user/{user}/edit/{type}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileController::addProfile'
+    _controller: '\Drupal\profile\Controller\ProfileController::addProfile'
     _title: 'Add new profile'
   options:
     _admin_route: TRUE
   requirements:
     _profile_access_check: 'TRUE'
 
-profile.account_edit_profile:
-  path: '/user/{user}/edit/{type}/{id}'
+entity.profile.edit_form:
+  path: '/user/{user}/edit/{type}/{profile}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileController::editProfile'
+    _entity_form: 'profile.default'
     _title: 'Edit a profile'
   options:
     _admin_route: TRUE
   requirements:
-    _profile_access_check: 'TRUE'
+    _entity_access: 'profile.update'
 
-profile.account_delete_profile:
-  path: '/user/{user}/delete/{type}/{id}'
+entity.profile.delete_form:
+  path: '/profile/{profile}/delete'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileController::deleteProfile'
+    _entity_form: 'profile.delete'
     _title: 'Delete a profile'
+  requirements:
+    _entity_access: 'profile.delete'
   options:
     _admin_route: TRUE
-  requirements:
-    _profile_access_check: 'TRUE'
 
 entity.profile.canonical:
   path: '/profile/{profile}'

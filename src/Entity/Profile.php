@@ -23,6 +23,7 @@ use Drupal\user\UserInterface;
  *   bundle_label = @Translation("Profile"),
  *   handlers = {
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
+ *     "views_data" = "Drupal\profile\ProfileViewsData",
  *     "list_builder" = "Drupal\profile\ProfileListBuilder",
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileFormController",
@@ -43,11 +44,14 @@ use Drupal\user\UserInterface;
  *     "id" = "pid",
  *     "revision" = "vid",
  *     "bundle" = "type",
+ *     "langcode" = "langcode",
  *     "uuid" = "uuid"
  *   },
  *  links = {
  *    "canonical" = "entity.profile.canonical",
- *    "admin-form" = "profile.type_edit"
+ *    "admin-form" = "profile.type_edit",
+ *    "edit-form" = "entity.profile.edit_form",
+ *    "delete-form" = "entity.profile.delete_form"
  *   },
  * )
  */
@@ -86,6 +90,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setDescription(t('The user ID of the user associated with the profile.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default')
       ->setTranslatable(TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
@@ -200,6 +205,14 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function getChangedTime() {
     return $this->get('changed')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setChangedTime($timestamp) {
+    $this->set('changed', $timestamp);
+    return $this;
   }
 
   /**

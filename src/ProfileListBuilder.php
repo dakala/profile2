@@ -116,15 +116,15 @@ class ProfileListBuilder extends EntityListBuilder {
       $row['language_name'] = $language_manager->getLanguageName($langcode);
     }
 
-    $route_params = array('user' => $entity->getOwnerId(), 'type' => $entity->bundle(), 'id' => $entity->id());
+    $route_params = array('user' => $entity->getOwnerId(), 'type' => $entity->bundle(), 'profile' => $entity->id());
     $links['edit'] = array(
       'title' => t('Edit'),
-      'route_name' => 'profile.account_edit_profile',
+      'route_name' => 'entity.profile.edit_form',
       'route_parameters' => $route_params,
     );
     $links['delete'] = array(
       'title' => t('Delete'),
-      'route_name' => 'profile.account_delete_profile',
+      'route_name' => 'entity.profile.delete_form',
       'route_parameters' => $route_params,
     );
 
