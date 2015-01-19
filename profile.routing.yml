@@ -38,17 +38,19 @@ entity.profile_type.delete_form:
     _permission: 'administer profile types'
 
 entity.profile.add_form:
-  path: '/user/{user}/edit/{type}'
+  path: '/user/{user}/edit/profile/{profile_type}'
   defaults:
     _controller: '\Drupal\profile\Controller\ProfileController::addProfile'
     _title: 'Add new profile'
   options:
-    _admin_route: TRUE
+    parameters:
+      profile_type:
+        use_current_language: TRUE
   requirements:
-    _profile_access_check: 'TRUE'
+    _profile_access_check: 'profile:{profile_type}'
 
 entity.profile.edit_form:
-  path: '/user/{user}/edit/{type}/{profile}'
+  path: '/user/{user}/edit/profile/{profile_type}/{profile}'
   defaults:
     _entity_form: 'profile.default'
     _title: 'Edit a profile'
