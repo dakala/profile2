@@ -70,6 +70,7 @@ class ProfileAccessTest extends WebTestBase {
     $this->admin_user = $this->drupalCreateUser(array(
       'administer profile types',
       "view any $id profile",
+      "add any $id profile",
       "edit any $id profile",
       "delete any $id profile",
     ));
