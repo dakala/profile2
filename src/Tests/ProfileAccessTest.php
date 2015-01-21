@@ -92,12 +92,13 @@ class ProfileAccessTest extends WebTestBase {
     $edit = array(
       "{$field_name}[0][value]" => $value,
     );
-    $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save and make active'));
 
     $profiles = entity_load_multiple_by_properties('profile', array(
       'uid' => $uid,
       'type' => $this->type->id(),
     ));
+
     $profile = reset($profiles);
     $profile_id = $profile->id();
 
@@ -112,13 +113,13 @@ class ProfileAccessTest extends WebTestBase {
     $this->drupalGet("user/$uid");
     $this->assertNoText($this->type->label());
     $this->assertNoText($value);
-    $this->drupalGet("user/$uid/edit/$id/$profile_id");
+    $this->drupalGet("user/$uid/edit/profile/$id/$profile_id");
     $this->assertResponse(403);
 
     // Check edit link isn't displayed.
-    $this->assertNoLinkByHref("user/$uid/edit/$id/$profile_id");
+    $this->assertNoLinkByHref("user/$uid/edit/profile/$id/$profile_id");
     // Check delete link isn't displayed.
-    $this->assertNoLinkByHref("user/$uid/delete/$id/$profile_id");
+    $this->assertNoLinkByHref("user/$uid/delete/profile/$id/$profile_id");
 
     // Allow users to edit own profiles.
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("edit own $id profile"));
@@ -128,7 +129,7 @@ class ProfileAccessTest extends WebTestBase {
     $edit = array(
       "{$field_name}[0][value]" => $value,
     );
-    $this->drupalPostForm("user/$uid/edit/$id/$profile_id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id/$profile_id", $edit, t('Save'));
     $this->assertText(format_string('profile has been updated.'));
 
     // Verify that the own profile is still not visible on the account page.
@@ -148,7 +149,7 @@ class ProfileAccessTest extends WebTestBase {
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("delete own $id profile"));
 
     // Verify that the user can delete the own profile.
-    $this->drupalGet("user/$uid/edit/$id/$profile_id");
+    $this->drupalGet("user/$uid/edit/profile/$id/$profile_id");
     $this->clickLink(t('Delete'));
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertRaw(format_string('@label profile deleted.', array('@label' => $this->type->label())));
@@ -158,7 +159,7 @@ class ProfileAccessTest extends WebTestBase {
     $this->drupalGet("user/$uid");
     $this->assertNoText($this->type->label());
     $this->assertNoText($value);
-    $this->drupalGet("user/$uid/edit/$id");
+    $this->drupalGet("user/$uid/edit/profile/$id");
     $this->assertNoText($value);
   }
 

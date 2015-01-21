@@ -76,7 +76,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     $edit = array(
       'field_secret[0][value]' => $secret,
     );
-    $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save'));
 
     // Verify that the private field value appears for the profile owner.
     $this->drupalGet("user/$uid");
