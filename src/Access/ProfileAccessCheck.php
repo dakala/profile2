@@ -8,10 +8,14 @@ namespace Drupal\profile\Access;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessCheckInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\profile\ProfileTypeInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+
 
 /**
  * Checks access to add, edit and delete profiles.
@@ -25,13 +29,29 @@ class ProfileAccessCheck implements AccessCheckInterface {
   protected $account;
 
   /**
-   * Constructs a CustomAccessCheck object.
-   *
-   * @param \Drupal\Core\Session\AccountInterface
-   *   The user account to check access for.
+ * The entity manager.
+ *
+ * @var \Drupal\Core\Entity\EntityManagerInterface
+ */
+  protected $entityManager;
+
+  /**
+   * Service RequestStack
+   * @var RequestStack
    */
-  public function __construct(AccountInterface $account) {
-    $this->account = $account;
+  protected $requestStack;
+
+  /**
+   * Constructs a EntityCreateAccessCheck object.
+   *
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
+   */
+  public function __construct(EntityManagerInterface $entity_manager, RequestStack $requestStack) {
+    $this->entityManager = $entity_manager;
+    $this->requestStack = $requestStack;
   }
 
   /**
@@ -41,28 +61,26 @@ class ProfileAccessCheck implements AccessCheckInterface {
     return FALSE;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function access(Request $request, Route $route) {
-    $frags = explode('/', $route->getPath());
-    if ((!count($frags) > 3) && (!in_array($frags[3], array(
-        'add',
-        'edit',
-        'delete'
-      )))
-    ) {
-      return AccessResult::forbidden();
+  public function access(AccountInterface $account, ProfileTypeInterface $profile_type = NULL) {
+
+    $access_control_handler = $this->entityManager->getAccessControlHandler('profile');
+    $operation = $this->requestStack->getCurrentRequest()->attributes->get('operation');
+    if ($operation == 'add') {
+      return $access_control_handler->access($profile_type, $operation, LanguageInterface::LANGCODE_DEFAULT, $account, TRUE);
     }
 
-    $profile_type = $request->attributes->get('type');
-    if ($profile_type instanceof ProfileTypeInterface) {
-      $anyPermission = sprintf("%s any %s profile", $frags[3], $profile_type->id());
-      $ownPermission = sprintf("%s own %s profile", $frags[3], $profile_type->id());
-      return ($this->account->hasPermission($anyPermission) || $this->account->hasPermission($ownPermission)) ?
-        AccessResult::allowed() : AccessResult::forbidden();
+    // If checking whether a profile of a particular type may be created.
+    if ($profile_type) {
+      return $access_control_handler->createAccess($profile_type->id(), $account, [], TRUE);
+    }
+    // If checking whether a profile of any type may be created.
+    foreach ($this->entityManager->getStorage('profile_type')->loadMultiple() as $profile_type) {
+      if (($access = $access_control_handler->createAccess($profile_type->id(), $account, [], TRUE)) && $access->isAllowed()) {
+        return $access;
+      }
     }
 
-    return AccessResult::allowed();
+    // No opinion.
+    return AccessResult::neutral();
   }
 }

@@ -92,7 +92,7 @@ class ProfileAccessTest extends WebTestBase {
     $edit = array(
       "{$field_name}[0][value]" => $value,
     );
-    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save and make active'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save'));
 
     $profiles = entity_load_multiple_by_properties('profile', array(
       'uid' => $uid,

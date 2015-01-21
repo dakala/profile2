@@ -42,6 +42,7 @@ entity.profile.add_form:
   defaults:
     _controller: '\Drupal\profile\Controller\ProfileController::addProfile'
     _title: 'Add new profile'
+    operation: 'add'
   options:
     parameters:
       profile_type:
@@ -52,10 +53,8 @@ entity.profile.add_form:
 entity.profile.edit_form:
   path: '/user/{user}/edit/profile/{profile_type}/{profile}'
   defaults:
-    _entity_form: 'profile.default'
+    _entity_form: 'profile.edit'
     _title: 'Edit a profile'
-  options:
-    _admin_route: TRUE
   requirements:
     _entity_access: 'profile.update'
 
@@ -66,8 +65,6 @@ entity.profile.delete_form:
     _title: 'Delete a profile'
   requirements:
     _entity_access: 'profile.delete'
-  options:
-    _admin_route: TRUE
 
 entity.profile.canonical:
   path: '/profile/{profile}'
