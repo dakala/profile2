@@ -23,7 +23,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
    * Tests CRUD operations for profile types through the UI.
    */
   function testCRUDUI() {
-    $this->drupalLogin($this->root_user);
+    $this->drupalLogin($this->rootUser);
 
     // Create a new profile type.
     $this->drupalGet('admin/config/people/profiles/types');
