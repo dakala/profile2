@@ -8,34 +8,35 @@
 namespace Drupal\profile\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\profile\ProfileTypeInterface;
 use Drupal\profile\Entity\Profile;
+use Drupal\user\UserInterface;
 
 /**
  * Returns responses for ProfileController routes.
  */
-class ProfileController extends ControllerBase {
+class ProfileController extends ControllerBase implements ContainerInjectionInterface {
 
   /**
    * Provides the profile submission form.
    *
-   * @param \Drupal\profile\ProfileTypeInterface $type
-   *   The profile type entity for the node.
+   * @param \Drupal\user\UserInterface $profile_type
+   *   The user account.
+   * @param \Drupal\profile\ProfileTypeInterface $profile_type
+   *   The profile type entity for the profile.
    *
    * @return array
    *   A profile submission form.
    */
-  public function addProfile($user, $type) {
-    $config = \Drupal::config('profile.type.' . $type);
-    $langcode = $config->get('langcode');
+  public function addProfile(UserInterface $user, ProfileTypeInterface $profile_type) {
 
     $profile = $this->entityManager()->getStorage('profile')->create(array(
-      'uid' => $user,
-      'type' => $config->get('id'),
-      'langcode' => $langcode ? $langcode : $this->languageManager()->getCurrentLanguage()->id,
+      'uid' => $user->id(),
+      'type' => $profile_type->id(),
     ));
 
-    return $this->entityFormBuilder()->getForm($profile, 'add', array('uid' => $user, 'created' => REQUEST_TIME));
+    return $this->entityFormBuilder()->getForm($profile, 'add', array('uid' => $user->id(), 'created' => REQUEST_TIME));
   }
 
   /**

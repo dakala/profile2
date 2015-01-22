@@ -109,7 +109,7 @@ class ProfileTypeFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function delete(array $form, FormStateInterface $form_state) {
-    $form_state->setRedirect('profile.type_delete', array(
+    $form_state->setRedirect('entity.profile_type.delete_form', array(
       'profile_type' => $this->entity->id()
     ));
   }

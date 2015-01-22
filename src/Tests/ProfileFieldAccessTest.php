@@ -39,6 +39,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     ));
     $user_permissions = array(
       'access user profiles',
+      'add own personal profile',
       'edit own personal profile',
       'view any personal profile',
     );
@@ -76,7 +77,11 @@ class ProfileFieldAccessTest extends WebTestBase {
     $edit = array(
       'field_secret[0][value]' => $secret,
     );
-    $this->drupalPostForm("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save'));
+
+    // User cache page need to be cleared to see new profile.
+    // TODO: We shouldn't have to clear all cache to display this.
+    drupal_flush_all_caches();
 
     // Verify that the private field value appears for the profile owner.
     $this->drupalGet("user/$uid");
