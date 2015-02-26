@@ -7,7 +7,7 @@
 
 namespace Drupal\profile\Plugin\views\field;
 
-use Drupal\profile\Plugin\views\field\Link;
+
 use Drupal\views\ResultRow;
 
 /**

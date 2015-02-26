@@ -9,6 +9,7 @@ namespace Drupal\profile\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Logger\RfcLogLevel;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
@@ -90,7 +91,7 @@ class ProfileTypeDeleteForm extends EntityConfirmFormBase {
 
     \Drupal::service('logger.factory')
       ->get('profile')
-      ->log(WATCHDOG_NOTICE, 'Profile type %label has been deleted.', array('@type' => $this->entity->label()));
+      ->log(RfcLogLevel::NOTICE, 'Profile type %label has been deleted.', array('@type' => $this->entity->label()));
 
     drupal_set_message(t('Profile type %label has been deleted.', array('%label' => $this->entity->label())));
 
