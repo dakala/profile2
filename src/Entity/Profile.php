@@ -49,10 +49,10 @@ use Drupal\user\UserInterface;
  *     "uuid" = "uuid"
  *   },
  *  links = {
- *    "canonical" = "entity.profile.canonical",
- *    "admin-form" = "entity.profile_type.edit_form",
- *    "edit-form" = "entity.profile.edit_form",
- *    "delete-form" = "entity.profile.delete_form"
+ *    "canonical" = "/profile/{profile}",
+ *    "admin-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
+ *    "edit-form" = "/user/{user}/edit/profile/{profile_type}/{profile}",
+ *    "delete-form" = "/profile/{profile}/delete"
  *   },
  * )
  */
