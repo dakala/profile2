@@ -20,31 +20,43 @@ class ProfileAttachTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
 
+  /**
+   * The entity type to test against
+   */
+  protected $profile_type;
+
+  /**
+   * The entity type to test against
+   */
+  protected $profile_field;
+
+  protected $instance;
+
   function setUp() {
     parent::setUp();
 
-    $this->type = entity_create('profile_type', array(
+    $this->profile_type = entity_create('profile_type', array(
       'id' => 'test',
       'label' => 'Test profile',
       'weight' => 0,
       'registration' => TRUE,
     ));
-    $this->type->save();
+    $this->profile_type->save();
 
-    $this->field = array(
+    $this->profile_field = array(
       'field_name' => 'profile_fullname',
       'type' => 'text',
       'entity_type' => 'profile',
       'cardinality' => 1,
       'translatable' => FALSE,
     );
-    $this->field = FieldStorageConfig::create($this->field);
-    $this->field->save();
+    $this->profile_field = FieldStorageConfig::create($this->profile_field);
+    $this->profile_field->save();
 
     $this->instance = array(
-      'entity_type' => $this->field->entity_type,
-      'field_name' => $this->field->field_name,
-      'bundle' => $this->type->id(),
+      'entity_type' => $this->profile_field->get('entity_type'),
+      'field_name' => $this->profile_field->get('field_name'),
+      'bundle' => $this->profile_type->id(),
       'label' => 'Full name',
       'required' => TRUE,
       'widget' => array(
@@ -54,18 +66,17 @@ class ProfileAttachTest extends WebTestBase {
     $this->instance = FieldConfig::create($this->instance);
     $this->instance->save();
 
-    $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+    $display = entity_get_display('profile', 'test', 'default')
+      ->setComponent($this->profile_field->get('field_name'), array(
         'type' => 'text_default',
       ));
-    $this->display->save();
+    $display->save();
 
-    $this->form = entity_get_form_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+    $form = entity_get_form_display('profile', 'test', 'default')
+      ->setComponent($this->profile_field->get('field_name'), array(
         'type' => 'string_textfield',
       ));
-    $this->form->save();
-
+    $form->save();
     $this->checkPermissions(array(), TRUE);
   }
 
@@ -73,15 +84,17 @@ class ProfileAttachTest extends WebTestBase {
    * Test user registration integration.
    */
   function testUserRegisterForm() {
-    $id = $this->type->id();
-    $field_name = $this->field->field_name;
+    $id = $this->profile_type->id();
+    $field_name = $this->profile_field->get('field_name');
 
-    // Allow registration without administrative approval and log in user
-    // directly after registering.
-    \Drupal::config('user.settings')
+    $config = $this->config('user.settings');
+    // Don't require email verification and allow registration by site visitors
+    // without administrator approval.
+    $config
+      ->set('verify_mail', FALSE)
       ->set('register', USER_REGISTER_VISITORS)
-      ->set('verify_mail', 0)
       ->save();
+
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('view own test profile'));
 
     // Verify that the additional profile field is attached and required.
@@ -107,7 +120,7 @@ class ProfileAttachTest extends WebTestBase {
     // Verify that a new profile was created for the new user ID.
     $profiles = entity_load_multiple_by_properties('profile', array(
       'uid' => $new_user->id(),
-      'type' => $this->type->id(),
+      'type' => $this->profile_type->id(),
     ));
     $profile = reset($profiles);
     $this->assertEqual($profile->get($field_name)->value, $edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found in loaded profile.');
