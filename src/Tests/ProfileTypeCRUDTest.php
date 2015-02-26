@@ -8,6 +8,8 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\Unicode;
 
 /**
  * Tests basic CRUD functionality of profile types.
@@ -34,7 +36,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $this->drupalGet('admin/people/profiles');
     $this->clickLink(t('Add profile type'));
     $this->assertUrl('admin/people/profiles/add');
-    $id = drupal_strtolower($this->randomName());
+    $id = Unicode::strtolower($this->randomName());
     $label = $this->randomString();
     $edit = array(
       'id' => $id,
@@ -60,7 +62,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
 
     // Add a field to the profile type.
     $this->drupalGet("admin/people/profiles/manage/$id/fields");
-    $field_name = drupal_strtolower($this->randomName());
+    $field_name = Unicode::strtolower($this->randomName());
     $field_label = $this->randomString();
     $edit = array(
       'fields[_add_new_field][label]' => $field_name,
@@ -75,7 +77,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
 
     // Rename the profile type ID.
     $this->drupalGet("admin/people/profiles/manage/$id/edit");
-    $new_id = drupal_strtolower($this->randomName());
+    $new_id = Unicode::strtolower($this->randomName());
     $edit = array(
       'id' => $new_id,
     );
@@ -93,7 +95,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     //   correctly. The pre-existing field does not appear on the Manage
     //   fields page of the renamed bundle. Not even flushing all caches
     //   helps. Can be reproduced manually.
-    //$this->assertText(check_plain($field_label));
+    //$this->assertText(String::checkPlain($field_label));
   }
 
 }
