@@ -11,18 +11,12 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests profile field access functionality.
+ *
+ * @group profile
  */
 class ProfileFieldAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text', 'field_ui');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Field access',
-      'description' => 'Tests profile field access functionality.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -45,6 +39,7 @@ class ProfileFieldAccessTest extends WebTestBase {
     ));
     $user_permissions = array(
       'access user profiles',
+      'add own personal profile',
       'edit own personal profile',
       'view any personal profile',
     );
@@ -62,28 +57,31 @@ class ProfileFieldAccessTest extends WebTestBase {
 
     // Create a private profile field.
     $edit = array(
-      'fields[_add_new_field][label]' => 'Secret',
-      'fields[_add_new_field][field_name]' => 'secret',
-      'fields[_add_new_field][type]' => 'text',
-      'fields[_add_new_field][widget_type]' => 'text_textfield',
+      'new_storage_type' => 'string',
+      'label' => 'Secret',
+      'field_name' => 'secret',
     );
-    $this->drupalPost("admin/people/profiles/manage/$id/fields", $edit, t('Save'));
+    $this->drupalPostForm("admin/config/people/profiles/types/manage/$id/fields/add-field", $edit, t('Save and continue'));
 
     $edit = array(
       'field[settings][profile_private]' => 1,
     );
-    $this->drupalPost(NULL, $edit, t('Save field settings'));
+    $this->drupalPostForm(NULL, $edit, t('Save field settings'));
 
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->drupalPostForm(NULL, array(), t('Save settings'));
 
     // Fill in a field value.
     $this->drupalLogin($this->web_user);
     $uid = $this->web_user->id();
-    $secret = $this->randomName();
+    $secret = $this->randomMachineName();
     $edit = array(
-      'field_secret[und][0][value]' => $secret,
+      'field_secret[0][value]' => $secret,
     );
-    $this->drupalPost("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save'));
+
+    // User cache page need to be cleared to see new profile.
+    // TODO: We shouldn't have to clear all cache to display this.
+    drupal_flush_all_caches();
 
     // Verify that the private field value appears for the profile owner.
     $this->drupalGet("user/$uid");

@@ -23,6 +23,8 @@ use Drupal\user\UserInterface;
  *   bundle_label = @Translation("Profile"),
  *   handlers = {
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
+ *     "views_data" = "Drupal\profile\ProfileViewsData",
+ *     "access" = "Drupal\profile\ProfileAccessControlHandler",
  *     "list_builder" = "Drupal\profile\ProfileListBuilder",
  *     "form" = {
  *       "default" = "Drupal\profile\ProfileFormController",
@@ -32,7 +34,7 @@ use Drupal\user\UserInterface;
  *     },
  *   },
  *   bundle_entity_type = "profile_type",
- *   field_ui_base_route = "profile.type_edit",
+ *   field_ui_base_route = "entity.profile_type.edit_form",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
  *   data_table = "profile_field_data",
@@ -43,11 +45,14 @@ use Drupal\user\UserInterface;
  *     "id" = "pid",
  *     "revision" = "vid",
  *     "bundle" = "type",
+ *     "langcode" = "langcode",
  *     "uuid" = "uuid"
  *   },
  *  links = {
- *    "canonical" = "entity.profile.canonical",
- *    "admin-form" = "profile.type_edit"
+ *    "canonical" = "/profile/{profile}",
+ *    "admin-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
+ *    "edit-form" = "/user/{user}/edit/profile/{profile_type}/{profile}",
+ *    "delete-form" = "/profile/{profile}/delete"
  *   },
  * )
  */
@@ -86,6 +91,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setDescription(t('The user ID of the user associated with the profile.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default')
       ->setTranslatable(TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
@@ -200,6 +206,14 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function getChangedTime() {
     return $this->get('changed')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setChangedTime($timestamp) {
+    $this->set('changed', $timestamp);
+    return $this;
   }
 
   /**

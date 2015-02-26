@@ -34,10 +34,10 @@ use Drupal\profile\ProfileTypeInterface;
  *     "label" = "label"
  *   },
  *   links = {
- *     "add-form" = "profile.type_add",
- *     "delete-form" = "profile.type_delete",
- *     "edit-form" = "profile.type_edit",
- *     "admin-form" = "profile.type_edit",
+ *     "add-form" = "/admin/config/people/profiles/types/add",
+ *     "delete-form" = "/admin/config/people/profiles/types/manage/{profile_type}/delete",
+ *     "edit-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
+ *     "admin-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
  *   }
  * )
  */

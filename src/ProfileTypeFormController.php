@@ -10,8 +10,8 @@ namespace Drupal\profile;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Utility\String;
 use Drupal\profile\Entity\ProfileType;
-use Drupal\profile\ProfileTypeInterface;
 
 
 /**
@@ -25,6 +25,13 @@ class ProfileTypeFormController extends EntityForm {
   function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $type = $this->entity;
+
+    if ($this->operation == 'add') {
+      $form['#title'] = String::checkPlain($this->t('Add profile type'));
+    }
+    else {
+      $form['#title'] = $this->t('Edit %label profile type', array('%label' => $type->label()));
+    }
 
     $form['label'] = array(
       '#title' => t('Label'),
@@ -102,7 +109,7 @@ class ProfileTypeFormController extends EntityForm {
    * {@inheritdoc}
    */
   public function delete(array $form, FormStateInterface $form_state) {
-    $form_state->setRedirect('profile.type_delete', array(
+    $form_state->setRedirect('entity.profile_type.delete_form', array(
       'profile_type' => $this->entity->id()
     ));
   }

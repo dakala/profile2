@@ -8,21 +8,17 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Tests profile access handling.
+ *
+ * @group profile
  */
 class ProfileAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Profile access',
-      'description' => 'Tests profile access handling.',
-      'group' => 'profile',
-    );
-  }
 
   function setUp() {
     parent::setUp();
@@ -36,26 +32,37 @@ class ProfileAccessTest extends WebTestBase {
 
     $this->field = array(
       'field_name' => 'profile_fullname',
+      'entity_type' => 'profile',
       'type' => 'text',
       'cardinality' => 1,
       'translatable' => FALSE,
     );
-    $this->field = field_create_field($this->field);
+    $this->field = FieldStorageConfig::create($this->field);
+    $this->field->save();
+
     $this->instance = array(
-      'entity_type' => 'profile',
-      'field_name' => $this->field['field_name'],
+      'entity_type' => $this->field->entity_type,
+      'field_name' => $this->field->field_name,
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'widget' => array(
         'type' => 'text_textfield',
       ),
     );
-    $this->instance = field_create_instance($this->instance);
+    $this->instance = FieldConfig::create($this->instance);
+    $this->instance->save();
+
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field['field_name'], array(
+      ->setComponent($this->field->field_name, array(
         'type' => 'text_default',
       ));
     $this->display->save();
+
+    $this->form = entity_get_form_display('profile', 'test', 'default')
+      ->setComponent($this->field->field_name, array(
+        'type' => 'string_textfield',
+      ));
+    $this->form->save();
 
     $this->checkPermissions(array(), TRUE);
 
@@ -63,6 +70,7 @@ class ProfileAccessTest extends WebTestBase {
     $this->admin_user = $this->drupalCreateUser(array(
       'administer profile types',
       "view any $id profile",
+      "add any $id profile",
       "edit any $id profile",
       "delete any $id profile",
     ));
@@ -73,43 +81,57 @@ class ProfileAccessTest extends WebTestBase {
    */
   function testAdminOnlyProfiles() {
     $id = $this->type->id();
-    $field_name = $this->field['field_name'];
+    $field_name = $this->field->field_name;
 
     // Create a test user account.
     $web_user = $this->drupalCreateUser(array('access user profiles'));
     $uid = $web_user->id();
-    $value = $this->randomName();
+    $value = $this->randomMachineName();
 
     // Administratively enter profile field values for the new account.
     $this->drupalLogin($this->admin_user);
     $edit = array(
-      "{$field_name}[und][0][value]" => $value,
+      "{$field_name}[0][value]" => $value,
     );
-    $this->drupalPost("user/$uid/edit/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save'));
+
+    $profiles = entity_load_multiple_by_properties('profile', array(
+      'uid' => $uid,
+      'type' => $this->type->id(),
+    ));
+
+    $profile = reset($profiles);
+    $profile_id = $profile->id();
 
     // Verify that the administrator can see the profile.
     $this->drupalGet("user/$uid");
     $this->assertText($this->type->label());
     $this->assertText($value);
+    $this->drupalLogout();
 
-    // Verify that the user can not access or edit the profile.
+    // Verify that the user can not access, create or edit the profile.
     $this->drupalLogin($web_user);
     $this->drupalGet("user/$uid");
     $this->assertNoText($this->type->label());
     $this->assertNoText($value);
-    $this->drupalGet("user/$uid/edit/$id");
+    $this->drupalGet("user/$uid/edit/profile/$id/$profile_id");
     $this->assertResponse(403);
+
+    // Check edit link isn't displayed.
+    $this->assertNoLinkByHref("user/$uid/edit/profile/$id/$profile_id");
+    // Check delete link isn't displayed.
+    $this->assertNoLinkByHref("user/$uid/delete/profile/$id/$profile_id");
 
     // Allow users to edit own profiles.
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("edit own $id profile"));
 
     // Verify that the user is able to edit the own profile.
-    $value = $this->randomName();
+    $value = $this->randomMachineName();
     $edit = array(
-      "{$field_name}[und][0][value]" => $value,
+      "{$field_name}[0][value]" => $value,
     );
-    $this->drupalPost("user/$uid/edit/$id", $edit, t('Save'));
-    $this->assertText(t('Your profile has been saved.'));
+    $this->drupalPostForm("user/$uid/edit/profile/$id/$profile_id", $edit, t('Save'));
+    $this->assertText(format_string('profile has been updated.'));
 
     // Verify that the own profile is still not visible on the account page.
     $this->drupalGet("user/$uid");
@@ -128,16 +150,17 @@ class ProfileAccessTest extends WebTestBase {
     user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array("delete own $id profile"));
 
     // Verify that the user can delete the own profile.
-    $this->drupalPost("user/$uid/edit/$id", array(), t('Delete'));
-    $this->drupalPost(NULL, array(), t('Delete'));
-    $this->assertRaw(t('Your %label profile has been deleted.', array('%label' => $this->type->label())));
+    $this->drupalGet("user/$uid/edit/profile/$id/$profile_id");
+    $this->clickLink(t('Delete'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->assertRaw(format_string('@label profile deleted.', array('@label' => $this->type->label())));
     $this->assertUrl("user/$uid");
 
     // Verify that the profile is gone.
     $this->drupalGet("user/$uid");
     $this->assertNoText($this->type->label());
     $this->assertNoText($value);
-    $this->drupalGet("user/$uid/edit/$id");
+    $this->drupalGet("user/$uid/edit/profile/$id");
     $this->assertNoText($value);
   }
 

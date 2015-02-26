@@ -9,6 +9,7 @@ namespace Drupal\profile\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\user\TempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -68,6 +69,14 @@ class DeleteProfile extends ActionBase implements ContainerFactoryPluginInterfac
    */
   public function execute($object = NULL) {
     $this->executeMultiple(array($object));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    /** @var \Drupal\node\NodeInterface $object */
+    return $object->access('delete', $account, $return_as_object);
   }
 
 }
