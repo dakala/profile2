@@ -12,7 +12,7 @@ use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Url;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\TempStoreFactory;
+use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -29,11 +29,11 @@ class DeleteMultiple extends ConfirmFormBase {
   protected $profiles = array();
 
   /**
-   * The tempstore factory.
+   * The private_tempstore factory.
    *
-   * @var \Drupal\user\TempStoreFactory
+   * @var \Drupal\user\PrivateTempStoreFactory
    */
-  protected $tempStoreFactory;
+  protected $privateTempStoreFactory;
 
   /**
    * The node storage.
@@ -45,13 +45,13 @@ class DeleteMultiple extends ConfirmFormBase {
   /**
    * Constructs a DeleteMultiple form object.
    *
-   * @param \Drupal\user\TempStoreFactory $temp_store_factory
+   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    * @param \Drupal\Core\Entity\EntityManagerInterface $manager
    *   The entity manager.
    */
-  public function __construct(TempStoreFactory $temp_store_factory, EntityManagerInterface $manager) {
-    $this->tempStoreFactory = $temp_store_factory;
+  public function __construct(PrivateTempStoreFactory $privateTempStoreFactory, EntityManagerInterface $manager) {
+    $this->privateTempStoreFactory = $privateTempStoreFactory;
     $this->storage = $manager->getStorage('profile');
   }
 
@@ -60,7 +60,7 @@ class DeleteMultiple extends ConfirmFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('user.tempstore'),
+      $container->get('user.private_tempstore'),
       $container->get('entity.manager')
     );
   }
@@ -76,7 +76,7 @@ class DeleteMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return format_plural(count($this->profiles), 'Are you sure you want to delete this profile?', 'Are you sure you want to delete these profiles?');
+    return \Drupal::translation()->formatPlural(count($this->profiles), 'Are you sure you want to delete this profile?', 'Are you sure you want to delete these profiles?');
   }
 
   /**
@@ -97,9 +97,9 @@ class DeleteMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $this->profiles = $this->tempStoreFactory->get('profile_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
+    $this->profiles = $this->privateTempStoreFactory->get('profile_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
     if (empty($this->profiles)) {
-      return new RedirectResponse(url('admin/config/people/profiles', array('absolute' => TRUE)));
+      return new RedirectResponse(\Drupal::url('admin/config/people/profiles', array('absolute' => TRUE)));
     }
 
     $form['profiles'] = array(
@@ -119,10 +119,10 @@ class DeleteMultiple extends ConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getValue('confirm') && !empty($this->profiles)) {
       $this->storage->delete($this->profiles);
-      $this->tempStoreFactory->get('profile_multiple_delete_confirm')->delete(\Drupal::currentUser()->id());
+      $this->privateTempStoreFactory->get('profile_multiple_delete_confirm')->delete(\Drupal::currentUser()->id());
       $count = count($this->profiles);
       $this->logger('content')->notice('Deleted @count profiles.', array('@count' => $count));
-      drupal_set_message(format_plural($count, 'Deleted 1 profile.', 'Deleted @count profiles.'));
+      drupal_set_message(\Drupal::translation()->formatPlural($count, 'Deleted 1 profile.', 'Deleted @count profiles.'));
     }
     $form_state->setRedirect('profile.overview_profiles');
   }

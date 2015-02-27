@@ -9,7 +9,7 @@ namespace Drupal\profile\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Component\Utility\Unicode;
-use Drupal\field\FieldInstanceConfigInterface;
+use Drupal\field\FieldConfigInterface;
 use Drupal\user\UserInterface;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -82,7 +82,7 @@ class ProfileAddLocalTask extends DeriverBase implements ContainerDeriverInterfa
       $configs = array();
       foreach ($this->config as $config) {
         $instances = array_filter($this->entityManager->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
-          return $field_definition instanceof FieldInstanceConfigInterface;
+          return $field_definition instanceof FieldConfigInterface;
         });
 
         $display = FALSE;

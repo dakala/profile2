@@ -7,9 +7,9 @@
 
 namespace Drupal\profile\Tests;
 
-use Drupal\simpletest\WebTestBase;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests profile access handling.
@@ -19,6 +19,10 @@ use Drupal\field\Entity\FieldConfig;
 class ProfileAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text');
+
+  private $type;
+  private $field;
+  private $admin_user;
 
   function setUp() {
     parent::setUp();
@@ -40,29 +44,35 @@ class ProfileAccessTest extends WebTestBase {
     $this->field = FieldStorageConfig::create($this->field);
     $this->field->save();
 
-    $this->instance = array(
-      'entity_type' => $this->field->entity_type,
-      'field_name' => $this->field->field_name,
+    $instance = array(
+      'entity_type' => $this->field->get('entity_type'),
+      'field_name' => $this->field->get('field_name'),
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'widget' => array(
         'type' => 'text_textfield',
       ),
     );
-    $this->instance = FieldConfig::create($this->instance);
-    $this->instance->save();
+    $instance = FieldConfig::create($instance);
+    $instance->save();
 
-    $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+    $display = entity_get_display('profile', 'test', 'default')
+      ->setComponent($this->field->get('field_name'), array(
         'type' => 'text_default',
       ));
-    $this->display->save();
+    $display->save();
 
-    $this->form = entity_get_form_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+    entity_get_display('profile', 'test', 'default')
+      ->setComponent($this->field->get('field_name'), array(
+        'type' => 'text_default',
+      ))
+    ->save();
+
+    entity_get_form_display('profile', 'test', 'default')
+      ->setComponent($this->field->get('field_name'), array(
         'type' => 'string_textfield',
-      ));
-    $this->form->save();
+      ))
+      ->save();
 
     $this->checkPermissions(array(), TRUE);
 
@@ -81,7 +91,7 @@ class ProfileAccessTest extends WebTestBase {
    */
   function testAdminOnlyProfiles() {
     $id = $this->type->id();
-    $field_name = $this->field->field_name;
+    $field_name = $this->field->get('field_name');
 
     // Create a test user account.
     $web_user = $this->drupalCreateUser(array('access user profiles'));
