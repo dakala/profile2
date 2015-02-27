@@ -18,6 +18,11 @@ class ProfileFieldAccessTest extends WebTestBase {
 
   public static $modules = array('profile', 'text', 'field_ui');
 
+  private $type;
+  private $admin_user;
+  private $web_user;
+  private $other_user;
+
   function setUp() {
     parent::setUp();
 
@@ -67,7 +72,6 @@ class ProfileFieldAccessTest extends WebTestBase {
       'field[settings][profile_private]' => 1,
     );
     $this->drupalPostForm(NULL, $edit, t('Save field settings'));
-
     $this->drupalPostForm(NULL, array(), t('Save settings'));
 
     // Fill in a field value.

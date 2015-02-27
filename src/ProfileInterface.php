@@ -10,7 +10,7 @@ namespace Drupal\profile;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\user\EntityOwnerInterface;
-use Drupal\user\UserInterface;
+
 
 /**
  * Provides an interface defining a profile entity.
