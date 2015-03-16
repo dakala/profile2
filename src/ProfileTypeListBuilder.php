@@ -46,13 +46,15 @@ class ProfileTypeListBuilder extends ConfigEntityListBuilder {
       $operations['edit'] = array(
           'title' => t('Edit'),
           'weight' => 30,
-        ) + $entity->urlInfo('edit-form')->toArray();
+          'url' => $entity->urlInfo('edit-form'),
+        );
     }
     if (isset($operations['delete'])) {
       $operations['delete'] = array(
           'title' => t('Delete'),
           'weight' => 35,
-        ) + $entity->urlInfo('delete-form')->toArray();
+          'url' => $entity->urlInfo('delete-form'),
+        );
     }
     // Sort the operations to normalize link order.
     uasort($operations, array(
