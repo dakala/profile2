@@ -42,8 +42,8 @@ class ProfileAttachTest extends WebTestBase {
     $this->field->save();
 
     $this->instance = array(
-      'entity_type' => $this->field->entity_type,
-      'field_name' => $this->field->field_name,
+      'entity_type' => $this->field->getTargetEntityTypeId(),
+      'field_name' => $this->field->getName(),
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'required' => TRUE,
@@ -55,13 +55,13 @@ class ProfileAttachTest extends WebTestBase {
     $this->instance->save();
 
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+      ->setComponent($this->field->getName(), array(
         'type' => 'text_default',
       ));
     $this->display->save();
 
     $this->form = entity_get_form_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+      ->setComponent($this->field->getName(), array(
         'type' => 'string_textfield',
       ));
     $this->form->save();
@@ -74,7 +74,7 @@ class ProfileAttachTest extends WebTestBase {
    */
   function testUserRegisterForm() {
     $id = $this->type->id();
-    $field_name = $this->field->field_name;
+    $field_name = $this->field->getName();
 
     // Allow registration without administrative approval and log in user
     // directly after registering.

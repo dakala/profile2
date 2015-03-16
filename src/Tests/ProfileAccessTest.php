@@ -41,8 +41,8 @@ class ProfileAccessTest extends WebTestBase {
     $this->field->save();
 
     $this->instance = array(
-      'entity_type' => $this->field->entity_type,
-      'field_name' => $this->field->field_name,
+      'entity_type' => $this->field->getTargetEntityTypeId(),
+      'field_name' => $this->field->getName(),
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'widget' => array(
@@ -53,13 +53,13 @@ class ProfileAccessTest extends WebTestBase {
     $this->instance->save();
 
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+      ->setComponent($this->field->getName(), array(
         'type' => 'text_default',
       ));
     $this->display->save();
 
     $this->form = entity_get_form_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, array(
+      ->setComponent($this->field->getName(), array(
         'type' => 'string_textfield',
       ));
     $this->form->save();
@@ -81,7 +81,7 @@ class ProfileAccessTest extends WebTestBase {
    */
   function testAdminOnlyProfiles() {
     $id = $this->type->id();
-    $field_name = $this->field->field_name;
+    $field_name = $this->field->getName();
 
     // Create a test user account.
     $web_user = $this->drupalCreateUser(array('access user profiles'));
