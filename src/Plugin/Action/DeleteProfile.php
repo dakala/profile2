@@ -10,7 +10,7 @@ namespace Drupal\profile\Plugin\Action;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\user\TempStoreFactory;
+use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,9 +26,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class DeleteProfile extends ActionBase implements ContainerFactoryPluginInterface {
 
   /**
-   * The tempstore object.
+   * The tempstore factory.
    *
-   * @var \Drupal\user\TempStore
+   * @var \Drupal\user\PrivateTempStoreFactory
    */
   protected $tempStore;
 
@@ -41,10 +41,10 @@ class DeleteProfile extends ActionBase implements ContainerFactoryPluginInterfac
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\user\TempStoreFactory $temp_store_factory
+   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, TempStoreFactory $temp_store_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $temp_store_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->tempStore = $temp_store_factory->get('profile_multiple_delete_confirm');
@@ -54,7 +54,7 @@ class DeleteProfile extends ActionBase implements ContainerFactoryPluginInterfac
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.tempstore'));
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('user.private_tempstore'));
   }
 
   /**
