@@ -17,7 +17,7 @@ use Drupal\Component\Utility\Unicode;
  */
 class ProfileTypeCRUDTest extends WebTestBase {
 
-  public static $modules = array('profile', 'field_ui', 'text');
+  public static $modules = array('profile', 'field_ui', 'text', 'user');
 
   /**
    * Tests CRUD operations for profile types through the UI.

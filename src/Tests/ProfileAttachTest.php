@@ -18,7 +18,7 @@ use Drupal\field\Entity\FieldConfig;
  */
 class ProfileAttachTest extends WebTestBase {
 
-  public static $modules = array('profile', 'text');
+  public static $modules = array('profile', 'text', 'user');
 
   function setUp() {
     parent::setUp();

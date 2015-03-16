@@ -16,7 +16,7 @@ use Drupal\simpletest\WebTestBase;
  */
 class ProfileFieldAccessTest extends WebTestBase {
 
-  public static $modules = array('profile', 'text', 'field_ui');
+  public static $modules = array('profile', 'text', 'field_ui', 'user');
 
   function setUp() {
     parent::setUp();
