@@ -44,13 +44,11 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
     );
   }
 
-
   /**
    * {@inheritdoc}
    */
   public function access(EntityInterface $entity, $operation, $langcode = LanguageInterface::LANGCODE_DEFAULT, AccountInterface $account = NULL, $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
-
     $user_page = \Drupal::request()->attributes->get('user');
 
     // Some times, operation edit is called update.
@@ -60,9 +58,10 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
     }
 
     if ($account->hasPermission('bypass profile access')) {
-      $result = AccessResult::allowed()->cachePerRole();
+      $result = AccessResult::allowed()->cachePerUser();
       return $return_as_object ? $result : $result->isAllowed();
     }
+
     if (
       (
         $operation == 'add'
@@ -78,17 +77,17 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
         && (
           (
             $entity->getOwnerId() == $account->id()
-            && $account->hasPermission($operation . ' own ' . $entity->getType() . ' profile')
+            && $account->hasPermission($operation . ' own ' . $entity->getEntityTypeId() . ' profile')
           )
-          || $account->hasPermission($operation . ' any ' . $entity->getType() . ' profile')
+          || $account->hasPermission($operation . ' any ' . $entity->getEntityTypeId() . ' profile')
         )
       )
-    ){
-      $result = AccessResult::allowed()->cachePerRole();
+    ) {
+      $result = AccessResult::allowed()->cachePerUser();
       return $return_as_object ? $result : $result->isAllowed();
     }
     else {
-      $result = AccessResult::forbidden()->cachePerRole();
+      $result = AccessResult::forbidden()->cachePerUser();
       return $return_as_object ? $result : $result->isAllowed();
     }
   }
@@ -98,13 +97,13 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
    */
   public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = array(), $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
-
+    // TODO:
     if ($account->hasPermission('bypass profile access')) {
-      $result = AccessResult::allowed()->cachePerRole();
+      $result = AccessResult::allowed()->cachePerUser();
       return $return_as_object ? $result : $result->isAllowed();
     }
 
-    $result = AccessResult::allowed()->cachePerRole();
+    $result = AccessResult::allowed()->cachePerUser();
     return $return_as_object ? $result : $result->isAllowed();
   }
 
@@ -120,7 +119,7 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIf($account->hasPermission('add ' . $entity_bundle . ' content'))->cachePerRole();
+    return AccessResult::allowedIf($account->hasPermission('add ' . $entity_bundle . ' content'))
+      ->cachePerUser();
   }
-
 }

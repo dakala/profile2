@@ -118,7 +118,6 @@ class ProfileAddLocalTask extends DeriverBase implements ContainerDeriverInterfa
               'profile_type' => $config->get('id')
             );
           }
-          var_dump($this->derivatives);
         }
       }
     }
