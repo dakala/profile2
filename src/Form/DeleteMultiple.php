@@ -7,10 +7,10 @@
 
 namespace Drupal\profile\Form;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Url;
-use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -83,7 +83,7 @@ class DeleteMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('profile.overview_profiles');
+    return new Url('entity.profile.collection');
   }
 
   /**
@@ -105,7 +105,7 @@ class DeleteMultiple extends ConfirmFormBase {
     $form['profiles'] = array(
       '#theme' => 'item_list',
       '#items' => array_map(function ($profile) {
-        return String::checkPlain($profile->label());
+        return SafeMarkup::checkPlain($profile->label());
       }, $this->profiles),
     );
     $form = parent::buildForm($form, $form_state);
@@ -124,7 +124,7 @@ class DeleteMultiple extends ConfirmFormBase {
       $this->logger('content')->notice('Deleted @count profiles.', array('@count' => $count));
       drupal_set_message(\Drupal::translation()->formatPlural($count, 'Deleted 1 profile.', 'Deleted @count profiles.'));
     }
-    $form_state->setRedirect('profile.overview_profiles');
+    $form_state->setRedirect('entity.profile.collection');
   }
 
 }

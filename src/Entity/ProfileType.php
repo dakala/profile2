@@ -33,11 +33,21 @@ use Drupal\profile\ProfileTypeInterface;
  *     "id" = "id",
  *     "label" = "label"
  *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "registration",
+ *     "multiple",
+ *     "weight",
+ *     "status",
+ *     "langcode"
+ *   },
  *   links = {
  *     "add-form" = "/admin/config/people/profiles/types/add",
  *     "delete-form" = "/admin/config/people/profiles/types/manage/{profile_type}/delete",
  *     "edit-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
  *     "admin-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
+ *     "collection" = "/admin/config/people/profiles/types"
  *   }
  * )
  */
@@ -48,42 +58,42 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    *
    * @var integer
    */
-  public $id;
+  protected $id;
 
   /**
    * The universally unique identifier of the profile type.
    *
    * @var string
    */
-  public $uuid;
+  protected $uuid;
 
   /**
    * The human-readable name of the profile type.
    *
    * @var string
    */
-  public $label;
+  protected $label;
 
   /**
    * Whether the profile type is shown during registration.
    *
    * @var boolean
    */
-  public $registration = FALSE;
+  protected $registration = FALSE;
 
   /**
    * Whether the profile type allows multiple profiles.
    *
    * @var boolean
    */
-  public $multiple = FALSE;
+  protected $multiple = FALSE;
 
   /**
    * The weight of the profile type compared to others.
    *
    * @var integer
    */
-  public $weight = 0;
+  protected $weight = 0;
 
   /**
    * {@inheritdoc}
@@ -103,7 +113,30 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    * {@inheritdoc}
    */
   public function getRegistration() {
-    return $this->get('registration')->value;
+    return $this->registration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRegistration($registration) {
+    $this->registration = $registration;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMultiple() {
+    return $this->multiple;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMultiple($multiple) {
+    $this->multiple = $multiple;
+    return $this;
   }
 
 }

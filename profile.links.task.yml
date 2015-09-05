@@ -1,25 +1,25 @@
 # Tabs on the profile admin page
-profile.overview_profiles_tab:
-  route_name: profile.overview_profiles
-  base_route: profile.overview_profiles
+entity.profile.collection_tab:
+  route_name: entity.profile.collection
+  base_route: entity.profile.collection
   title: 'Profiles'
 
-profile.overview_types_tab:
-  route_name: profile.overview_types
-  base_route: profile.overview_profiles
+entity.profile_type.collection_tab:
+  route_name: entity.profile_type.collection
+  base_route: entity.profile.collection
   title: 'Profile types'
 
 # Secondary tabs on main account edit page
-entity.user.edit_form_global:
-  route_name: entity.user.edit_form
-  title: 'Edit user account'
+# Duplicate user edit tab
+entity.profile.edit_form:
+  route_name: entity.profile.edit_form
+  title: 'User account'
   parent_id: entity.user.edit_form
   weight: -100
 
+# Add tabs for each profile type
 entity.profile.add_form:
-#  route_name: system.theme_settings_theme
+  title: 'Add new profile'
   route_name: entity.profile.add_form
-  title: 'Theme name'
   parent_id: entity.user.edit_form
-#  deriver: Drupal\system\Plugin\Derivative\ThemeLocalTask
   deriver: Drupal\profile\Plugin\Derivative\ProfileAddLocalTask

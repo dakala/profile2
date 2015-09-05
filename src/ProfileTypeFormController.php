@@ -7,10 +7,10 @@
 
 namespace Drupal\profile;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Utility\String;
 use Drupal\profile\Entity\ProfileType;
 
 
@@ -27,7 +27,7 @@ class ProfileTypeFormController extends EntityForm {
     $type = $this->entity;
 
     if ($this->operation == 'add') {
-      $form['#title'] = String::checkPlain($this->t('Add profile type'));
+      $form['#title'] = SafeMarkup::checkPlain($this->t('Add profile type'));
     }
     else {
       $form['#title'] = $this->t('Edit %label profile type', array('%label' => $type->label()));
@@ -52,12 +52,12 @@ class ProfileTypeFormController extends EntityForm {
     $form['registration'] = array(
       '#type' => 'checkbox',
       '#title' => t('Include in user registration form'),
-      '#default_value' => $type->registration,
+      '#default_value' => $type->getRegistration(),
     );
     $form['multiple'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow multiple profiles'),
-      '#default_value' => $type->multiple,
+      '#default_value' => $type->getMultiple(),
     );
     return $form;
   }
@@ -93,7 +93,7 @@ class ProfileTypeFormController extends EntityForm {
     else {
       drupal_set_message(t('%label profile type has been created.', array('%label' => $type->label())));
     }
-    $form_state->setRedirect('profile.overview_types');
+    $form_state->setRedirect('entity.profile_type.collection');
   }
 
   /**

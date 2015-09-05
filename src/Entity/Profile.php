@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Entity;
 
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -50,13 +51,15 @@ use Drupal\user\UserInterface;
  *   },
  *  links = {
  *    "canonical" = "/profile/{profile}",
- *    "admin-form" = "/admin/config/people/profiles/types/manage/{profile_type}",
- *    "edit-form" = "/user/{user}/edit/profile/{profile_type}/{profile}",
- *    "delete-form" = "/profile/{profile}/delete"
+ *    "edit-form" = "/user/{user}/profile/{profile_type}/{profile}",
+ *    "delete-form" = "/profile/{profile}/delete",
+ *    "collection" = "/admin/config/people/profiles"
  *   },
  * )
  */
 class Profile extends ContentEntityBase implements ProfileInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}

@@ -64,7 +64,6 @@ class ProfileAccessCheck implements AccessCheckInterface {
   public function access(AccountInterface $account, ProfileTypeInterface $profile_type = NULL) {
     $access_control_handler = $this->entityManager->getAccessControlHandler('profile');
     $operation = $this->requestStack->getCurrentRequest()->attributes->get('operation');
-
     if ($operation == 'add') {
       return $access_control_handler->access($profile_type, $operation, LanguageInterface::LANGCODE_DEFAULT, $account, TRUE);
     }

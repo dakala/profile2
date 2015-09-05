@@ -72,7 +72,9 @@ class ProfileAddLocalTask extends DeriverBase implements ContainerDeriverInterfa
     $this->derivatives = array();
     $user = \Drupal::request()->attributes->get('user');
     $route_name = \Drupal::routeMatch()->getRouteName();
+
     if ($user instanceof UserInterface && $route_name == 'entity.user.edit_form') {
+
       PhpStorageFactory::get('service_container')->deleteAll();
       PhpStorageFactory::get('twig')->deleteAll();
       drupal_flush_all_caches();
@@ -115,9 +117,10 @@ class ProfileAddLocalTask extends DeriverBase implements ContainerDeriverInterfa
               ->translate('Add @type profile', array('@type' => Unicode::strtolower($config->get('label'))));
             $this->derivatives[$id]['route_parameters'] = array(
               'user' => $user->id(),
-              'profile_type' => $config->get('id')
+              'type' => $config->get('id')
             );
           }
+
         }
       }
     }

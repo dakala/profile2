@@ -37,8 +37,8 @@ class LinkEdit extends Link {
     }
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = "user/" . $profile->getOwnerId() . "/edit/" . $profile->bundle() . "/" . $profile->id();
-    $this->options['alter']['query'] = drupal_get_destination();
+    $this->options['alter']['path'] = "user/" . $profile->getOwnerId() . "/profile/" . $profile->bundle() . "/" . $profile->id();
+    $this->options['alter']['query'] = \Drupal::destination()->getAsArray();
     $text = !empty($this->options['text']) ? $this->options['text'] : t('Edit');
     return $text;
   }
