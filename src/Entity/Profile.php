@@ -40,7 +40,6 @@ use Drupal\user\UserInterface;
  *   data_table = "profile_field_data",
  *   revision_table = "profile_revision",
  *   fieldable = TRUE,
- *   translatable = TRUE,
  *   entity_keys = {
  *     "id" = "profile_id",
  *     "revision" = "revision_id",
