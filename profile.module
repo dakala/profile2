@@ -92,7 +92,7 @@ function profile_profile_access(ProfileInterface $profile, $op, $account) {
 /**
  * Implements hook_user_view().
  */
-function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode, $langcode) {
+function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode) {
   // Only attach profiles for the full account view.
   if ($view_mode != 'full') {
     return;
