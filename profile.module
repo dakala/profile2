@@ -241,7 +241,8 @@ function template_preprocess_profile_items(&$variables) {
   if (count($variables['profile_items'])) {
     $variables['title'] = SafeMarkup::checkPlain($variables['type']);
     foreach ($variables['profile_items'] as $profile_item) {
-      $variables['items'][] = entity_view($profile_item, 'default');
+      $view_builder = \Drupal::entityManager()->getViewBuilder($profile_item->getEntityTypeId());
+      $variables['items'][] = $view_builder->view($profile_item, 'default');
       if ($profile_item->access('update')) {
         $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("entity.profile.edit_form", array(
           'user' => \Drupal::currentUser()->id(),
