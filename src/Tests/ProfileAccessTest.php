@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
@@ -141,7 +142,7 @@ class ProfileAccessTest extends WebTestBase {
       "{$field_name}[0][value]" => $value,
     ];
     $this->drupalPostForm("user/$uid/edit/profile/$id/$profile_id", $edit, t('Save'));
-    $this->assertText(format_string('profile has been updated.'));
+    $this->assertText(new FormattableMarkup('profile has been updated.'));
 
     // Verify that the own profile is still not visible on the account page.
     $this->drupalGet("user/$uid");
@@ -163,7 +164,7 @@ class ProfileAccessTest extends WebTestBase {
     $this->drupalGet("user/$uid/edit/profile/$id/$profile_id");
     $this->clickLink(t('Delete'));
     $this->drupalPostForm(NULL, [], t('Delete'));
-    $this->assertRaw(format_string('@label profile deleted.', ['@label' => $this->type->label()]));
+    $this->assertRaw(new FormattableMarkup('@label profile deleted.', ['@label' => $this->type->label()]));
     $this->assertUrl("user/$uid");
 
     // Verify that the profile is gone.
