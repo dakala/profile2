@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\simpletest\WebTestBase;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
@@ -94,12 +95,12 @@ class ProfileAttachTest extends WebTestBase {
       'pass[pass2]' => $pass_raw,
     ];
     $this->drupalPostForm('user/register', $edit, t('Create new account'));
-    $this->assertRaw(format_string('@name field is required.', ['@name' => $this->instance->label]));
+    $this->assertRaw(new FormattableMarkup('@name field is required.', ['@name' => $this->instance->label]));
 
     // Verify that we can register.
     $edit["entity_" . $id . "[$field_name][0][value]"] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Create new account'));
-    $this->assertText(format_string('Registration successful. You are now logged in.'));
+    $this->assertText(new FormattableMarkup('Registration successful. You are now logged in.'));
 
     $new_user = user_load_by_name($name);
     $this->assertTrue($new_user->isActive(), 'New account is active after registration.');

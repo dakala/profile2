@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Component\Utility\Unicode;
 
@@ -37,7 +38,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/config/people/profiles/types');
-    $this->assertRaw(format_string('%label profile type has been created.', ['%label' => $label]));
+    $this->assertRaw(new FormattableMarkup('%label profile type has been created.', ['%label' => $label]));
     $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id");
     $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id/fields");
     $this->assertLinkByHref("admin/config/people/profiles/types/manage/$id/display");
@@ -45,13 +46,13 @@ class ProfileTypeCRUDTest extends WebTestBase {
 
     // Edit the new profile type.
     $this->drupalGet("admin/config/people/profiles/types/manage/$id");
-    $this->assertRaw(format_string('Edit %label profile type', ['%label' => $label]));
+    $this->assertRaw(new FormattableMarkup('Edit %label profile type', ['%label' => $label]));
     $edit = [
       'registration' => 1,
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/config/people/profiles/types');
-    $this->assertRaw(format_string('%label profile type has been updated.', ['%label' => $label]));
+    $this->assertRaw(new FormattableMarkup('%label profile type has been updated.', ['%label' => $label]));
 
     // Add a field to the profile type.
     $this->drupalGet("admin/config/people/profiles/types/manage/$id/fields/add-field");
@@ -71,7 +72,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
         'destinations[0]' => "admin/config/people/profiles/types/manage/$id/fields/add-field",
       ]
     ]);
-    $this->assertRaw(format_string('Saved %label configuration.', ['%label' => $field_label]));
+    $this->assertRaw(new FormattableMarkup('Saved %label configuration.', ['%label' => $field_label]));
 
     // Rename the profile type ID.
     $this->drupalGet("admin/config/people/profiles/types/manage/$id");
@@ -81,7 +82,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertUrl('admin/config/people/profiles/types');
-    $this->assertRaw(format_string('%label profile type has been updated.', ['%label' => $label]));
+    $this->assertRaw(new FormattableMarkup('%label profile type has been updated.', ['%label' => $label]));
     $this->assertLinkByHref("admin/config/people/profiles/types/manage/$new_id");
     $this->assertNoLinkByHref("admin/config/people/profiles/types/manage/$id");
     $id = $new_id;
