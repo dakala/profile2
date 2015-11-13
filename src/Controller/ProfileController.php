@@ -23,7 +23,7 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   /**
    * Provides the profile submission form.
    *
-   * @param \Drupal\user\UserInterface $profile_type
+   * @param \Drupal\user\UserInterface $user
    *   The user account.
    * @param \Drupal\profile\Entity\ProfileTypeInterface $profile_type
    *   The profile type entity for the profile.
@@ -44,13 +44,16 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   /**
    * Provides profile delete form.
    *
-   * @param $user
-   * @param $type
-   * @param $id
+   * @param \Drupal\user\UserInterface $user
+   *   The user account.
+   * @param \Drupal\profile\Entity\ProfileTypeInterface $profile_type
+   *   The profile type entity for the profile.
+   * @param int $id
+   *   The id of the profile to delete.
    *
    * @return array
    */
-  public function deleteProfile($user, $type, $id) {
+  public function deleteProfile(UserInterface $user, ProfileTypeInterface $profile_type, $id) {
     return $this->entityFormBuilder()->getForm(Profile::load($id), 'delete');
   }
 

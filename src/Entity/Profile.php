@@ -88,8 +88,8 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('User ID'))
-      ->setDescription(t('The user ID of the user associated with the profile.'))
+      ->setLabel(t('Owner'))
+      ->setDescription(t('The user that owns this profile.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default');
