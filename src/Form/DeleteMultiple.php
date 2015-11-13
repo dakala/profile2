@@ -7,7 +7,6 @@
 
 namespace Drupal\profile\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Url;
@@ -105,7 +104,7 @@ class DeleteMultiple extends ConfirmFormBase {
     $form['profiles'] = [
       '#theme' => 'item_list',
       '#items' => array_map(function ($profile) {
-        return SafeMarkup::checkPlain($profile->label());
+        return $profile->label();
       }, $this->profiles),
     ];
     $form = parent::buildForm($form, $form_state);

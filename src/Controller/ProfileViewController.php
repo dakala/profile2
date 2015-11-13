@@ -7,7 +7,6 @@
 
 namespace Drupal\profile\Controller;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Controller\EntityViewController;
 
@@ -62,8 +61,7 @@ class ProfileViewController extends EntityViewController {
    *   The page title.
    */
   public function title(EntityInterface $profile) {
-    return SafeMarkup::checkPlain($this->entityManager->getTranslationFromContext($profile)
-      ->label());
+    return $this->entityManager->getTranslationFromContext($profile)->label();
   }
 
 }
