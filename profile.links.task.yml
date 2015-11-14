@@ -10,10 +10,5 @@ entity.profile_type.collection_tab:
   title: 'Profile types'
 
 # Add tabs for each profile type
-entity.profile.add_form:
-  title: 'Add new profile'
-  route_name: entity.profile.add_form
-  parent_id: entity.user.edit_form
-  deriver: Drupal\profile\Plugin\Derivative\ProfileAddLocalTask
 entity.profile.user_profile_form:
   deriver: Drupal\profile\Plugin\Derivative\ProfileLocalTask
