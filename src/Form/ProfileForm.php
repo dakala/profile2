@@ -2,19 +2,19 @@
 
 /**
  * @file
- * Contains \Drupal\profile\ProfileFormController.
+ * Contains \Drupal\profile\Form\ProfileForm.
  */
 
-namespace Drupal\profile;
+namespace Drupal\profile\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\profile\Entity\ProfileType;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\profile\Entity\ProfileType;
 
 /**
  * Form controller for profile forms.
  */
-class ProfileFormController extends ContentEntityForm {
+class ProfileForm extends ContentEntityForm {
 
   /**
    * {@inheritdoc}
@@ -45,7 +45,7 @@ class ProfileFormController extends ContentEntityForm {
         $element['activate']['#value'] = $profile->isActive() ? t('Save and keep active') : t('Save and make active');
       }
       $element['activate']['#weight'] = 0;
-      array_unshift($element['activate']['#submit'], array($this, 'activate'));
+      array_unshift($element['activate']['#submit'], [$this, 'activate']);
 
       // Add a "Deactivate" button.
       $element['deactivate'] = $element['submit'];
@@ -57,10 +57,10 @@ class ProfileFormController extends ContentEntityForm {
         $element['deactivate']['#value'] = !$profile->isActive() ? t('Save and keep inactive') : t('Save and make inactive');
       }
       $element['deactivate']['#weight'] = 10;
-      array_unshift($element['deactivate']['#submit'], array(
+      array_unshift($element['deactivate']['#submit'], [
           $this,
           'deactivate'
-        ));
+        ]);
 
       // If already deactivated, the 'activate' button is primary.
       if ($profile->isActive()) {
@@ -122,16 +122,16 @@ class ProfileFormController extends ContentEntityForm {
     }
     switch ($this->entity->save()) {
       case SAVED_NEW:
-        drupal_set_message(t('%label profile has been created.', array('%label' => $profile_type->label())));
+        drupal_set_message(t('%label profile has been created.', ['%label' => $profile_type->label()]));
         break;
       case SAVED_UPDATED:
-        drupal_set_message(t('%label profile has been updated.', array('%label' => $profile_type->label())));
+        drupal_set_message(t('%label profile has been updated.', ['%label' => $profile_type->label()]));
         break;
     }
 
-    $form_state->setRedirect('entity.user.canonical', array(
+    $form_state->setRedirect('entity.user.canonical', [
       'user' => $this->entity->getOwnerId(),
-    ));
+    ]);
   }
 
 }
