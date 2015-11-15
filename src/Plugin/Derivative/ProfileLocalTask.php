@@ -8,8 +8,7 @@
 namespace Drupal\profile\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -19,30 +18,22 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ProfileLocalTask extends DeriverBase implements ContainerDeriverInterface {
 
   /**
-   * Stores the profile type config objects.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Config\Config
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $config;
-
-  /**
-   * The entity manager service
-   *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
-   */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * Constructs a new ProfileAddLocalTask.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
+   * @param $base_plugin_definition
+   *   The base plugin definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct($base_plugin_definition, ConfigFactoryInterface $config_factory, EntityManagerInterface $entity_manager) {
-    $this->config = $config_factory->loadMultiple($config_factory->listAll('profile.type'));
-    $this->entityManager = $entity_manager;
+  public function __construct($base_plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -51,8 +42,7 @@ class ProfileLocalTask extends DeriverBase implements ContainerDeriverInterface 
   public static function create(ContainerInterface $container, $base_plugin_definition) {
     return new static(
       $base_plugin_definition,
-      $container->get('config.factory'),
-      $container->get('entity.manager')
+      $container->get('entity_type.manager')
     );
   }
 
@@ -61,16 +51,15 @@ class ProfileLocalTask extends DeriverBase implements ContainerDeriverInterface 
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     $this->derivatives = [];
-
-    //foreach ($this->config as $profile_type_id => $profile_type) {
-    foreach ($this->entityManager->getStorage('profile_type')->loadMultiple() as $profile_type_id => $profile_type) {
-      $this->derivatives['profile.type.' . $profile_type_id] = $base_plugin_definition;
-      $this->derivatives['profile.type.' . $profile_type_id]['route_name'] = "entity.profile.type.$profile_type_id.user_profile_form";
-      //$this->derivatives['profile.type.' . $profile_type_id]['weight'] = 1; // @TODO.
-      $this->derivatives['profile.type.' . $profile_type_id]['title'] = $profile_type->label();
-      $this->derivatives['profile.type.' . $profile_type_id]['parent_id'] = 'entity.user.edit_form';
-      $this->derivatives['profile.type.' . $profile_type_id]['route_parameters'] = array('profile_type' => $profile_type_id);
+    foreach ($this->entityTypeManager->getStorage('profile_type')->loadMultiple() as $profile_type_id => $profile_type) {
+      $this->derivatives["profile.type.$profile_type_id"] = [
+          'title' => $profile_type->label(),
+          'route_name' => "entity.profile.type.$profile_type_id.user_profile_form",
+          'parent_id' => 'entity.user.edit_form',
+          'route_parameters' => ['profile_type' => $profile_type_id],
+        ] + $base_plugin_definition;
     }
+
     return $this->derivatives;
   }
 
