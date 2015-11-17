@@ -93,7 +93,7 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
   /**
    * Returns the node published status indicator.
    *
-   * Unpublished profiles are only visible to their authors and to administrators.
+   * Unpublished profiles are only visible to their authors and administrators.
    *
    * @return bool
    *   TRUE if the profile is active.

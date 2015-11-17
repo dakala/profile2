@@ -46,20 +46,20 @@ class ProfileTypeListBuilder extends ConfigEntityListBuilder {
       $operations['edit'] = [
         'title' => t('Edit'),
         'weight' => 30,
-        'url' => $entity->urlInfo('edit-form')
+        'url' => $entity->urlInfo('edit-form'),
       ];
     }
     if (isset($operations['delete'])) {
       $operations['delete'] = [
         'title' => t('Delete'),
         'weight' => 35,
-        'url' => $entity->urlInfo('delete-form')
+        'url' => $entity->urlInfo('delete-form'),
       ];
     }
     // Sort the operations to normalize link order.
     uasort($operations, [
       'Drupal\Component\Utility\SortArray',
-      'sortByWeightElement'
+      'sortByWeightElement',
     ]);
 
     return $operations;

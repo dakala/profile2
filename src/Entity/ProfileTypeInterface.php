@@ -20,8 +20,9 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
   public function getLabel();
 
   /**
-   * Return the registration flag for allowing creation of profile type
-   * at user registration.
+   * Return the registration form flag.
+   *
+   * For allowing creation of profile type at user registration.
    */
   public function getRegistration();
 
@@ -42,4 +43,5 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
    * @return $this
    */
   public function setWeight($weight);
+
 }

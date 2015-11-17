@@ -10,8 +10,6 @@ namespace Drupal\profile;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -107,10 +105,9 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    $stop = null;
     return AccessResult::allowedIfHasPermissions($account, [
       'add any ' . $entity_bundle . ' profile',
-      'add own ' . $entity_bundle . ' profile'
+      'add own ' . $entity_bundle . ' profile',
     ], 'OR');
   }
 

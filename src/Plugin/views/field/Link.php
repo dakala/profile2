@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Plugin\views\field;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
@@ -27,12 +28,18 @@ class Link extends FieldPluginBase {
     return FALSE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['text'] = ['default' => '', 'translatable' => TRUE];
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['text'] = [
       '#type' => 'textfield',
@@ -65,15 +72,15 @@ class Link extends FieldPluginBase {
   /**
    * Prepares the link to the node.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $node
-   *   The node entity this field belongs to.
+   * @param \Drupal\Core\Entity\EntityInterface $profile
+   *   The profile entity this field belongs to.
    * @param ResultRow $values
    *   The values retrieved from the view's result set.
    *
    * @return string
    *   Returns a string for the link text.
    */
-  protected function renderLink($profile, ResultRow $values) {
+  protected function renderLink(EntityInterface $profile, ResultRow $values) {
     if ($profile->access('view')) {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = 'profile/' . $profile->id();

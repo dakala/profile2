@@ -25,7 +25,8 @@ class PublishProfile extends ActionBase {
    * {@inheritdoc}
    */
   public function execute($entity = NULL) {
-    $entity->status = PROFILE_ACTIVE;
+    /** @var \Drupal\profile\Entity\ProfileInterface $entity */
+    $entity->setActive(TRUE);
     $entity->save();
   }
 
@@ -33,7 +34,6 @@ class PublishProfile extends ActionBase {
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    /** @var \Drupal\node\NodeInterface $object */
     $result = $object->access('update', $account, TRUE)
       ->andIf($object->status->access('edit', $account, TRUE));
 

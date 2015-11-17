@@ -8,7 +8,6 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\profile\Entity\Profile;
 use Drupal\user\RoleInterface;
 
@@ -20,6 +19,8 @@ use Drupal\user\RoleInterface;
 class ProfileAccessTest extends ProfileTestBase {
 
   /**
+   * The access control handler.
+   *
    * @var \Drupal\profile\ProfileAccessControlHandler
    */
   protected $accessControlHandler;
@@ -35,6 +36,9 @@ class ProfileAccessTest extends ProfileTestBase {
     $this->accessControlHandler = \Drupal::entityTypeManager()->getAccessControlHandler('profile');
   }
 
+  /**
+   * Tests profile create and permissions.
+   */
   public function testProfileCreateAccess() {
     // Test user without any permissions.
     $web_user1 = $this->drupalCreateUser([]);
@@ -80,7 +84,6 @@ class ProfileAccessTest extends ProfileTestBase {
     $access = $this->accessControlHandler->createAccess($this->type->id(), $web_user2);
     $this->assertTrue($access);
 
-
     // Verify access through route.
     $this->drupalLogin($web_user3);
     $this->drupalGet("user/{$web_user3->id()}/edit/user_profile_form/{$this->type->id()}");
@@ -89,8 +92,11 @@ class ProfileAccessTest extends ProfileTestBase {
     $this->assertResponse(200);
   }
 
+  /**
+   * Tests profile edit flow and permissions.
+   */
   public function testProfileEditAccess() {
-    // Setup users
+    // Setup users.
     $web_user1 = $this->drupalCreateUser([
       "add own {$this->type->id()} profile",
       "edit own {$this->type->id()} profile",
@@ -100,7 +106,7 @@ class ProfileAccessTest extends ProfileTestBase {
       "edit any {$this->type->id()} profile",
     ]);
 
-    // Setup profiles
+    // Setup profiles.
     $profile1 = Profile::create([
       'uid' => $web_user1->id(),
       'type' => $this->type->id(),
@@ -114,19 +120,22 @@ class ProfileAccessTest extends ProfileTestBase {
     $profile2->set($this->field->getName(), $this->randomString());
     $profile2->save();
 
-    // Test user1 can only edit own profiles
+    // Test user1 can only edit own profiles.
     $access = $this->accessControlHandler->access($profile1, 'edit', $web_user1);
     $this->assertTrue($access);
     $access = $this->accessControlHandler->access($profile2, 'edit', $web_user1);
     $this->assertFalse($access);
 
-    // Test user2 can edit any profiles
+    // Test user2 can edit any profiles.
     $access = $this->accessControlHandler->access($profile1, 'edit', $web_user2);
     $this->assertTrue($access);
     $access = $this->accessControlHandler->access($profile2, 'edit', $web_user2);
     $this->assertTrue($access);
   }
 
+  /**
+   * Tests the non-multiple profile type create and edit flow.
+   */
   public function testProfileNotMultipleFlow() {
     $web_user1 = $this->drupalCreateUser([
       "add own {$this->type->id()} profile",
@@ -140,23 +149,23 @@ class ProfileAccessTest extends ProfileTestBase {
     ];
     $this->drupalPostForm("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
     $this->assertRaw(new FormattableMarkup('%type profile has been created.', [
-      '%type' => $this->type->label()
+      '%type' => $this->type->label(),
     ]));
 
-    // Update the profile
+    // Update the profile.
     $edit = [
       "{$this->field->getName()}[0][value]" => $this->randomString(),
     ];
     $this->drupalPostForm("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
     $this->assertRaw(new FormattableMarkup('%type profile has been updated.', [
-      '%type' => $this->type->label()
+      '%type' => $this->type->label(),
     ]));
   }
 
   /**
    * Tests administrative-only profiles.
    */
-  function testAdminOnlyProfiles() {
+  public function testAdminOnlyProfiles() {
     $id = $this->type->id();
     $field_name = $this->field->getName();
 
@@ -166,7 +175,7 @@ class ProfileAccessTest extends ProfileTestBase {
     $value = $this->randomMachineName();
 
     // Administratively enter profile field values for the new account.
-    $this->drupalLogin($this->admin_user);
+    $this->drupalLogin($this->adminUser);
 
     $edit = [
       "{$this->field->getName()}[0][value]" => $value,
