@@ -32,6 +32,9 @@ use Drupal\user\UserInterface;
  *       "edit" = "Drupal\profile\Form\ProfileForm",
  *       "delete" = "Drupal\profile\Form\ProfileDeleteForm",
  *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+ *     },
  *   },
  *   bundle_entity_type = "profile_type",
  *   field_ui_base_route = "entity.profile_type.edit_form",

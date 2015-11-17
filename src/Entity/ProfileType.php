@@ -24,6 +24,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *       "edit" = "Drupal\profile\Form\ProfileTypeForm",
  *       "delete" = "Drupal\profile\Form\ProfileTypeDeleteForm"
  *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+ *     },
  *   },
  *   admin_permission = "administer profile types",
  *   config_prefix = "type",
