@@ -106,12 +106,10 @@ class ProfileAccessTest extends WebTestBase {
     ];
     $this->drupalPostForm("user/$uid/edit/profile/$id", $edit, t('Save'));
 
-    $profiles = entity_load_multiple_by_properties('profile', [
-      'uid' => $uid,
-      'type' => $this->type->id(),
-    ]);
+    $profile = \Drupal::entityTypeManager()
+      ->getStorage('profile')
+      ->loadByUser($web_user, $this->type->id());
 
-    $profile = reset($profiles);
     $profile_id = $profile->id();
 
     // Verify that the administrator can see the profile.

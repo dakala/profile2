@@ -19,6 +19,31 @@ use Drupal\field\Entity\FieldConfig;
  */
 class ProfileAttachTest extends WebTestBase {
 
+  /**
+   * @var \Drupal\field\FieldStorageConfigInterface $field.
+   */
+  protected $field;
+
+  /**
+   * @var \Drupal\field\FieldConfigInterface $field.
+   */
+  protected $instance;
+
+  /**
+   * @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+   */
+  protected $display;
+
+  /**
+   * @var \Drupal\profile\Entity\ProfileTypeInterface $type
+   */
+  protected $type;
+
+  /**
+   * @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form
+   */
+  protected $form;
+
   public static $modules = ['profile', 'text'];
 
   function setUp() {
@@ -43,8 +68,8 @@ class ProfileAttachTest extends WebTestBase {
     $this->field->save();
 
     $this->instance = [
-      'entity_type' => $this->field->entity_type,
-      'field_name' => $this->field->field_name,
+      'entity_type' => 'profile',
+      'field_name' => $this->field->getName(),
       'bundle' => $this->type->id(),
       'label' => 'Full name',
       'required' => TRUE,
@@ -56,18 +81,18 @@ class ProfileAttachTest extends WebTestBase {
     $this->instance->save();
 
     $this->display = entity_get_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, [
+      ->setComponent($this->field->getName(), [
         'type' => 'text_default',
       ]);
     $this->display->save();
 
     $this->form = entity_get_form_display('profile', 'test', 'default')
-      ->setComponent($this->field->field_name, [
+      ->setComponent($this->field->getName(), [
         'type' => 'string_textfield',
       ]);
     $this->form->save();
 
-    $this->checkPermissions([], TRUE);
+    $this->checkPermissions([]);
   }
 
   /**
@@ -75,15 +100,15 @@ class ProfileAttachTest extends WebTestBase {
    */
   function testUserRegisterForm() {
     $id = $this->type->id();
-    $field_name = $this->field->field_name;
+    $field_name = $this->field->getName();
 
     // Allow registration without administrative approval and log in user
     // directly after registering.
-    \Drupal::config('user.settings')
+    \Drupal::configFactory()->getEditable('user.settings')
       ->set('register', USER_REGISTER_VISITORS)
       ->set('verify_mail', 0)
       ->save();
-    user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, ['view own test profile']);
+    user_role_grant_permissions(\Drupal\user\RoleInterface::AUTHENTICATED_ID, ['view own test profile']);
 
     // Verify that the additional profile field is attached and required.
     $name = $this->randomMachineName();
@@ -95,22 +120,21 @@ class ProfileAttachTest extends WebTestBase {
       'pass[pass2]' => $pass_raw,
     ];
     $this->drupalPostForm('user/register', $edit, t('Create new account'));
-    $this->assertRaw(new FormattableMarkup('@name field is required.', ['@name' => $this->instance->label]));
+    $this->assertRaw(new FormattableMarkup('@name field is required.', ['@name' => $this->instance->getLabel()]));
 
     // Verify that we can register.
     $edit["entity_" . $id . "[$field_name][0][value]"] = $this->randomMachineName();
     $this->drupalPostForm(NULL, $edit, t('Create new account'));
-    $this->assertText(new FormattableMarkup('Registration successful. You are now logged in.'));
+    $this->assertText(new FormattableMarkup('Registration successful. You are now logged in.', []));
 
     $new_user = user_load_by_name($name);
     $this->assertTrue($new_user->isActive(), 'New account is active after registration.');
 
     // Verify that a new profile was created for the new user ID.
-    $profiles = entity_load_multiple_by_properties('profile', [
-      'uid' => $new_user->id(),
-      'type' => $this->type->id(),
-    ]);
-    $profile = reset($profiles);
+    $profile = \Drupal::entityTypeManager()
+      ->getStorage('profile')
+      ->loadByUser($new_user, $this->type->id());
+
     $this->assertEqual($profile->get($field_name)->value, $edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found in loaded profile.');
 
     // Verify that the profile field value appears on the user account page.
