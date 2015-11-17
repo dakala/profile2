@@ -22,6 +22,7 @@ use Drupal\user\UserInterface;
  *   label = @Translation("Profile"),
  *   bundle_label = @Translation("Profile"),
  *   handlers = {
+ *     "storage" = "Drupal\profile\ProfileStorage",
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
  *     "views_data" = "Drupal\profile\ProfileViewsData",
  *     "access" = "Drupal\profile\ProfileAccessControlHandler",

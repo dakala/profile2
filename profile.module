@@ -101,13 +101,9 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
   foreach (\Drupal::configFactory()->listAll('profile.type.') as $config_name) {
     $config = \Drupal::config($config_name);
 
-    $profiles = \Drupal::entityManager()
+    $profiles = \Drupal::entityTypeManager()
       ->getStorage('profile')
-      ->loadByProperties(array(
-        'uid' => $account->id(),
-        'type' => $config->get('id'),
-        'status' => PROFILE_ACTIVE
-      ));
+      ->loadMultipleByUser($account, $config_name);
 
     if (count($profiles)) {
       // Only display profiles user has access.
