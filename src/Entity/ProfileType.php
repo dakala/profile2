@@ -9,7 +9,6 @@
 namespace Drupal\profile\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\profile\ProfileTypeInterface;
 
 /**
  * Defines the profile type entity class.
@@ -20,10 +19,13 @@ use Drupal\profile\ProfileTypeInterface;
  *   handlers = {
  *     "list_builder" = "Drupal\profile\ProfileTypeListBuilder",
  *     "form" = {
- *       "default" = "Drupal\profile\ProfileTypeFormController",
- *       "add" = "Drupal\profile\ProfileTypeFormController",
- *       "edit" = "Drupal\profile\ProfileTypeFormController",
+ *       "default" = "Drupal\profile\Form\ProfileTypeForm",
+ *       "add" = "Drupal\profile\Form\ProfileTypeForm",
+ *       "edit" = "Drupal\profile\Form\ProfileTypeForm",
  *       "delete" = "Drupal\profile\Form\ProfileTypeDeleteForm"
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *     },
  *   },
  *   admin_permission = "administer profile types",

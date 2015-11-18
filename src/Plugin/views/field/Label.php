@@ -25,7 +25,7 @@ class Label extends FieldPluginBase {
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
-    $this->additional_fields['pid'] = 'pid';
+    $this->additional_fields['profile_id'] = 'profile_id';
   }
 
   public function query() {
@@ -71,10 +71,10 @@ class Label extends FieldPluginBase {
    *  Renderable array of the entity mark.
    */
   protected function getMark($entity) {
-    return array(
+    return [
       '#theme' => 'mark',
       '#mark_type' => node_mark($entity->id(), $entity->getChangedTime()),
-    );
+    ];
   }
 
 }

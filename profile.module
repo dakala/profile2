@@ -9,7 +9,6 @@ use Drupal\user\UserInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Access\AccessResult;
 use Drupal\profile\Entity\ProfileType;
@@ -92,7 +91,7 @@ function profile_profile_access(ProfileInterface $profile, $op, $account) {
 /**
  * Implements hook_user_view().
  */
-function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode, $langcode) {
+function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode) {
   // Only attach profiles for the full account view.
   if ($view_mode != 'full') {
     return;
@@ -102,13 +101,9 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
   foreach (\Drupal::configFactory()->listAll('profile.type.') as $config_name) {
     $config = \Drupal::config($config_name);
 
-    $profiles = \Drupal::entityManager()
+    $profiles = \Drupal::entityTypeManager()
       ->getStorage('profile')
-      ->loadByProperties(array(
-        'uid' => $account->id(),
-        'type' => $config->get('id'),
-        'status' => PROFILE_ACTIVE
-      ));
+      ->loadMultipleByUser($account, $config_name);
 
     if (count($profiles)) {
       // Only display profiles user has access.
@@ -239,9 +234,10 @@ function profile_theme() {
  */
 function template_preprocess_profile_items(&$variables) {
   if (count($variables['profile_items'])) {
-    $variables['title'] = SafeMarkup::checkPlain($variables['type']);
+    $variables['title'] = $variables['type'];
     foreach ($variables['profile_items'] as $profile_item) {
-      $variables['items'][] = entity_view($profile_item, 'default');
+      $view_builder = \Drupal::entityManager()->getViewBuilder($profile_item->getEntityTypeId());
+      $variables['items'][] = $view_builder->view($profile_item, 'default');
       if ($profile_item->access('update')) {
         $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("entity.profile.edit_form", array(
           'user' => \Drupal::currentUser()->id(),

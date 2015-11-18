@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\profile\ProfileInterface;
 use Drupal\user\UserInterface;
 
 
@@ -23,15 +22,19 @@ use Drupal\user\UserInterface;
  *   label = @Translation("Profile"),
  *   bundle_label = @Translation("Profile"),
  *   handlers = {
+ *     "storage" = "Drupal\profile\ProfileStorage",
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
  *     "views_data" = "Drupal\profile\ProfileViewsData",
  *     "access" = "Drupal\profile\ProfileAccessControlHandler",
  *     "list_builder" = "Drupal\profile\ProfileListBuilder",
  *     "form" = {
- *       "default" = "Drupal\profile\ProfileFormController",
- *       "add" = "Drupal\profile\ProfileFormController",
- *       "edit" = "Drupal\profile\ProfileFormController",
+ *       "default" = "Drupal\profile\Form\ProfileForm",
+ *       "add" = "Drupal\profile\Form\ProfileForm",
+ *       "edit" = "Drupal\profile\Form\ProfileForm",
  *       "delete" = "Drupal\profile\Form\ProfileDeleteForm",
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *     },
  *   },
  *   bundle_entity_type = "profile_type",
@@ -41,10 +44,9 @@ use Drupal\user\UserInterface;
  *   data_table = "profile_field_data",
  *   revision_table = "profile_revision",
  *   fieldable = TRUE,
- *   translatable = TRUE,
  *   entity_keys = {
- *     "id" = "pid",
- *     "revision" = "vid",
+ *     "id" = "profile_id",
+ *     "revision" = "revision_id",
  *     "bundle" = "type",
  *     "langcode" = "langcode",
  *     "uuid" = "uuid"
@@ -66,7 +68,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
 
-    $fields['pid'] = BaseFieldDefinition::create('integer')
+    $fields['profile_id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Profile ID'))
       ->setDescription(t('The profile ID.'))
       ->setReadOnly(TRUE)
@@ -77,7 +79,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setDescription(t('The profile UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['vid'] = BaseFieldDefinition::create('integer')
+    $fields['revision_id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Revision ID'))
       ->setDescription(t('The profile revision ID.'))
       ->setReadOnly(TRUE)
@@ -90,12 +92,11 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('User ID'))
-      ->setDescription(t('The user ID of the user associated with the profile.'))
+      ->setLabel(t('Owner'))
+      ->setDescription(t('The user that owns this profile.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
-      ->setSetting('handler', 'default')
-      ->setTranslatable(TRUE);
+      ->setSetting('handler', 'default');
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
@@ -105,20 +106,17 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
       ->setDescription(t('A boolean indicating whether the profile is active.'))
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE);
+      ->setRevisionable(TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the profile was created.'))
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE);
+      ->setRevisionable(TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the profile was last edited.'))
-      ->setRevisionable(TRUE)
-      ->setTranslatable(TRUE);
+      ->setRevisionable(TRUE);
 
     return $fields;
   }
@@ -127,7 +125,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    * Overrides Entity::id().
    */
   public function id() {
-    return $this->get('pid')->value;
+    return $this->get('profile_id')->value;
   }
 
   /**
@@ -137,11 +135,11 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $profile_type = ProfileType::load($this->bundle());
     return
       t('@type profile of @username (uid: @uid)',
-        array(
+        [
           '@type' => $profile_type->label(),
           '@username' => $this->getOwner()->getUsername(),
           '@uid' => $this->getOwnerId()
-        ));
+        ]);
   }
 
   /**
@@ -201,21 +199,6 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function setCreatedTime($timestamp) {
     $this->set('created', $timestamp);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getChangedTime() {
-    return $this->get('changed')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setChangedTime($timestamp) {
-    $this->set('changed', $timestamp);
     return $this;
   }
 
