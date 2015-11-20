@@ -5,9 +5,3 @@ services:
     arguments: ['@entity.manager']
     tags:
       - { name: access_check, applies_to: _profile_access_check }
-
-  profile.route_subscriber:
-    class: Drupal\profile\Routing\RouteSubscriber
-    arguments: ['@entity.manager', '@current_user']
-    tags:
-      - { name: event_subscriber }
