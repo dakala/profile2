@@ -21,7 +21,7 @@ class ProfileViewController extends EntityViewController {
   public function view(EntityInterface $profile, $view_mode = 'full', $langcode = NULL) {
     $build = [
       'profiles' =>
-        \Drupal::entityManager()
+        \Drupal::entityTypeManager()
           ->getViewBuilder($profile->getEntityTypeId())
           ->view($profile, $view_mode, $langcode)
     ];

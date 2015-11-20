@@ -8,7 +8,7 @@
 namespace Drupal\profile\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
@@ -22,18 +22,18 @@ class ProfileAccessCheck implements AccessInterface {
   /**
  * The entity manager.
  *
- * @var \Drupal\Core\Entity\EntityManagerInterface
+ * @var \Drupal\Core\Entity\EntityTypeManagerInterface
  */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * Constructs a ProfileAccessCheck object.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity manager.
    */
-  public function __construct(EntityManagerInterface $entity_manager) {
-    $this->entityManager = $entity_manager;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -50,7 +50,7 @@ class ProfileAccessCheck implements AccessInterface {
    *   The access result.
    */
   public function access(Route $route, AccountInterface $account, ProfileTypeInterface $profile_type = NULL) {
-    $access_control_handler = $this->entityManager->getAccessControlHandler('profile');
+    $access_control_handler = $this->entityTypeManager->getAccessControlHandler('profile');
 
     if ($account->hasPermission('administer profile types')) {
       return AccessResult::allowed()->cachePerPermissions();
@@ -64,7 +64,7 @@ class ProfileAccessCheck implements AccessInterface {
       return $access_control_handler->createAccess($profile_type->id(), $account, [], TRUE);
     }
     // If checking whether a profile of any type may be created.
-    foreach ($this->entityManager->getStorage('profile_type')->loadMultiple() as $profile_type) {
+    foreach ($this->entityTypeManager->getStorage('profile_type')->loadMultiple() as $profile_type) {
       if (($access = $access_control_handler->createAccess($profile_type->id(), $account, [], TRUE)) && $access->isAllowed()) {
         return $access;
       }
