@@ -7,7 +7,7 @@
 
 namespace Drupal\profile\Form;
 
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
@@ -46,10 +46,10 @@ class DeleteMultiple extends ConfirmFormBase {
    *
    * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $manager
    *   The entity manager.
    */
-  public function __construct(PrivateTempStoreFactory $privateTempStoreFactory, EntityManagerInterface $manager) {
+  public function __construct(PrivateTempStoreFactory $privateTempStoreFactory, EntityTypeManagerInterface $manager) {
     $this->privateTempStoreFactory = $privateTempStoreFactory;
     $this->storage = $manager->getStorage('profile');
   }

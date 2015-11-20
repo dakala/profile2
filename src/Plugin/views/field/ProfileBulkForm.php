@@ -7,7 +7,6 @@
 
 namespace Drupal\profile\Plugin\views\field;
 
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\system\Plugin\views\field\BulkForm;
 
 /**
