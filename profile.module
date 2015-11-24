@@ -151,7 +151,7 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
     $config = \Drupal::config($config_name);
     $profile_type = ProfileType::load($config->get('id'));
 
-    $instances = array_filter(\Drupal::entityManager()->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
+    $instances = array_filter(\Drupal::service('entity_field.manager')->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
       return $field_definition instanceof FieldConfigInterface;
     });
 
@@ -236,7 +236,7 @@ function template_preprocess_profile_items(&$variables) {
   if (count($variables['profile_items'])) {
     $variables['title'] = $variables['type'];
     foreach ($variables['profile_items'] as $profile_item) {
-      $view_builder = \Drupal::entityManager()->getViewBuilder($profile_item->getEntityTypeId());
+      $view_builder = \Drupal::entityTypeManager()->getViewBuilder($profile_item->getEntityTypeId());
       $variables['items'][] = $view_builder->view($profile_item, 'default');
       if ($profile_item->access('update')) {
         $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("entity.profile.edit_form", array(

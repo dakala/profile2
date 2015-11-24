@@ -33,7 +33,7 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
    */
   public function addProfile(UserInterface $user, ProfileTypeInterface $profile_type) {
 
-    $profile = $this->entityManager()->getStorage('profile')->create([
+    $profile = $this->entityTypeManager()->getStorage('profile')->create([
       'uid' => $user->id(),
       'type' => $profile_type->id(),
     ]);
@@ -72,7 +72,7 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   }
 
   public function userProfileForm(RouteMatchInterface $route_match, UserInterface $user, ProfileTypeInterface $profile_type) {
-    $profile = $this->entityManager()->getStorage('profile')->create([
+    $profile = $this->entityTypeManager()->getStorage('profile')->create([
       'uid' => $user->id(),
       'type' => $profile_type->id(),
     ]);
