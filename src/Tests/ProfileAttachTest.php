@@ -8,6 +8,10 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\profile\Entity\ProfileType;
 use Drupal\simpletest\WebTestBase;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
@@ -49,7 +53,7 @@ class ProfileAttachTest extends WebTestBase {
   function setUp() {
     parent::setUp();
 
-    $this->type = entity_create('profile_type', [
+    $this->type = ProfileType::create([
       'id' => 'test',
       'label' => 'Test profile',
       'weight' => 0,
@@ -68,7 +72,7 @@ class ProfileAttachTest extends WebTestBase {
     $this->field->save();
 
     $this->instance = [
-      'entity_type' => 'profile',
+      'entity_type' => $this->field->getEntityType(),
       'field_name' => $this->field->getName(),
       'bundle' => $this->type->id(),
       'label' => 'Full name',
@@ -80,13 +84,21 @@ class ProfileAttachTest extends WebTestBase {
     $this->instance = FieldConfig::create($this->instance);
     $this->instance->save();
 
-    $this->display = entity_get_display('profile', 'test', 'default')
+    $this->display = EntityViewDisplay::create([
+      'targetEntityType' => 'profile',
+      'bundle' => 'test',
+      'mode' => 'default',
+    ])
       ->setComponent($this->field->getName(), [
         'type' => 'text_default',
       ]);
     $this->display->save();
 
-    $this->form = entity_get_form_display('profile', 'test', 'default')
+    $this->display = EntityFormDisplay::create([
+      'targetEntityType' => 'profile',
+      'bundle' => 'test',
+      'mode' => 'default',
+    ])
       ->setComponent($this->field->getName(), [
         'type' => 'string_textfield',
       ]);
@@ -108,7 +120,7 @@ class ProfileAttachTest extends WebTestBase {
       ->set('register', USER_REGISTER_VISITORS)
       ->set('verify_mail', 0)
       ->save();
-    user_role_grant_permissions(\Drupal\user\RoleInterface::AUTHENTICATED_ID, ['view own test profile']);
+    user_role_grant_permissions(AccountInterface::AUTHENTICATED_ROLE, ['view own test profile']);
 
     // Verify that the additional profile field is attached and required.
     $name = $this->randomMachineName();

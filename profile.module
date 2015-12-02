@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Access\AccessResult;
 use Drupal\profile\Entity\ProfileType;
-use Drupal\profile\ProfileInterface;
+use Drupal\profile\Entity\ProfileInterface;
 use Drupal\field\FieldConfigInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -130,9 +130,12 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
  * Implements hook_user_delete().
  */
 function profile_user_delete(EntityInterface $entity) {
-  $list = entity_load_multiple_by_properties('profile', array(
-    'uid' => $entity->id(),
-  ));
+  $list = \Drupal::entityTypeManager()
+    ->getStorage('profile')
+    ->loadByProperties([
+      'uid' => $entity->id(),
+      ]);
+
   foreach($list as $profile) {
     $profile->delete();
   }
@@ -160,10 +163,10 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
       $property = ['profiles',$id];
       $profile = $form_state->get($property);
       if (empty($profile)) {
-        $entity = entity_create('profile', array(
+        $entity = \Drupal::entityTypeManager()->getStorage('profile')->create([
           'type' => $id,
-          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->id
-        ));
+          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->getId()
+        ]);
 
         // Attach profile entity form.
         $form_state->set($property, $entity);
