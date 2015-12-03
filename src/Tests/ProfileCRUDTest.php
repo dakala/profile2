@@ -32,6 +32,11 @@ class ProfileCRUDTest extends WebTestBase {
   public $user2;
 
   /**
+   * @var \Drupal\profile\ProfileStorageInterface
+   */
+  public $profileStorage;
+
+  /**
    * Tests CRUD operations.
    */
   function testCRUD() {
@@ -57,6 +62,8 @@ class ProfileCRUDTest extends WebTestBase {
       'mail' => $this->randomMachineName() . '@example.com',
     ]);
     $this->user2->save();
+
+    $this->profileStorage = \Drupal::entityTypeManager()->getStorage('profile');
 
     // Create a new profile.
     $profile = Profile::create($expected = [
@@ -85,9 +92,7 @@ class ProfileCRUDTest extends WebTestBase {
     $this->assertIdentical($profile->getChangedTime(), REQUEST_TIME);
 
     // List profiles for the user and verify that the new profile appears.
-    $list = \Drupal::entityTypeManager()->getStorage('profile')->loadByProperties([
-      'uid' => $this->user1->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [(int) $profile->id()]);
 
@@ -114,9 +119,7 @@ class ProfileCRUDTest extends WebTestBase {
     $user1_profile = $profile;
 
     // List profiles for the user and verify that both profiles appear.
-    $list = \Drupal::entityTypeManager()->getStorage('profile')->loadByProperties([
-      'uid' => $this->user1->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [
       (int) $user1_profile1->id(),
@@ -126,9 +129,7 @@ class ProfileCRUDTest extends WebTestBase {
     // Delete the second profile and verify that the first still exists.
     $user1_profile->delete();
     $this->assertFalse(Profile::load($user1_profile->id()));
-    $list = \Drupal::entityTypeManager()->getStorage('profile')->loadByProperties([
-      'uid' => $this->user1->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [(int) $user1_profile1->id()]);
 
@@ -151,16 +152,12 @@ class ProfileCRUDTest extends WebTestBase {
     // Delete the first user and verify that all of its profiles are deleted.
     $this->user1->delete();
     $this->assertFalse(User::load($this->user1->id()));
-    $list = \Drupal::entityTypeManager()->getStorage('profile')->loadByProperties([
-      'uid' => $this->user1->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, []);
 
     // List profiles for the second user and verify that they still exist.
-    $list = \Drupal::entityTypeManager()->getStorage('profile')->loadByProperties([
-      'uid' => $this->user2->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user2->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [(int) $user2_profile1->id()]);
 

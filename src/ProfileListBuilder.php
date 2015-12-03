@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -30,6 +31,13 @@ class ProfileListBuilder extends EntityListBuilder {
   protected $dateFormatter;
 
   /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Constructs a new ProfileListController object.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -38,11 +46,14 @@ class ProfileListBuilder extends EntityListBuilder {
    *   The entity storage class.
    * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
    *   The date formatter service.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatter $date_formatter) {
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatter $date_formatter, RendererInterface $renderer) {
     parent::__construct($entity_type, $storage);
 
     $this->dateFormatter = $date_formatter;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -52,7 +63,8 @@ class ProfileListBuilder extends EntityListBuilder {
     return new static(
       $entity_type,
       $container->get('entity.manager')->getStorage($entity_type->id()),
-      $container->get('date.formatter')
+      $container->get('date.formatter'),
+      $container->get('renderer')
     );
   }
 
@@ -102,7 +114,7 @@ class ProfileListBuilder extends EntityListBuilder {
     $row['label']['data'] = [
         '#type' => 'link',
         '#title' => $entity->label(),
-        '#suffix' => ' ' . drupal_render($mark),
+        '#suffix' => ' ' . $this->renderer->render($mark),
       ] + $uri->toRenderArray();
     $row['type'] = $entity->getType()->id();
     $row['owner']['data'] = [

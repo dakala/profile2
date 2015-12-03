@@ -8,6 +8,7 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\simpletest\WebTestBase;
+use Drupal\profile\Entity\ProfileType;
 
 /**
  * Tests profile field access functionality.
@@ -26,7 +27,7 @@ class ProfileFieldAccessTest extends WebTestBase {
   function setUp() {
     parent::setUp();
 
-    $this->type = entity_create('profile_type', [
+    $this->type = ProfileType::create([
       'id' => 'personal',
       'label' => 'Personal data',
       'weight' => 0,
