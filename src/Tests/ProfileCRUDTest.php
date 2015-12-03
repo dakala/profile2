@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\profile\Entity\Profile;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\simpletest\WebTestBase;
@@ -74,11 +75,18 @@ class ProfileCRUDTest extends WebTestBase {
     $this->assertIdentical($profile->id(), NULL);
     $this->assertTrue($profile->uuid());
     $this->assertIdentical($profile->getType(), $expected['type']);
-    $this->assertIdentical($profile->label(), t('@type profile of @username (uid: @uid)',
+
+    $expectedLabel = t('@type profile of @username (uid: @uid)',
       [
         '@type' => $types['profile_type_0']->label(),
         '@username' => $this->user1->getDisplayName(),
         '@uid' => $this->user1->id(),
+      ]);
+
+    $this->assertEqual($profile->label(), $expectedLabel,
+      new FormattableMarkup('Expected "%expected" but got "%got"', [
+        '%expected' => $expectedLabel,
+        '%got' => $profile->label(),
       ])
     );
     $this->assertIdentical($profile->getOwnerId(), $this->user1->id());
@@ -102,11 +110,14 @@ class ProfileCRUDTest extends WebTestBase {
     $profile->setChangedTime($profile->getChangedTime() - 1000);
     $original = clone $profile;
     $status = $profile->save();
+
     $this->assertIdentical($status, SAVED_UPDATED);
     $this->assertIdentical($profile->id(), $original->id());
     $this->assertEqual($profile->getCreatedTime(), REQUEST_TIME);
     $this->assertEqual($original->getChangedTime(), REQUEST_TIME - 1000);
-    $this->assertEqual($profile->getChangedTime(), REQUEST_TIME);
+    // Changed time is only updated when saved through the UI form
+    // @see \Drupal\Core\Entity\ContentEntityForm::submitForm().
+    $this->assertEqual($profile->getChangedTime(), REQUEST_TIME - 1000);
 
     // Create a second profile.
     $user1_profile1 = $profile;

@@ -137,7 +137,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       t('@type profile of @username (uid: @uid)',
         [
           '@type' => $profile_type->label(),
-          '@username' => $this->getOwner()->getUsername(),
+          '@username' => $this->getOwner()->getDisplayName(),
           '@uid' => $this->getOwnerId()
         ]);
   }
