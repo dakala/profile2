@@ -7,7 +7,9 @@
 
 namespace Drupal\profile\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -245,6 +247,20 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   public function setActive($active) {
     $this->set('status', $active ? PROFILE_ACTIVE : PROFILE_NOT_ACTIVE);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    // We need to invalidate user_view cache tags.
+    Cache::invalidateTags([
+        'user:' . $this->getOwnerId(),
+        'user_view'
+      ]
+    );
   }
 
 }

@@ -25,4 +25,21 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
    */
   public function getRegistration();
 
+  /**
+   * Returns the profile type's weight.
+   *
+   * @return int
+   *   The weight.
+   */
+  public function getWeight();
+
+  /**
+   * Sets the profile type's weight.
+   *
+   * @param int $weight
+   *   The profile type's weight.
+   *
+   * @return $this
+   */
+  public function setWeight($weight);
 }

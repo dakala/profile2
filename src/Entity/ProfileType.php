@@ -141,4 +141,19 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getWeight() {
+    return $this->weight;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setWeight($weight) {
+    $this->weight = $weight;
+    return $this;
+  }
+
 }
