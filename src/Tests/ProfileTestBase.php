@@ -57,12 +57,8 @@ abstract class ProfileTestBase extends WebTestBase {
     $this->drupalPlaceBlock('local_actions_block');
     $this->drupalPlaceBlock('page_title_block');
 
-    $this->type = ProfileType::create([
-      'id' => 'test',
-      'label' => 'Test profile',
-      'registration' => TRUE,
-    ]);
-    $this->type->save();
+    $this->type = $this->createProfileType('test', 'Test profile', TRUE);
+
     $id = $this->type->id();
 
     $field_storage = FieldStorageConfig::create([
@@ -92,7 +88,7 @@ abstract class ProfileTestBase extends WebTestBase {
       $this->display->save();
     }
     $this->display
-      ->setComponent($this->field->getName(), ['type' => 'string',])
+      ->setComponent($this->field->getName(), ['type' => 'string'])
       ->save();
 
     // Configure rhe default form.
@@ -111,7 +107,17 @@ abstract class ProfileTestBase extends WebTestBase {
         'type' => 'string_textfield',
       ])->save();
 
-    $this->checkPermissions([]);
+    $this->checkPermissions([
+      'administer profile types',
+      "view own $id profile",
+      "view any $id profile",
+      "add own $id profile",
+      "add any $id profile",
+      "edit own $id profile",
+      "edit any $id profile",
+      "delete own $id profile",
+      "delete any $id profile",
+    ]);
 
     user_role_grant_permissions(AccountInterface::AUTHENTICATED_ROLE, ['access user profiles']);
     $this->admin_user = $this->drupalCreateUser([
@@ -121,5 +127,26 @@ abstract class ProfileTestBase extends WebTestBase {
       "edit any $id profile",
       "delete any $id profile",
     ]);
+  }
+
+  /**
+   * Creates a profile type for tests.
+   *
+   * @param $id
+   * @param $label
+   * @param bool|FALSE $registration
+   *
+   * @return \Drupal\profile\Entity\ProfileInterface
+   *   Returns a profile type entity.
+   */
+  protected function createProfileType($id, $label, $registration = FALSE) {
+    $type = ProfileType::create([
+      'id' => $id,
+      'label' => $label,
+      'registration' => $registration,
+    ]);
+    $type->save();
+    $this->container->get('router.builder')->rebuild();
+    return $type;
   }
 }

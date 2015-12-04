@@ -10,6 +10,7 @@ namespace Drupal\profile\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\profile\Entity\ProfileInterface;
 use Drupal\profile\Entity\ProfileTypeInterface;
 use Drupal\profile\Entity\Profile;
 use Drupal\user\UserInterface;
@@ -39,6 +40,21 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
     ]);
 
     return $this->entityFormBuilder()->getForm($profile, 'add', ['uid' => $user->id(), 'created' => REQUEST_TIME]);
+  }
+
+  /**
+   * Provides the profile edit form.
+   *
+   * @param \Drupal\user\UserInterface $user
+   *   The user account.
+   * @param \Drupal\profile\Entity\ProfileInterface $profile
+   *   The profile entity to edit.
+   *
+   * @return array
+   *   The profile edit form.
+   */
+  public function editProfile(UserInterface $user, ProfileInterface $profile) {
+    return $this->entityFormBuilder()->getForm($profile, 'edit');
   }
 
   /**
@@ -72,12 +88,26 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   }
 
   public function userProfileForm(RouteMatchInterface $route_match, UserInterface $user, ProfileTypeInterface $profile_type) {
+    /** @var \Drupal\profile\Entity\ProfileType $profile_type */
+
+    // If the profile type does not support multiple, only display an add form
+    // if there are no entities, or an edit for the current.
+    if (!$profile_type->getMultiple()) {
+      /** @var \Drupal\profile\Entity\ProfileInterface|bool $active_profile */
+      $active_profile = $this->entityTypeManager()->getStorage('profile')
+        ->loadByUser($user, $profile_type->id());
+
+      if ($active_profile) {
+        return $this->editProfile($user, $active_profile);
+      }
+    }
+
     $profile = $this->entityTypeManager()->getStorage('profile')->create([
       'uid' => $user->id(),
       'type' => $profile_type->id(),
     ]);
 
-    return $this->entityFormBuilder()->getForm($profile, 'add', ['uid' => $user->id(), 'created' => REQUEST_TIME]);
+    return $this->addProfile($user, $profile_type);
   }
 
 }
