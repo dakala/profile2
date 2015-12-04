@@ -57,10 +57,7 @@ class ProfileForm extends ContentEntityForm {
         $element['deactivate']['#value'] = !$profile->isActive() ? t('Save and keep inactive') : t('Save and make inactive');
       }
       $element['deactivate']['#weight'] = 10;
-      array_unshift($element['deactivate']['#submit'], [
-          $this,
-          'deactivate'
-        ]);
+      array_unshift($element['deactivate']['#submit'], [$this, 'deactivate']);
 
       // If already deactivated, the 'activate' button is primary.
       if ($profile->isActive()) {
@@ -89,6 +86,9 @@ class ProfileForm extends ContentEntityForm {
    *   An associative array containing the structure of the form.
    * @param $form_state
    *   A reference to a keyed array containing the current state of the form.
+   *
+   * @return \Drupal\profile\Entity\ProfileInterface
+   *   The current profile entity.
    */
   public function activate(array $form, FormStateInterface $form_state) {
     $profile = $this->entity;
@@ -103,6 +103,9 @@ class ProfileForm extends ContentEntityForm {
    *   An associative array containing the structure of the form.
    * @param $form_state
    *   A reference to a keyed array containing the current state of the form.
+   *
+   * @return \Drupal\profile\Entity\ProfileInterface
+   *   The current profile entity.
    */
   public function deactivate(array $form, FormStateInterface $form_state) {
     $profile = $this->entity;
@@ -122,10 +125,10 @@ class ProfileForm extends ContentEntityForm {
     }
     switch ($this->entity->save()) {
       case SAVED_NEW:
-        drupal_set_message(t('%label profile has been created.', ['%label' => $profile_type->label()]));
+        drupal_set_message($this->t('%label profile has been created.', ['%label' => $profile_type->label()]));
         break;
       case SAVED_UPDATED:
-        drupal_set_message(t('%label profile has been updated.', ['%label' => $profile_type->label()]));
+        drupal_set_message($this->t('%label profile has been updated.', ['%label' => $profile_type->label()]));
         break;
     }
 

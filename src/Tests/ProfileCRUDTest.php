@@ -18,9 +18,7 @@ use Drupal\user\Entity\User;
  *
  * @group profile
  */
-class ProfileCRUDTest extends WebTestBase {
-
-  public static $modules = ['field', 'user', 'profile'];
+class ProfileCRUDTest extends ProfileTestBase {
 
   /**
    * @var \Drupal\user\UserInterface
