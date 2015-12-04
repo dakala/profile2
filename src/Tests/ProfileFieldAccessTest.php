@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\simpletest\WebTestBase;
 use Drupal\profile\Entity\ProfileType;
 
@@ -35,7 +36,7 @@ class ProfileFieldAccessTest extends ProfileTestBase {
       'access user profiles',
       "add own {$this->type->id()} profile",
       "edit own {$this->type->id()} profile",
-      "view any {$this->type->id()} profile",
+      "view own {$this->type->id()} profile",
     ];
 
     $this->web_user = $this->drupalCreateUser($user_permissions);
@@ -55,14 +56,11 @@ class ProfileFieldAccessTest extends ProfileTestBase {
       'field_name' => 'secret',
     ];
     $this->drupalPostForm("admin/config/people/profiles/types/manage/{$this->type->id()}/fields/add-field", $edit, t('Save and continue'));
-
-    // @todo #2628108, #2599010.
-    /*
+    $this->drupalPostForm(NULL, [], t('Save field settings'));
     $edit = [
-      'field[settings][profile_private]' => 1,
+      'profile_private' => 1,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save field settings'));
-    $this->drupalPostForm(NULL, [], t('Save settings'));
+    $this->drupalPostForm(NULL, $edit, t('Save settings'));
 
     // Fill in a field value.
     $this->drupalLogin($this->web_user);
@@ -71,11 +69,13 @@ class ProfileFieldAccessTest extends ProfileTestBase {
     $edit = [
       'field_secret[0][value]' => $secret,
     ];
-    $this->drupalPostForm("user/$uid/edit/profile/{$this->type->id()}", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
 
     // User cache page need to be cleared to see new profile.
-    // TODO: We shouldn't have to clear all cache to display this.
-    drupal_flush_all_caches();
+    Cache::invalidateTags([
+      'user:' . $uid,
+      'user_view'
+    ]);
 
     // Verify that the private field value appears for the profile owner.
     $this->drupalGet("user/$uid");
@@ -90,7 +90,6 @@ class ProfileFieldAccessTest extends ProfileTestBase {
     $this->drupalLogin($this->other_user);
     $this->drupalGet("user/$uid");
     $this->assertNoText($secret);
-    */
   }
 
 }

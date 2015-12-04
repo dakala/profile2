@@ -98,12 +98,11 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
   }
   // Position profiles at the bottom of account page.
   $weight = 100;
-  foreach (\Drupal::configFactory()->listAll('profile.type.') as $config_name) {
-    $config = \Drupal::config($config_name);
 
+  foreach (array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo('profile')) as $profile_type_id) {
     $profiles = \Drupal::entityTypeManager()
       ->getStorage('profile')
-      ->loadMultipleByUser($account, $config_name);
+      ->loadMultipleByUser($account, $profile_type_id);
 
     if (count($profiles)) {
       // Only display profiles user has access.
@@ -114,11 +113,14 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
       }
 
       if (count($profiles)) {
-        $build['profiles']['#weight'] = $weight + $config->get('weight');
-        $build['profiles'][$config->get('id')] = array(
+        /** @var ProfileType $profile_type */
+        $profile_type = ProfileType::load($profile_type_id);
+
+        $build['profiles']['#weight'] = $weight + $profile_type->getWeight();
+        $build['profiles'][$profile_type->id()] = array(
           '#theme' => 'profile_items',
           '#profile_items' => $profiles,
-          '#type' => $config->get('label'),
+          '#type' => $profile_type->label(),
         );
       }
     }
@@ -138,6 +140,44 @@ function profile_user_delete(EntityInterface $entity) {
 
   foreach($list as $profile) {
     $profile->delete();
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function profile_form_field_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $field = $form_state->getFormObject()->getEntity();
+  if ($field->getTargetEntityTypeId() != 'profile') {
+    return;
+  }
+
+  $form['field']['profile']['profile_private'] = [
+    '#type' => 'checkbox',
+    '#title' => t('This is a private field.'),
+    '#default_value' => $field->getThirdPartySetting('profile', 'profile_private', FALSE),
+  ];
+  $form['actions']['submit']['#submit'][] = 'profile_form_field_config_edit_form_submit';
+}
+
+/**
+ * Form submission handler for profile_form_field_config_edit_form_alter
+ *
+ * @param $form
+ * @param FormStateInterface $form_state
+ */
+function profile_form_field_config_edit_form_submit($form, FormStateInterface $form_state) {
+  $field = $form_state->getFormObject()->getEntity();
+  $formFields = &$form_state->getValues('field');
+
+  // If the private option is checked, update settings.
+  if ($formFields['profile_private']) {
+    $field->setThirdPartySetting('profile', 'profile_private', TRUE);
+    $field->save();
+  }
+  else {
+    $field->unsetThirdPartySetting('profile', 'profile_private');
+    $field->save();
   }
 }
 
