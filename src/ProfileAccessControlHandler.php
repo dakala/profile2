@@ -10,8 +10,6 @@ namespace Drupal\profile;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -43,11 +41,25 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = [], $return_as_object = FALSE) {
+    $account = $this->prepareUser($account);
+
+    if ($account->hasPermission('bypass profile access')) {
+      $result = AccessResult::allowed()->cachePerPermissions();
+      return $return_as_object ? $result : $result->isAllowed();
+    }
+
+    $result = parent::createAccess($entity_bundle, $account, $context, TRUE)->cachePerPermissions();
+    return $return_as_object ? $result : $result->isAllowed();
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function access(EntityInterface $entity, $operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     $account = $this->prepareUser($account);
 
     $user_page = \Drupal::request()->attributes->get('user');
@@ -59,10 +71,9 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
     }
 
     if ($account->hasPermission('bypass profile access')) {
-      $result = AccessResult::allowed()->cachePerPermissions();
-      return $return_as_object ? $result : $result->isAllowed();
+      return AccessResult::allowed()->cachePerPermissions();
     }
-    if (
+    elseif (
       (
         $operation == 'add'
         && (
@@ -83,43 +94,21 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
         )
       )
     ){
-      $result = AccessResult::allowed()->cachePerPermissions();
-      return $return_as_object ? $result : $result->isAllowed();
+      return AccessResult::allowed()->cachePerPermissions();
     }
     else {
-      $result = AccessResult::forbidden()->cachePerPermissions();
-      return $return_as_object ? $result : $result->isAllowed();
+      return AccessResult::forbidden()->cachePerPermissions();
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = [], $return_as_object = FALSE) {
-    $account = $this->prepareUser($account);
-
-    if ($account->hasPermission('bypass profile access')) {
-      $result = AccessResult::allowed()->cachePerPermissions();
-      return $return_as_object ? $result : $result->isAllowed();
-    }
-
-    $result = AccessResult::allowed()->cachePerPermissions();
-    return $return_as_object ? $result : $result->isAllowed();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    // No opinion.
-    return AccessResult::neutral();
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIf($account->hasPermission('add ' . $entity_bundle . ' content'))->cachePerPermissions();
+    return AccessResult::allowedIfHasPermissions($account, [
+      'add any ' . $entity_bundle . ' profile',
+      'add own ' . $entity_bundle . ' profile',
+    ], 'OR');
   }
 
 }

@@ -7,8 +7,7 @@
 
 namespace Drupal\profile\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
@@ -47,11 +46,11 @@ class DeleteMultiple extends ConfirmFormBase {
    *
    * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $manager
    *   The entity manager.
    */
-  public function __construct(PrivateTempStoreFactory $privateTempStoreFactory, EntityManagerInterface $manager) {
-    $this->privateTempStoreFactory = $privateTempStoreFactory;
+  public function __construct(PrivateTempStoreFactory $temp_store_factory, EntityTypeManagerInterface $manager) {
+    $this->privateTempStoreFactory = $temp_store_factory;
     $this->storage = $manager->getStorage('profile');
   }
 
@@ -105,7 +104,7 @@ class DeleteMultiple extends ConfirmFormBase {
     $form['profiles'] = [
       '#theme' => 'item_list',
       '#items' => array_map(function ($profile) {
-        return SafeMarkup::checkPlain($profile->label());
+        return $profile->label();
       }, $this->profiles),
     ];
     $form = parent::buildForm($form, $form_state);

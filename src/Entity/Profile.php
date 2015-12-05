@@ -7,7 +7,9 @@
 
 namespace Drupal\profile\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -22,6 +24,7 @@ use Drupal\user\UserInterface;
  *   label = @Translation("Profile"),
  *   bundle_label = @Translation("Profile"),
  *   handlers = {
+ *     "storage" = "Drupal\profile\ProfileStorage",
  *     "view_builder" = "Drupal\profile\ProfileViewBuilder",
  *     "views_data" = "Drupal\profile\ProfileViewsData",
  *     "access" = "Drupal\profile\ProfileAccessControlHandler",
@@ -31,6 +34,9 @@ use Drupal\user\UserInterface;
  *       "add" = "Drupal\profile\Form\ProfileForm",
  *       "edit" = "Drupal\profile\Form\ProfileForm",
  *       "delete" = "Drupal\profile\Form\ProfileDeleteForm",
+ *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\profile\ProfileHtmlRouteProvider",
  *     },
  *   },
  *   bundle_entity_type = "profile_type",
@@ -133,8 +139,8 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       t('@type profile of @username (uid: @uid)',
         [
           '@type' => $profile_type->label(),
-          '@username' => $this->getOwner()->getUsername(),
-          '@uid' => $this->getOwnerId()
+          '@username' => $this->getOwner()->getDisplayName(),
+          '@uid' => $this->getOwnerId(),
         ]);
   }
 
@@ -241,6 +247,20 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   public function setActive($active) {
     $this->set('status', $active ? PROFILE_ACTIVE : PROFILE_NOT_ACTIVE);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    // We need to invalidate user_view cache tags.
+    Cache::invalidateTags([
+        'user:' . $this->getOwnerId(),
+        'user_view',
+      ]
+    );
   }
 
 }

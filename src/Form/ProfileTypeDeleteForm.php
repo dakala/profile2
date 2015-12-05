@@ -27,11 +27,11 @@ class ProfileTypeDeleteForm extends EntityDeleteForm {
   /**
    * Constructs a new ProductTypeDeleteForm object.
    *
-   * @param \Drupal\Core\Entity\Query\QueryFactory $queryFactory
+   * @param \Drupal\Core\Entity\Query\QueryFactory $query_factory
    *    The entity query object.
    */
-  public function __construct(QueryFactory $queryFactory) {
-    $this->queryFactory = $queryFactory;
+  public function __construct(QueryFactory $query_factory) {
+    $this->queryFactory = $query_factory;
   }
 
   /**

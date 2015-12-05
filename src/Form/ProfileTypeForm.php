@@ -7,7 +7,6 @@
 
 namespace Drupal\profile\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
@@ -23,12 +22,12 @@ class ProfileTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  function form(array $form, FormStateInterface $form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $type = $this->entity;
 
     if ($this->operation == 'add') {
-      $form['#title'] = SafeMarkup::checkPlain($this->t('Add profile type'));
+      $form['#title'] = $this->t('Add profile type');
     }
     else {
       $form['#title'] = $this->t('Edit %label profile type', ['%label' => $type->label()]);
@@ -73,10 +72,7 @@ class ProfileTypeForm extends EntityForm {
     ) {
       $actions['save_continue'] = $actions['submit'];
       $actions['save_continue']['#value'] = t('Save and manage fields');
-      $actions['save_continue']['#submit'][] = [
-        $this,
-        'redirectToFieldUI'
-      ];
+      $actions['save_continue']['#submit'][] = [$this, 'redirectToFieldUI'];
     }
     return $actions;
   }
@@ -111,15 +107,18 @@ class ProfileTypeForm extends EntityForm {
    */
   public function delete(array $form, FormStateInterface $form_state) {
     $form_state->setRedirect('entity.profile_type.delete_form', [
-      'profile_type' => $this->entity->id()
+      'profile_type' => $this->entity->id(),
     ]);
   }
 
   /**
    * Check whether the profile type exists.
    *
-   * @param $id
+   * @param string $id
+   *   A string representing a profile type ID.
+   *
    * @return bool
+   *   Returns bool if profile exists.
    */
   public function exists($id) {
     $profile_type = ProfileType::load($id);

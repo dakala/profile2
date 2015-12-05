@@ -41,13 +41,13 @@ class DeleteProfile extends ActionBase implements ContainerFactoryPluginInterfac
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\user\PrivateTempStoreFactory $privateTempStoreFactory
+   * @param \Drupal\user\PrivateTempStoreFactory $private_temp_store
    *   The tempstore factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $privateTempStoreFactory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $private_temp_store) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    $this->privateTempStore = $privateTempStoreFactory->get('profile_multiple_delete_confirm');
+    $this->privateTempStore = $private_temp_store->get('profile_multiple_delete_confirm');
   }
 
   /**
