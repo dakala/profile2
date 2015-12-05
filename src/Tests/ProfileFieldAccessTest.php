@@ -8,8 +8,6 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\simpletest\WebTestBase;
-use Drupal\profile\Entity\ProfileType;
 
 /**
  * Tests profile field access functionality.
@@ -18,13 +16,16 @@ use Drupal\profile\Entity\ProfileType;
  */
 class ProfileFieldAccessTest extends ProfileTestBase {
 
-  private $web_user;
-  private $other_user;
+  private $webUser;
+  private $otherUser;
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->drupalCreateUser([
+    $this->adminUser = $this->drupalCreateUser([
       'access user profiles',
       'administer profile types',
       'administer profile fields',
@@ -39,15 +40,15 @@ class ProfileFieldAccessTest extends ProfileTestBase {
       "view own {$this->type->id()} profile",
     ];
 
-    $this->web_user = $this->drupalCreateUser($user_permissions);
-    $this->other_user = $this->drupalCreateUser($user_permissions);
+    $this->webUser   = $this->drupalCreateUser($user_permissions);
+    $this->otherUser = $this->drupalCreateUser($user_permissions);
   }
 
   /**
    * Tests private profile field access.
    */
-  function testPrivateField() {
-    $this->drupalLogin($this->admin_user);
+  public function testPrivateField() {
+    $this->drupalLogin($this->adminUser);
 
     // Create a private profile field.
     $edit = [
@@ -63,8 +64,8 @@ class ProfileFieldAccessTest extends ProfileTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
 
     // Fill in a field value.
-    $this->drupalLogin($this->web_user);
-    $uid = $this->web_user->id();
+    $this->drupalLogin($this->webUser);
+    $uid = $this->webUser->id();
     $secret = $this->randomMachineName();
     $edit = [
       'field_secret[0][value]' => $secret,
@@ -74,7 +75,7 @@ class ProfileFieldAccessTest extends ProfileTestBase {
     // User cache page need to be cleared to see new profile.
     Cache::invalidateTags([
       'user:' . $uid,
-      'user_view'
+      'user_view',
     ]);
 
     // Verify that the private field value appears for the profile owner.
@@ -82,12 +83,12 @@ class ProfileFieldAccessTest extends ProfileTestBase {
     $this->assertText($secret);
 
     // Verify that the private field value appears for the administrator.
-    $this->drupalLogin($this->admin_user);
+    $this->drupalLogin($this->adminUser);
     $this->drupalGet("user/$uid");
     $this->assertText($secret);
 
     // Verify that the private field value does not appear for other users.
-    $this->drupalLogin($this->other_user);
+    $this->drupalLogin($this->otherUser);
     $this->drupalGet("user/$uid");
     $this->assertNoText($secret);
   }

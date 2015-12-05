@@ -23,29 +23,39 @@ abstract class ProfileTestBase extends WebTestBase {
   public static $modules = ['profile', 'field_ui', 'text', 'block'];
 
   /**
+   * Testing profile type entity.
+   *
    * @var \Drupal\profile\Entity\ProfileType
    */
   protected $type;
 
   /**
+   * Testing profile type entity view display.
+   *
    * @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
    */
   protected $display;
 
   /**
+   * Testing profile type entity form display.
+   *
    * @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form
    */
   protected $form;
 
   /**
+   * Testing field on profile type.
+   *
    * @var \Drupal\field\FieldConfigInterface
    */
   protected $field;
 
   /**
+   * Testing admin user.
+   *
    * @var \Drupal\user\Entity\User
    */
-  protected $admin_user;
+  protected $adminUser;
 
   /**
    * {@inheritdoc}
@@ -74,7 +84,6 @@ abstract class ProfileTestBase extends WebTestBase {
       'label' => 'Full name',
     ]);
     $this->field->save();
-
 
     // Configure the default display.
     $this->display = EntityViewDisplay::load("profile.{$this->type->id()}.default");
@@ -120,7 +129,7 @@ abstract class ProfileTestBase extends WebTestBase {
     ]);
 
     user_role_grant_permissions(AccountInterface::AUTHENTICATED_ROLE, ['access user profiles']);
-    $this->admin_user = $this->drupalCreateUser([
+    $this->adminUser = $this->drupalCreateUser([
       'administer profile types',
       "view any $id profile",
       "add any $id profile",
@@ -132,9 +141,12 @@ abstract class ProfileTestBase extends WebTestBase {
   /**
    * Creates a profile type for tests.
    *
-   * @param $id
-   * @param $label
+   * @param string $id
+   *   The profile type machine name.
+   * @param string $label
+   *   The profile type human display name.
    * @param bool|FALSE $registration
+   *   Boolean if profile type shows on registration form.
    *
    * @return \Drupal\profile\Entity\ProfileInterface
    *   Returns a profile type entity.
@@ -149,4 +161,5 @@ abstract class ProfileTestBase extends WebTestBase {
     $this->container->get('router.builder')->rebuild();
     return $type;
   }
+
 }

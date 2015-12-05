@@ -7,7 +7,7 @@
 
 namespace Drupal\profile\Plugin\views\field;
 
-use Drupal\profile\Plugin\views\field\Link;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\views\ResultRow;
 
 /**
@@ -30,10 +30,10 @@ class LinkDelete extends Link {
    * @return string
    *   Returns a string for the link text.
    */
-  protected function renderLink($profile, ResultRow $values) {
+  protected function renderLink(EntityInterface $profile, ResultRow $values) {
     // Ensure user has access to delete this node.
     if (!$profile->access('delete')) {
-      return;
+      return '';
     }
 
     $this->options['alter']['make_link'] = TRUE;

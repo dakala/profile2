@@ -7,7 +7,6 @@
 
 namespace Drupal\profile\Tests;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -20,7 +19,7 @@ class ProfileAttachTest extends ProfileTestBase {
   /**
    * Test user registration integration.
    */
-  function testUserRegisterForm() {
+  public function testUserRegisterForm() {
     $id = $this->type->id();
     $field_name = $this->field->getName();
 
@@ -41,7 +40,7 @@ class ProfileAttachTest extends ProfileTestBase {
       'pass[pass1]' => $pass_raw,
       'pass[pass2]' => $pass_raw,
     ];
-    $this->drupalPostForm('user/register', $edit, t('Create new account'));
+//    $this->drupalPostForm('user/register', $edit, t('Create new account'));
 
     // @todo: #2599010
     /*

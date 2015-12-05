@@ -101,7 +101,7 @@ class ProfileListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /** @var \Drupal\profile\ProfileInterface $entity */
+    /** @var \Drupal\profile\Entity\ProfileInterface $entity */
     $mark = [
       '#theme' => 'mark',
       '#mark_type' => node_mark($entity->id(), $entity->getChangedTime()),
@@ -112,10 +112,10 @@ class ProfileListBuilder extends EntityListBuilder {
     $options += ($langcode != LanguageInterface::LANGCODE_NOT_SPECIFIED && isset($languages[$langcode]) ? ['language' => $languages[$langcode]] : []);
     $uri->setOptions($options);
     $row['label']['data'] = [
-        '#type' => 'link',
-        '#title' => $entity->label(),
-        '#suffix' => ' ' . $this->renderer->render($mark),
-      ] + $uri->toRenderArray();
+      '#type' => 'link',
+      '#title' => $entity->label(),
+      '#suffix' => ' ' . $this->renderer->render($mark),
+    ] + $uri->toRenderArray();
     $row['type'] = $entity->getType()->id();
     $row['owner']['data'] = [
       '#theme' => 'username',
@@ -128,7 +128,12 @@ class ProfileListBuilder extends EntityListBuilder {
       $row['language_name'] = $language_manager->getLanguageName($langcode);
     }
 
-    $route_params = ['user' => $entity->getOwnerId(), 'type' => $entity->bundle(), 'profile' => $entity->id()];
+    $route_params = [
+      'user' => $entity->getOwnerId(),
+      'type' => $entity->bundle(),
+      'profile' => $entity->id(),
+    ];
+
     $links['edit'] = [
       'title' => t('Edit'),
       'route_name' => 'entity.profile.edit_form',

@@ -106,7 +106,7 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
 
     if (count($profiles)) {
       // Only display profiles user has access.
-      foreach($profiles as $key => $profile) {
+      foreach ($profiles as $key => $profile) {
         if (!$profile->access('view')) {
           unset($profiles[$key]);
         }
@@ -138,7 +138,7 @@ function profile_user_delete(EntityInterface $entity) {
       'uid' => $entity->id(),
       ]);
 
-  foreach($list as $profile) {
+  foreach ($list as $profile) {
     $profile->delete();
   }
 }
@@ -161,17 +161,19 @@ function profile_form_field_config_edit_form_alter(&$form, FormStateInterface $f
 }
 
 /**
- * Form submission handler for profile_form_field_config_edit_form_alter
+ * Form submission handler for profile_form_field_config_edit_form_alter.
  *
- * @param $form
+ * @param array $form
+ *   The form array.
  * @param FormStateInterface $form_state
+ *   The form state.
  */
-function profile_form_field_config_edit_form_submit($form, FormStateInterface $form_state) {
+function profile_form_field_config_edit_form_submit(array $form, FormStateInterface $form_state) {
   $field = $form_state->getFormObject()->getEntity();
-  $formFields = &$form_state->getValues('field');
+  $form_fields = &$form_state->getValues();
 
   // If the private option is checked, update settings.
-  if ($formFields['profile_private']) {
+  if ($form_fields['profile_private']) {
     $field->setThirdPartySetting('profile', 'profile_private', TRUE);
     $field->save();
   }
@@ -185,7 +187,6 @@ function profile_form_field_config_edit_form_submit($form, FormStateInterface $f
  * Implements hook_form_FORM_ID_alter().
  *
  * Add available profile forms to the user registration form.
- *
  */
 function profile_form_user_register_form_alter(&$form, FormStateInterface $form_state) {
   $attached_profile_form = FALSE;
@@ -200,12 +201,12 @@ function profile_form_user_register_form_alter(&$form, FormStateInterface $form_
 
     if ($profile_type->getRegistration() === TRUE && count($instances)) {
       $id = $profile_type->id();
-      $property = ['profiles',$id];
+      $property = ['profiles', $id];
       $profile = $form_state->get($property);
       if (empty($profile)) {
         $entity = \Drupal::entityTypeManager()->getStorage('profile')->create([
           'type' => $id,
-          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->getId()
+          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->getId(),
         ]);
 
         // Attach profile entity form.
@@ -273,7 +274,7 @@ function profile_theme() {
 }
 
 /**
- * Implements hook_preprocess_HOOK() for profile templates.
+ * Implements hook_preprocess_profile_items().
  */
 function template_preprocess_profile_items(&$variables) {
   if (count($variables['profile_items'])) {

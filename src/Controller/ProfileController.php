@@ -14,7 +14,6 @@ use Drupal\profile\Entity\ProfileInterface;
 use Drupal\profile\Entity\ProfileTypeInterface;
 use Drupal\profile\Entity\Profile;
 use Drupal\user\UserInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Returns responses for ProfileController routes.
@@ -68,6 +67,7 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
    *   The id of the profile to delete.
    *
    * @return array
+   *   Returns form array.
    */
   public function deleteProfile(UserInterface $user, ProfileTypeInterface $profile_type, $id) {
     return $this->entityFormBuilder()->getForm(Profile::load($id), 'delete');
@@ -87,6 +87,19 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
     return $this->t('Create @label', ['@label' => $profile_type->label()]);
   }
 
+  /**
+   * Provides profile create form.
+   *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
+   * @param \Drupal\user\UserInterface $user
+   *   The user account.
+   * @param \Drupal\profile\Entity\ProfileTypeInterface $profile_type
+   *   The profile type entity for the profile.
+   *
+   * @return array
+   *    Returns form array.
+   */
   public function userProfileForm(RouteMatchInterface $route_match, UserInterface $user, ProfileTypeInterface $profile_type) {
     /** @var \Drupal\profile\Entity\ProfileType $profile_type */
 
@@ -101,11 +114,6 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
         return $this->editProfile($user, $active_profile);
       }
     }
-
-    $profile = $this->entityTypeManager()->getStorage('profile')->create([
-      'uid' => $user->id(),
-      'type' => $profile_type->id(),
-    ]);
 
     return $this->addProfile($user, $profile_type);
   }

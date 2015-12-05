@@ -82,9 +82,9 @@ class ProfileForm extends ContentEntityForm {
   /**
    * Form submission handler for the 'activate' action.
    *
-   * @param $form
+   * @param array $form
    *   An associative array containing the structure of the form.
-   * @param $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   A reference to a keyed array containing the current state of the form.
    *
    * @return \Drupal\profile\Entity\ProfileInterface
@@ -99,9 +99,9 @@ class ProfileForm extends ContentEntityForm {
   /**
    * Form submission handler for the 'deactivate' action.
    *
-   * @param $form
+   * @param array $form
    *   An associative array containing the structure of the form.
-   * @param $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   A reference to a keyed array containing the current state of the form.
    *
    * @return \Drupal\profile\Entity\ProfileInterface
@@ -127,6 +127,7 @@ class ProfileForm extends ContentEntityForm {
       case SAVED_NEW:
         drupal_set_message($this->t('%label profile has been created.', ['%label' => $profile_type->label()]));
         break;
+
       case SAVED_UPDATED:
         drupal_set_message($this->t('%label profile has been updated.', ['%label' => $profile_type->label()]));
         break;

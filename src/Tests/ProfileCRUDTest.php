@@ -10,7 +10,6 @@ namespace Drupal\profile\Tests;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\profile\Entity\Profile;
 use Drupal\profile\Entity\ProfileType;
-use Drupal\simpletest\WebTestBase;
 use Drupal\user\Entity\User;
 
 /**
@@ -21,16 +20,22 @@ use Drupal\user\Entity\User;
 class ProfileCRUDTest extends ProfileTestBase {
 
   /**
+   * Testing demo user 1.
+   *
    * @var \Drupal\user\UserInterface
    */
   public $user1;
 
   /**
+   * Testing demo user 2.
+   *
    * @var \Drupal\user\UserInterface;
    */
   public $user2;
 
   /**
+   * Profile entity storage.
+   *
    * @var \Drupal\profile\ProfileStorageInterface
    */
   public $profileStorage;
@@ -38,7 +43,7 @@ class ProfileCRUDTest extends ProfileTestBase {
   /**
    * Tests CRUD operations.
    */
-  function testCRUD() {
+  public function testCRUD() {
     $types_data = [
       'profile_type_0' => ['label' => $this->randomMachineName()],
       'profile_type_1' => ['label' => $this->randomMachineName()],
@@ -74,16 +79,16 @@ class ProfileCRUDTest extends ProfileTestBase {
     $this->assertTrue($profile->uuid());
     $this->assertIdentical($profile->getType(), $expected['type']);
 
-    $expectedLabel = t('@type profile of @username (uid: @uid)',
+    $expected_label = t('@type profile of @username (uid: @uid)',
       [
         '@type' => $types['profile_type_0']->label(),
         '@username' => $this->user1->getDisplayName(),
         '@uid' => $this->user1->id(),
       ]);
 
-    $this->assertEqual($profile->label(), $expectedLabel,
+    $this->assertEqual($profile->label(), $expected_label,
       new FormattableMarkup('Expected "%expected" but got "%got"', [
-        '%expected' => $expectedLabel,
+        '%expected' => $expected_label,
         '%got' => $profile->label(),
       ])
     );
@@ -113,7 +118,7 @@ class ProfileCRUDTest extends ProfileTestBase {
     $this->assertIdentical($profile->id(), $original->id());
     $this->assertEqual($profile->getCreatedTime(), REQUEST_TIME);
     $this->assertEqual($original->getChangedTime(), REQUEST_TIME - 1000);
-    // Changed time is only updated when saved through the UI form
+    // Changed time is only updated when saved through the UI form.
     // @see \Drupal\Core\Entity\ContentEntityForm::submitForm().
     $this->assertEqual($profile->getChangedTime(), REQUEST_TIME - 1000);
 

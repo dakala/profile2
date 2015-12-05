@@ -8,7 +8,6 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\simpletest\WebTestBase;
 use Drupal\Component\Utility\Unicode;
 
 /**
@@ -18,10 +17,13 @@ use Drupal\Component\Utility\Unicode;
  */
 class ProfileTypeCRUDTest extends ProfileTestBase {
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->drupalCreateUser([
+    $this->adminUser = $this->drupalCreateUser([
       'access user profiles',
       'administer profile types',
       'administer profile fields',
@@ -33,8 +35,8 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
   /**
    * Tests CRUD operations for profile types through the UI.
    */
-  function testCRUDUI() {
-    $this->drupalLogin($this->admin_user);
+  public function testCRUDUI() {
+    $this->drupalLogin($this->adminUser);
 
     // Create a new profile type.
     $this->drupalGet('admin/config/people/profiles/types');
@@ -66,8 +68,6 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
     $this->assertUrl('admin/config/people/profiles/types');
     $this->assertRaw(new FormattableMarkup('%label profile type has been updated.', ['%label' => $label]));
 
-    // What.
-    // Notice: Undefined index: TYPE in Drupal\field_ui\Form\FieldConfigEditForm->form() (line 43 of core/modules/field_ui/src/Form/FieldConfigEditForm.php).
     \Drupal::service('entity_type.bundle.info')->clearCachedBundles();
 
     // Add a field to the profile type.
@@ -86,7 +86,7 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
       'query' => [
         'destinations[0]' => "/admin/config/people/profiles/types/manage/$id/fields/add-field",
         'field_config' => "profile.$id.field_$field_name",
-      ]
+      ],
     ]);
     $this->assertRaw(new FormattableMarkup('Saved %label configuration.', ['%label' => $field_label]));
 
@@ -110,7 +110,7 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
     //   correctly. The pre-existing field does not appear on the Manage
     //   fields page of the renamed bundle. Not even flushing all caches
     //   helps. Can be reproduced manually.
-    //$this->assertText(check_plain($field_label));
+    // $this->assertText(check_plain($field_label));
   }
 
 }

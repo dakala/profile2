@@ -140,7 +140,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
         [
           '@type' => $profile_type->label(),
           '@username' => $this->getOwner()->getDisplayName(),
-          '@uid' => $this->getOwnerId()
+          '@uid' => $this->getOwnerId(),
         ]);
   }
 
@@ -258,7 +258,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     // We need to invalidate user_view cache tags.
     Cache::invalidateTags([
         'user:' . $this->getOwnerId(),
-        'user_view'
+        'user_view',
       ]
     );
   }

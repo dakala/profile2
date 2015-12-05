@@ -27,7 +27,7 @@ class ProfileLocalTask extends DeriverBase implements ContainerDeriverInterface 
   /**
    * Constructs a new ProfileAddLocalTask.
    *
-   * @param $base_plugin_definition
+   * @param string $base_plugin_definition
    *   The base plugin definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -53,10 +53,10 @@ class ProfileLocalTask extends DeriverBase implements ContainerDeriverInterface 
     $this->derivatives = [];
     foreach ($this->entityTypeManager->getStorage('profile_type')->loadMultiple() as $profile_type_id => $profile_type) {
       $this->derivatives["profile.type.$profile_type_id"] = [
-          'title' => $profile_type->label(),
-          'route_name' => "entity.profile.type.$profile_type_id.user_profile_form",
-          'parent_id' => 'entity.user.edit_form',
-          'route_parameters' => ['profile_type' => $profile_type_id],
+        'title' => $profile_type->label(),
+        'route_name' => "entity.profile.type.$profile_type_id.user_profile_form",
+        'parent_id' => 'entity.user.edit_form',
+        'route_parameters' => ['profile_type' => $profile_type_id],
         ] + $base_plugin_definition;
     }
 
