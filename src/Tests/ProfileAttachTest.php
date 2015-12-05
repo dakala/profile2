@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -22,6 +23,9 @@ class ProfileAttachTest extends ProfileTestBase {
   public function testUserRegisterForm() {
     $id = $this->type->id();
     $field_name = $this->field->getName();
+
+    $this->field->setRequired(TRUE);
+    $this->field->save();
 
     // Allow registration without administrative approval and log in user
     // directly after registering.
@@ -40,10 +44,8 @@ class ProfileAttachTest extends ProfileTestBase {
       'pass[pass1]' => $pass_raw,
       'pass[pass2]' => $pass_raw,
     ];
-//    $this->drupalPostForm('user/register', $edit, t('Create new account'));
+    $this->drupalPostForm('user/register', $edit, t('Create new account'));
 
-    // @todo: #2599010
-    /*
     $this->assertRaw(new FormattableMarkup('@name field is required.', ['@name' => $this->field->getLabel()]));
 
     // Verify that we can register.
@@ -64,7 +66,6 @@ class ProfileAttachTest extends ProfileTestBase {
     // Verify that the profile field value appears on the user account page.
     $this->drupalGet('user');
     $this->assertText($edit["entity_" . $id . "[$field_name][0][value]"], 'Field value found on user account page.');
-    */
   }
 
 }
