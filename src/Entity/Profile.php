@@ -252,15 +252,12 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   /**
    * {@inheritdoc}
    */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    parent::postSave($storage, $update);
-
-    // We need to invalidate user_view cache tags.
-    Cache::invalidateTags([
-        'user:' . $this->getOwnerId(),
-        'user_view',
-      ]
-    );
+  public function getCacheTagsToInvalidate() {
+    $tags = parent::getCacheTagsToInvalidate();
+    return Cache::mergeTags($tags, [
+      'user:' . $this->getOwnerId(),
+      'user_view',
+    ]);
   }
 
 }

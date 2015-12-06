@@ -11,6 +11,7 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Access\AccessResult;
+use Drupal\profile\Entity\Profile;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\field\FieldConfigInterface;
@@ -147,41 +148,44 @@ function profile_form_field_config_edit_form_submit(array $form, FormStateInterf
 function profile_form_user_register_form_alter(&$form, FormStateInterface $form_state) {
   $attached_profile_form = FALSE;
   $weight = 90;
-  foreach (\Drupal::configFactory()->listAll('profile.type.') as $config_name) {
-    $config = \Drupal::config($config_name);
-    $profile_type = ProfileType::load($config->get('id'));
 
-    $instances = array_filter(\Drupal::service('entity_field.manager')->getFieldDefinitions('profile', $config->get('id')), function ($field_definition) {
+  /** @var ProfileType[] $profile_types */
+  $profile_types = ProfileType::loadMultiple();
+  foreach ($profile_types as $profile_type) {
+    $instances = array_filter(\Drupal::service('entity_field.manager')->getFieldDefinitions('profile', $profile_type->id()), function ($field_definition) {
       return $field_definition instanceof FieldConfigInterface;
     });
 
     if ($profile_type->getRegistration() === TRUE && count($instances)) {
-      $id = $profile_type->id();
-      $property = ['profiles', $id];
+      $property = ['profiles', $profile_type->id()];
       $profile = $form_state->get($property);
       if (empty($profile)) {
-        $entity = \Drupal::entityTypeManager()->getStorage('profile')->create([
-          'type' => $id,
-          'langcode' => $profile_type->language() ? $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->getId(),
+        $profile = Profile::create([
+          'type' => $profile_type->id(),
+          'langcode' => $profile_type->language() ?
+            $profile_type->language() : \Drupal::languageManager()->getDefaultLanguage()->getId(),
         ]);
 
         // Attach profile entity form.
-        $form_state->set($property, $entity);
-        $form_state->set('form_display_' . $id, EntityFormDisplay::collectRenderDisplay($entity, 'default'));
-        $form['entity_' . $id] = array(
+        $form_state->set($property, $profile);
+        $form_state->set('form_display_' . $profile_type->id(), EntityFormDisplay::collectRenderDisplay($profile, 'default'));
+        $form['entity_' . $profile_type->id()] = array(
           '#type' => 'details',
           '#title' => $profile_type->label(),
           '#tree' => TRUE,
-          '#parents' => array('entity_' . $id),
+          '#parents' => array('entity_' . $profile_type->id()),
           '#weight' => ++$weight,
           '#open' => TRUE,
         );
-        $form_state->get('form_display_' . $id)->buildForm($entity, $form['entity_' . $id], $form_state);
+        $form_state
+          ->get('form_display_' . $profile_type->id())
+          ->buildForm($profile, $form['entity_' . $profile_type->id()], $form_state);
 
         $attached_profile_form = TRUE;
       }
     }
   }
+
   if ($attached_profile_form) {
     $form['actions']['submit']['#validate'][] = 'profile_form_user_register_form_validate';
     $form['actions']['submit']['#submit'][] = 'profile_form_user_register_form_submit';
@@ -195,17 +199,22 @@ function profile_form_user_register_form_validate(array &$form, FormStateInterfa
   $profiles = $form_state->get('profiles');
   if (!empty($profiles)) {
     foreach ($profiles as $bundle => $entity) {
+      /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_display */
       $form_display = $form_state->get('form_display_' . $bundle);
       $form_display->extractFormValues($entity, $form['entity_' . $bundle], $form_state);
       $form_display->validateFormValues($entity, $form['entity_' . $bundle], $form_state);
     }
   }
+  // Entity was validated in entityFormValidate(). This will prevent validation
+  // exception from being thrown.
+  $form_state->getFormObject()->getEntity()->validate();
 }
 
 /**
  * Extra form submission handler for the user registration form.
  */
 function profile_form_user_register_form_submit(array &$form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Session\AccountInterface $account */
   $account = $form_state->getFormObject()->getEntity();
   $profiles = $form_state->get('profiles');
   if (!empty($profiles)) {
