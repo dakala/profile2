@@ -27,6 +27,24 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
   public function getRegistration();
 
   /**
+   * Return the allow multiple flag.
+   *
+   * @return bool
+   *   TRUE if multiple allowed.
+   */
+  public function getMultiple();
+
+  /**
+   * Set the allow multiple flag.
+   *
+   * @param bool $multiple
+   *   Boolean for the allow multiple flag.
+   *
+   * @return $this
+   */
+  public function setMultiple($multiple);
+
+  /**
    * Returns the profile type's weight.
    *
    * @return int
