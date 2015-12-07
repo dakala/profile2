@@ -77,7 +77,7 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
         $build['profiles'][$profile_type->id()] = array(
           '#theme' => 'profile_items',
           '#profile_items' => $profiles,
-          '#type' => $profile_type->label(),
+          '#title' => $profile_type->label(),
         );
       }
     }
@@ -232,7 +232,7 @@ function profile_form_user_register_form_submit(array &$form, FormStateInterface
 function profile_theme() {
   return array(
     'profile_items' => array(
-      'variables' => array('profile_items' => NULL, 'type' => NULL),
+      'variables' => array('profile_items' => NULL, 'title' => NULL),
       'template' => 'profile-items',
     ),
   );
@@ -243,7 +243,6 @@ function profile_theme() {
  */
 function template_preprocess_profile_items(&$variables) {
   if (count($variables['profile_items'])) {
-    $variables['title'] = $variables['type'];
     foreach ($variables['profile_items'] as $profile_item) {
       $view_builder = \Drupal::entityTypeManager()->getViewBuilder($profile_item->getEntityTypeId());
       $variables['items'][] = $view_builder->view($profile_item, 'default');
