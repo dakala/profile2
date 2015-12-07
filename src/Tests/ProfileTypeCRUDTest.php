@@ -8,7 +8,6 @@
 namespace Drupal\profile\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\simpletest\WebTestBase;
 use Drupal\Component\Utility\Unicode;
 
 /**
@@ -16,19 +15,34 @@ use Drupal\Component\Utility\Unicode;
  *
  * @group profile
  */
-class ProfileTypeCRUDTest extends WebTestBase {
+class ProfileTypeCRUDTest extends ProfileTestBase {
 
-  public static $modules = ['profile', 'field_ui', 'text'];
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->adminUser = $this->drupalCreateUser([
+      'access user profiles',
+      'administer profile types',
+      'administer profile fields',
+      'administer profile display',
+      'bypass profile access',
+    ]);
+  }
 
   /**
    * Tests CRUD operations for profile types through the UI.
    */
-  function testCRUDUI() {
-    $this->drupalLogin($this->rootUser);
+  public function testCRUDUI() {
+    $this->drupalLogin($this->adminUser);
 
     // Create a new profile type.
     $this->drupalGet('admin/config/people/profiles/types');
+    $this->assertResponse(200);
     $this->clickLink(t('Add profile type'));
+
     $this->assertUrl('admin/config/people/profiles/types/add');
     $id = Unicode::strtolower($this->randomMachineName());
     $label = $this->randomString();
@@ -54,6 +68,8 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $this->assertUrl('admin/config/people/profiles/types');
     $this->assertRaw(new FormattableMarkup('%label profile type has been updated.', ['%label' => $label]));
 
+    \Drupal::service('entity_type.bundle.info')->clearCachedBundles();
+
     // Add a field to the profile type.
     $this->drupalGet("admin/config/people/profiles/types/manage/$id/fields/add-field");
     $field_name = Unicode::strtolower($this->randomMachineName());
@@ -66,12 +82,6 @@ class ProfileTypeCRUDTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, [], t('Save field settings'));
     $this->drupalPostForm(NULL, [], t('Save settings'));
-    $this->assertUrl("admin/config/people/profiles/types/manage/$id/fields", [
-      'query' => [
-        'field_config' => "profile.$id.field_$field_name",
-        'destinations[0]' => "admin/config/people/profiles/types/manage/$id/fields/add-field",
-      ]
-    ]);
     $this->assertRaw(new FormattableMarkup('Saved %label configuration.', ['%label' => $field_label]));
 
     // Rename the profile type ID.
@@ -94,7 +104,7 @@ class ProfileTypeCRUDTest extends WebTestBase {
     //   correctly. The pre-existing field does not appear on the Manage
     //   fields page of the renamed bundle. Not even flushing all caches
     //   helps. Can be reproduced manually.
-    //$this->assertText(check_plain($field_label));
+    // $this->assertText(check_plain($field_label));
   }
 
 }

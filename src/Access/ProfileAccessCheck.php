@@ -20,10 +20,10 @@ use Drupal\profile\Entity\ProfileTypeInterface;
 class ProfileAccessCheck implements AccessInterface {
 
   /**
- * The entity manager.
- *
- * @var \Drupal\Core\Entity\EntityTypeManagerInterface
- */
+   * The entity manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
   /**

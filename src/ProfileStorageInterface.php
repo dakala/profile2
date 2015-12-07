@@ -40,4 +40,5 @@ interface ProfileStorageInterface extends EntityStorageInterface {
    *    An array of loaded profile entities.
    */
   public function loadMultipleByUser(AccountInterface $account, $profile_type);
+
 }

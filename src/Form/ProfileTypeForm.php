@@ -22,7 +22,7 @@ class ProfileTypeForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  function form(array $form, FormStateInterface $form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $type = $this->entity;
 
@@ -72,10 +72,7 @@ class ProfileTypeForm extends EntityForm {
     ) {
       $actions['save_continue'] = $actions['submit'];
       $actions['save_continue']['#value'] = t('Save and manage fields');
-      $actions['save_continue']['#submit'][] = [
-        $this,
-        'redirectToFieldUI'
-      ];
+      $actions['save_continue']['#submit'][] = [$this, 'redirectToFieldUI'];
     }
     return $actions;
   }
@@ -110,15 +107,18 @@ class ProfileTypeForm extends EntityForm {
    */
   public function delete(array $form, FormStateInterface $form_state) {
     $form_state->setRedirect('entity.profile_type.delete_form', [
-      'profile_type' => $this->entity->id()
+      'profile_type' => $this->entity->id(),
     ]);
   }
 
   /**
    * Check whether the profile type exists.
    *
-   * @param $id
+   * @param string $id
+   *   A string representing a profile type ID.
+   *
    * @return bool
+   *   Returns bool if profile exists.
    */
   public function exists($id) {
     $profile_type = ProfileType::load($id);

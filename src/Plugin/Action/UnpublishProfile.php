@@ -25,7 +25,8 @@ class UnpublishProfile extends ActionBase {
    * {@inheritdoc}
    */
   public function execute($entity = NULL) {
-    $entity->status = PROFILE_NOT_ACTIVE;
+    /** @var \Drupal\profile\Entity\ProfileInterface $entity */
+    $entity->setActive(FALSE);
     $entity->save();
   }
 

@@ -7,63 +7,89 @@
 
 namespace Drupal\profile\Tests;
 
-use Drupal\simpletest\KernelTestBase;
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\profile\Entity\Profile;
+use Drupal\profile\Entity\ProfileType;
+use Drupal\user\Entity\User;
 
 /**
  * Tests basic CRUD functionality of profiles.
  *
  * @group profile
  */
-class ProfileCRUDTest extends KernelTestBase {
+class ProfileCRUDTest extends ProfileTestBase {
 
-  public static $modules = ['system', 'field', 'field_sql_storage', 'user', 'profile'];
+  /**
+   * Testing demo user 1.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  public $user1;
 
-  function setUp() {
-    parent::setUp();
-    $this->installSchema('system', 'url_alias');
-    $this->installSchema('system', 'sequences');
-    $this->installSchema('user', 'users_data');
-    $this->installEntitySchema('user');
-    $this->installEntitySchema('profile');
-    $this->enableModules(['field', 'entity_reference', 'user', 'profile']);
-  }
+  /**
+   * Testing demo user 2.
+   *
+   * @var \Drupal\user\UserInterface;
+   */
+  public $user2;
+
+  /**
+   * Profile entity storage.
+   *
+   * @var \Drupal\profile\ProfileStorageInterface
+   */
+  public $profileStorage;
 
   /**
    * Tests CRUD operations.
    */
-  function testCRUD() {
+  public function testCRUD() {
     $types_data = [
       'profile_type_0' => ['label' => $this->randomMachineName()],
       'profile_type_1' => ['label' => $this->randomMachineName()],
     ];
+
+    /** @var ProfileType[] $types */
+    $types = [];
     foreach ($types_data as $id => $values) {
-      $types[$id] = entity_create('profile_type', ['id' => $id] + $values);
+      $types[$id] = ProfileType::create(['id' => $id] + $values);
       $types[$id]->save();
     }
-    $this->user1 = entity_create('user', [
+
+    $this->user1 = User::create([
       'name' => $this->randomMachineName(),
       'mail' => $this->randomMachineName() . '@example.com',
     ]);
     $this->user1->save();
-    $this->user2 = entity_create('user', [
+    $this->user2 = User::create([
       'name' => $this->randomMachineName(),
       'mail' => $this->randomMachineName() . '@example.com',
     ]);
     $this->user2->save();
 
+    $this->profileStorage = \Drupal::entityTypeManager()->getStorage('profile');
+
     // Create a new profile.
-    $profile = entity_create('profile', $expected = [
+    $profile = Profile::create($expected = [
       'type' => $types['profile_type_0']->id(),
       'uid' => $this->user1->id(),
     ]);
+
     $this->assertIdentical($profile->id(), NULL);
     $this->assertTrue($profile->uuid());
     $this->assertIdentical($profile->getType(), $expected['type']);
-    $this->assertIdentical($profile->label(), t('@type profile of @username (uid: @uid)',
+
+    $expected_label = t('@type profile of @username (uid: @uid)',
       [
         '@type' => $types['profile_type_0']->label(),
-        '@username' => $this->user1->getUsername(),
+        '@username' => $this->user1->getDisplayName(),
         '@uid' => $this->user1->id(),
+      ]);
+
+    $this->assertEqual($profile->label(), $expected_label,
+      new FormattableMarkup('Expected "%expected" but got "%got"', [
+        '%expected' => $expected_label,
+        '%got' => $profile->label(),
       ])
     );
     $this->assertIdentical($profile->getOwnerId(), $this->user1->id());
@@ -77,26 +103,28 @@ class ProfileCRUDTest extends KernelTestBase {
     $this->assertIdentical($profile->getChangedTime(), REQUEST_TIME);
 
     // List profiles for the user and verify that the new profile appears.
-    $list = entity_load_multiple_by_properties('profile', [
-      'uid' => $this->user1->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [(int) $profile->id()]);
 
     // Reload and update the profile.
-    $profile = entity_load('profile', $profile->id());
+    /** @var Profile $profile */
+    $profile = Profile::load($profile->id());
     $profile->setChangedTime($profile->getChangedTime() - 1000);
     $original = clone $profile;
     $status = $profile->save();
+
     $this->assertIdentical($status, SAVED_UPDATED);
     $this->assertIdentical($profile->id(), $original->id());
     $this->assertEqual($profile->getCreatedTime(), REQUEST_TIME);
     $this->assertEqual($original->getChangedTime(), REQUEST_TIME - 1000);
-    $this->assertEqual($profile->getChangedTime(), REQUEST_TIME);
+    // Changed time is only updated when saved through the UI form.
+    // @see \Drupal\Core\Entity\ContentEntityForm::submitForm().
+    $this->assertEqual($profile->getChangedTime(), REQUEST_TIME - 1000);
 
     // Create a second profile.
     $user1_profile1 = $profile;
-    $profile = entity_create('profile', [
+    $profile = Profile::create([
       'type' => $types['profile_type_0']->id(),
       'uid' => $this->user1->id(),
     ]);
@@ -105,9 +133,7 @@ class ProfileCRUDTest extends KernelTestBase {
     $user1_profile = $profile;
 
     // List profiles for the user and verify that both profiles appear.
-    $list = entity_load_multiple_by_properties('profile', [
-      'uid' => $this->user1->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [
       (int) $user1_profile1->id(),
@@ -116,15 +142,13 @@ class ProfileCRUDTest extends KernelTestBase {
 
     // Delete the second profile and verify that the first still exists.
     $user1_profile->delete();
-    $this->assertFalse(entity_load('profile', $user1_profile->id()));
-    $list = entity_load_multiple_by_properties('profile', [
-      'uid' => (int) $this->user1->id(),
-    ]);
+    $this->assertFalse(Profile::load($user1_profile->id()));
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [(int) $user1_profile1->id()]);
 
     // Create a new second profile.
-    $user1_profile = entity_create('profile', [
+    $user1_profile = Profile::create([
       'type' => $types['profile_type_1']->id(),
       'uid' => $this->user1->id(),
     ]);
@@ -132,7 +156,7 @@ class ProfileCRUDTest extends KernelTestBase {
     $this->assertIdentical($status, SAVED_NEW);
 
     // Create a profile for the second user.
-    $user2_profile1 = entity_create('profile', [
+    $user2_profile1 = Profile::create([
       'type' => $types['profile_type_0']->id(),
       'uid' => $this->user2->id(),
     ]);
@@ -141,17 +165,13 @@ class ProfileCRUDTest extends KernelTestBase {
 
     // Delete the first user and verify that all of its profiles are deleted.
     $this->user1->delete();
-    $this->assertFalse(entity_load('user', $this->user1->id()));
-    $list = entity_load_multiple_by_properties('profile', [
-      'uid' => $this->user1->id(),
-    ]);
+    $this->assertFalse(User::load($this->user1->id()));
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user1->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, []);
 
     // List profiles for the second user and verify that they still exist.
-    $list = entity_load_multiple_by_properties('profile', [
-      'uid' => $this->user2->id(),
-    ]);
+    $list = $this->profileStorage->loadByProperties(['uid' => $this->user2->id()]);
     $list_ids = array_keys($list);
     $this->assertEqual($list_ids, [(int) $user2_profile1->id()]);
 

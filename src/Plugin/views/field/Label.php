@@ -7,6 +7,7 @@
 
 namespace Drupal\profile\Plugin\views\field;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\views\ResultRow;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
@@ -20,7 +21,7 @@ use Drupal\views\ViewExecutable;
 class Label extends FieldPluginBase {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\field\FieldPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -28,6 +29,9 @@ class Label extends FieldPluginBase {
     $this->additional_fields['profile_id'] = 'profile_id';
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function query() {
     $this->ensureMyTable();
     $this->addAdditionalFields();
@@ -39,7 +43,7 @@ class Label extends FieldPluginBase {
   public function render(ResultRow $values) {
     if ($entity = $this->getEntity($values)) {
       $mark = $this->getMark($entity);
-      return $this->renderLink($entity, $values) . ' ' . drupal_render($mark);
+      return $this->renderLink($entity, $values) . ' ' . $this->getRenderer()->render($mark);
     }
   }
 
@@ -54,7 +58,7 @@ class Label extends FieldPluginBase {
    * @return string
    *   Returns a string for the link text.
    */
-  protected function renderLink($profile, ResultRow $values) {
+  protected function renderLink(EntityInterface $profile, ResultRow $values) {
     if ($profile->access('view')) {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = 'profile/' . $profile->id();
@@ -65,12 +69,13 @@ class Label extends FieldPluginBase {
   /**
    * Helper function to get the renderable array of the entity's mark.
    *
-   * @param $entity
-   *  The profile entity this field belongs to.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The profile entity this field belongs to.
+   *
    * @return array
-   *  Renderable array of the entity mark.
+   *   Renderable array of the entity mark.
    */
-  protected function getMark($entity) {
+  protected function getMark(EntityInterface $entity) {
     return [
       '#theme' => 'mark',
       '#mark_type' => node_mark($entity->id(), $entity->getChangedTime()),

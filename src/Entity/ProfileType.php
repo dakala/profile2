@@ -5,7 +5,6 @@
  * Contains \Drupal\profile\Entity\ProfileType.
  */
 
-
 namespace Drupal\profile\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -138,6 +137,21 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    */
   public function setMultiple($multiple) {
     $this->multiple = $multiple;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getWeight() {
+    return $this->weight;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setWeight($weight) {
+    $this->weight = $weight;
     return $this;
   }
 

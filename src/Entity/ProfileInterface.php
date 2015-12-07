@@ -18,6 +18,9 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
 
   /**
    * Returns the profile type.
+   *
+   * @return string
+   *   The profile type name.
    */
   public function getType();
 
@@ -27,8 +30,7 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    * @param string $type
    *   The profile type.
    *
-   * @return \Drupal\profile\ProfileInterface
-   *   The called profile entity.
+   * @return $this
    */
   public function setType($type);
 
@@ -43,8 +45,7 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    * @param int $timestamp
    *   The profile creation timestamp.
    *
-   * @return \Drupal\profile\ProfileInterface
-   *   The called profile entity.
+   * @return $this
    */
   public function setCreatedTime($timestamp);
 
@@ -62,8 +63,7 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    * @param int $timestamp
    *   The UNIX timestamp of when this revision was created.
    *
-   * @return \Drupal\profile\ProfileInterface
-   *   The called profile entity.
+   * @return $this
    */
   public function setRevisionCreationTime($timestamp);
 
@@ -81,8 +81,7 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    * @param int $uid
    *   The user ID of the revision author.
    *
-   * @return \Drupal\profile\ProfileInterface
-   *   The called profile entity.
+   * @return $this
    */
   public function setRevisionAuthorId($uid);
 
@@ -94,7 +93,7 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
   /**
    * Returns the node published status indicator.
    *
-   * Unpublished profiles are only visible to their authors and to administrators.
+   * Unpublished profiles are only visible to their authors and administrators.
    *
    * @return bool
    *   TRUE if the profile is active.
@@ -104,11 +103,10 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
   /**
    * Sets the published status of a profile.
    *
-   * @param bool $actvie
+   * @param bool $active
    *   TRUE to set this profile to active, FALSE to set it to inactive.
    *
-   * @return \Drupal\profile\ProfileInterface
-   *   The called profile entity.
+   * @return $this
    */
   public function setActive($active);
 

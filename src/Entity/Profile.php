@@ -7,7 +7,9 @@
 
 namespace Drupal\profile\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -137,8 +139,8 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       t('@type profile of @username (uid: @uid)',
         [
           '@type' => $profile_type->label(),
-          '@username' => $this->getOwner()->getUsername(),
-          '@uid' => $this->getOwnerId()
+          '@username' => $this->getOwner()->getDisplayName(),
+          '@uid' => $this->getOwnerId(),
         ]);
   }
 
@@ -245,6 +247,17 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   public function setActive($active) {
     $this->set('status', $active ? PROFILE_ACTIVE : PROFILE_NOT_ACTIVE);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTagsToInvalidate() {
+    $tags = parent::getCacheTagsToInvalidate();
+    return Cache::mergeTags($tags, [
+      'user:' . $this->getOwnerId(),
+      'user_view',
+    ]);
   }
 
 }

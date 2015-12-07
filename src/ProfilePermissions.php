@@ -21,6 +21,7 @@ class ProfilePermissions {
    * Returns an array of profile type permissions.
    *
    * @return array
+   *    Returns an array of permissions.
    */
   public function profileTypePermissions() {
     $perms = [];
