@@ -107,7 +107,7 @@ class ProfileListBuilder extends EntityListBuilder {
       '#mark_type' => node_mark($entity->id(), $entity->getChangedTime()),
     ];
     $langcode = $entity->language()->id;
-    $uri = $entity->urlInfo();
+    $uri = $entity->toUrl();
     $options = $uri->getOptions();
     $options += ($langcode != LanguageInterface::LANGCODE_NOT_SPECIFIED && isset($languages[$langcode]) ? ['language' => $languages[$langcode]] : []);
     $uri->setOptions($options);
