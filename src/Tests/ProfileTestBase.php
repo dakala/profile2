@@ -46,7 +46,7 @@ abstract class ProfileTestBase extends WebTestBase {
   /**
    * Testing field on profile type.
    *
-   * @var \Drupal\field\FieldConfigInterface
+   * @var \Drupal\Core\Field\FieldConfigInterface
    */
   protected $field;
 

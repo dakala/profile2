@@ -82,12 +82,6 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, [], t('Save field settings'));
     $this->drupalPostForm(NULL, [], t('Save settings'));
-    $this->assertUrl("admin/config/people/profiles/types/manage/$id/fields", [
-      'query' => [
-        'destinations[0]' => "/admin/config/people/profiles/types/manage/$id/fields/add-field",
-        'field_config' => "profile.$id.field_$field_name",
-      ],
-    ]);
     $this->assertRaw(new FormattableMarkup('Saved %label configuration.', ['%label' => $field_label]));
 
     // Rename the profile type ID.

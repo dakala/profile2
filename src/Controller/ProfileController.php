@@ -9,6 +9,7 @@ namespace Drupal\profile\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\profile\Entity\ProfileInterface;
 use Drupal\profile\Entity\ProfileTypeInterface;
@@ -23,6 +24,8 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   /**
    * Provides the profile submission form.
    *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
    * @param \Drupal\user\UserInterface $user
    *   The user account.
    * @param \Drupal\profile\Entity\ProfileTypeInterface $profile_type
@@ -31,7 +34,7 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
    * @return array
    *   A profile submission form.
    */
-  public function addProfile(UserInterface $user, ProfileTypeInterface $profile_type) {
+  public function addProfile(RouteMatchInterface $route_match, UserInterface $user, ProfileTypeInterface $profile_type) {
 
     $profile = $this->entityTypeManager()->getStorage('profile')->create([
       'uid' => $user->id(),
@@ -44,6 +47,8 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   /**
    * Provides the profile edit form.
    *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
    * @param \Drupal\user\UserInterface $user
    *   The user account.
    * @param \Drupal\profile\Entity\ProfileInterface $profile
@@ -52,13 +57,15 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
    * @return array
    *   The profile edit form.
    */
-  public function editProfile(UserInterface $user, ProfileInterface $profile) {
+  public function editProfile(RouteMatchInterface $route_match, UserInterface $user, ProfileInterface $profile) {
     return $this->entityFormBuilder()->getForm($profile, 'edit');
   }
 
   /**
    * Provides profile delete form.
    *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match.
    * @param \Drupal\user\UserInterface $user
    *   The user account.
    * @param \Drupal\profile\Entity\ProfileTypeInterface $profile_type
@@ -69,7 +76,7 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
    * @return array
    *   Returns form array.
    */
-  public function deleteProfile(UserInterface $user, ProfileTypeInterface $profile_type, $id) {
+  public function deleteProfile(RouteMatchInterface $route_match, UserInterface $user, ProfileTypeInterface $profile_type, $id) {
     return $this->entityFormBuilder()->getForm(Profile::load($id), 'delete');
   }
 
@@ -103,19 +110,58 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
   public function userProfileForm(RouteMatchInterface $route_match, UserInterface $user, ProfileTypeInterface $profile_type) {
     /** @var \Drupal\profile\Entity\ProfileType $profile_type */
 
+    /** @var \Drupal\profile\Entity\ProfileInterface|bool $active_profile */
+    $active_profile = $this->entityTypeManager()->getStorage('profile')
+                           ->loadByUser($user, $profile_type->id());
+
     // If the profile type does not support multiple, only display an add form
     // if there are no entities, or an edit for the current.
     if (!$profile_type->getMultiple()) {
-      /** @var \Drupal\profile\Entity\ProfileInterface|bool $active_profile */
-      $active_profile = $this->entityTypeManager()->getStorage('profile')
-        ->loadByUser($user, $profile_type->id());
 
+      // If there is an active profile, provide edit form.
       if ($active_profile) {
-        return $this->editProfile($user, $active_profile);
+        return $this->editProfile($route_match, $user, $active_profile);
       }
-    }
 
-    return $this->addProfile($user, $profile_type);
+      // Else show the add form.
+      return $this->addProfile($route_match, $user, $profile_type);
+    }
+    // Display active, inactive, and link to create a profile.
+    else {
+      $build = [];
+
+      $active_profiles = $this->entityTypeManager()->getStorage('profile')
+                                ->loadMultipleByUser($user, $profile_type->id(), PROFILE_ACTIVE);
+      $inactive_profiles = $this->entityTypeManager()->getStorage('profile')
+                                ->loadMultipleByUser($user, $profile_type->id(), PROFILE_NOT_ACTIVE);
+
+      // If there is no active profile or inactive, display add form.
+      if (!$active_profile && !$inactive_profiles) {
+        return $this->addProfile($route_match, $user, $profile_type);
+      }
+
+      $build['add_profile'] = Link::createFromRoute(
+        $this->t('Add new @type', ['@type' => $profile_type->label()]),
+        "entity.profile.type.{$profile_type->id()}.user_profile_form.add",
+        ['user' => \Drupal::currentUser()->id(), 'profile_type' => $profile_type->id()])
+        ->toRenderable();
+
+      // Render the active profiles.
+      $build['active_profiles'] = [
+        '#theme' => 'profile_items',
+        '#profile_items' => $active_profiles,
+        '#title' => $this->t('Active @type', ['@type' => $profile_type->label()]),
+      ];
+
+      // List all inactive profiles.
+      $build['inactive_profiles'] = [
+        '#theme' => 'profile_items',
+        '#profile_items' => $inactive_profiles,
+        '#title' => $this->t('Inactive @type', ['@type' => $profile_type->label()]),
+      ];
+
+      return $build;
+    }
   }
 
 }
