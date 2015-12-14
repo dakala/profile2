@@ -43,7 +43,6 @@ use Drupal\user\UserInterface;
  *   field_ui_base_route = "entity.profile_type.edit_form",
  *   admin_permission = "administer profiles",
  *   base_table = "profile",
- *   data_table = "profile_field_data",
  *   revision_table = "profile_revision",
  *   fieldable = TRUE,
  *   entity_keys = {
@@ -108,7 +107,8 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
       ->setDescription(t('A boolean indicating whether the profile is active.'))
-      ->setRevisionable(TRUE);
+      ->setRevisionable(TRUE)
+      ->setDefaultValue(TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
@@ -118,6 +118,24 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the profile was last edited.'))
+      ->setRevisionable(TRUE);
+
+    $fields['revision_timestamp'] = BaseFieldDefinition::create('created')
+      ->setLabel(t('Revision timestamp'))
+      ->setDescription(t('The time that the current revision was created.'))
+      ->setQueryable(FALSE)
+      ->setRevisionable(TRUE);
+
+    $fields['revision_uid'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Revision user ID'))
+      ->setDescription(t('The user ID of the author of the current revision.'))
+      ->setSetting('target_type', 'user')
+      ->setQueryable(FALSE)
+      ->setRevisionable(TRUE);
+
+    $fields['revision_log'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Revision log message'))
+      ->setDescription(t('The log entry explaining the changes in this revision.'))
       ->setRevisionable(TRUE);
 
     return $fields;
@@ -231,6 +249,21 @@ class Profile extends ContentEntityBase implements ProfileInterface {
    */
   public function setRevisionAuthorId($uid) {
     $this->set('revision_uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRevisionLog() {
+    return $this->get('revision_log')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRevisionLog($revision_log) {
+    $this->set('revision_log', $revision_log);
     return $this;
   }
 
