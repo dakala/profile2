@@ -40,27 +40,27 @@ class ProfileTypeMultipleTest extends ProfileTestBase {
     $edit = [
       "{$this->field->getName()}[0][value]" => $value,
     ];
-    $this->drupalPostForm("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
+    $this->drupalPostForm("user/{$web_user1->id()}/{$this->type->id()}", $edit, t('Save'));
     $this->assertRaw(new FormattableMarkup('%type profile has been created.', [
       '%type' => $this->type->label(),
     ]));
 
-    $this->drupalGet("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}");
-    $this->assertLinkByHref("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}/add");
+    $this->drupalGet("user/{$web_user1->id()}/{$this->type->id()}");
+    $this->assertLinkByHref("user/{$web_user1->id()}/{$this->type->id()}/add");
     $this->assertText($value);
 
     $value2 = $this->randomMachineName();
     $edit = [
       "{$this->field->getName()}[0][value]" => $value2,
     ];
-    $this->drupalPostForm("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}/add", $edit, t('Save'));
+    $this->drupalPostForm("user/{$web_user1->id()}/{$this->type->id()}/add", $edit, t('Save'));
     $this->assertRaw(new FormattableMarkup('%type profile has been created.', [
       '%type' => $this->type->label(),
     ]));
 
     Cache::invalidateTags(['profile_view']);
 
-    $this->drupalGet("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}");
+    $this->drupalGet("user/{$web_user1->id()}/{$this->type->id()}");
     $this->assertText($value2);
   }
 }
