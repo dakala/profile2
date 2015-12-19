@@ -53,36 +53,57 @@ function profile_user_view(array &$build, UserInterface $account, EntityViewDisp
   if ($view_mode != 'full') {
     return;
   }
-  // Position profiles at the bottom of account page.
-  $weight = 100;
 
-  foreach (array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo('profile')) as $profile_type_id) {
-    $profiles = \Drupal::entityTypeManager()
-      ->getStorage('profile')
-      ->loadMultipleByUser($account, $profile_type_id);
+  // Iterate through each bundle and see if it's component exists.
+  foreach (ProfileType::loadMultiple() as $bundle) {
+    $component_key = 'profile_' . $bundle->id();
+    if ($display->getComponent($component_key)) {
 
-    if (count($profiles)) {
-      // Only display profiles user has access.
-      foreach ($profiles as $key => $profile) {
-        if (!$profile->access('view')) {
-          unset($profiles[$key]);
-        }
-      }
+      // Load the profiles for the account and bundle.
+      $profiles = \Drupal::entityTypeManager()
+        ->getStorage('profile')
+        ->loadMultipleByUser($account, $bundle->id());
 
       if (count($profiles)) {
-        /** @var ProfileType $profile_type */
-        $profile_type = ProfileType::load($profile_type_id);
+        // Only display profiles user has access.
+        foreach ($profiles as $key => $profile) {
+          if (!$profile->access('view')) {
+            unset($profiles[$key]);
+          }
+        }
 
-        $build['profiles']['#weight'] = $weight + $profile_type->getWeight();
-        $build['profiles'][$profile_type->id()] = array(
-          '#theme' => 'profile_items',
-          '#profile_items' => $profiles,
-          '#title' => $profile_type->label(),
-        );
+        if (count($profiles)) {
+          // Add to build render array.
+          $build[$component_key] = [
+            '#theme' => 'profile_items',
+            '#profile_items' => $profiles,
+            '#title' => $bundle->label(),
+            '#attached' => [
+              'library' => ['profile/drupal.profile-items']
+            ]
+          ];
+        }
       }
     }
   }
-  $build['#attached']['library'][] = 'profile/drupal.profile-items';
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function profile_entity_extra_field_info() {
+  $extra = [];
+
+  // Add each profile type as an extra field for display. Enabled by default.
+  foreach (ProfileType::loadMultiple() as $bundle) {
+    $extra['user']['user']['display']['profile_' . $bundle->id()] = array(
+      'label' => $bundle->label(),
+      'description' => t('Display @type profiles', ['@type' => $bundle->label()]),
+      'weight' => 10,
+      'visible' => TRUE,
+    );
+  }
+  return $extra;
 }
 
 /**
