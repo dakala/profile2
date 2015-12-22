@@ -70,7 +70,7 @@ class ProfileFieldAccessTest extends ProfileTestBase {
     $edit = [
       'field_secret[0][value]' => $secret,
     ];
-    $this->drupalPostForm("user/$uid/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/{$this->type->id()}", $edit, t('Save'));
 
     // User cache page need to be cleared to see new profile.
     Cache::invalidateTags([
