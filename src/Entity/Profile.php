@@ -109,6 +109,11 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setDescription(t('A boolean indicating whether the profile is active.'))
       ->setRevisionable(TRUE);
 
+    $fields['is_default'] = BaseFieldDefinition::create('boolean')
+       ->setLabel(t('Default'))
+       ->setDescription(t('A boolean indicating whether the profile is the default one.'))
+       ->setRevisionable(TRUE);
+
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the profile was created.'))
@@ -251,12 +256,49 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   /**
    * {@inheritdoc}
    */
+  public function isDefault() {
+    return (bool) $this->get('is_default')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDefault($is_default) {
+    $this->set('is_default', $is_default ? PROFILE_DEFAULT : PROFILE_NOT_DEFAULT);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCacheTagsToInvalidate() {
     $tags = parent::getCacheTagsToInvalidate();
     return Cache::mergeTags($tags, [
       'user:' . $this->getOwnerId(),
       'user_view',
     ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    /** @var \Drupal\profile\ProfileStorage $storage */
+    parent::postSave($storage, $update);
+
+    // Check if this profile is, or became the default.
+    if ($this->isDefault()) {
+      /** @var \Drupal\profile\Entity\ProfileInterface[] $profiles */
+      $profiles = $storage->loadMultipleByUser($this->getOwner(), $this->getType());
+
+      // Ensure that all other profiles are set to not default.
+      foreach ($profiles as $profile) {
+        if ($profile->id() != $this->id()) {
+          $profile->setDefault(FALSE);
+          $profile->save();
+        }
+      }
+    }
   }
 
 }
