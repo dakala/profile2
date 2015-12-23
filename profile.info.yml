@@ -7,4 +7,5 @@ version: VERSION
 configure: entity.profile_type.collection
 dependencies:
   - user
+  - entity
   - field

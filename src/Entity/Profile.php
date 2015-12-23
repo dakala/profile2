@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\entity\EntityKeysFieldsTrait;
 use Drupal\user\UserInterface;
 
 
@@ -62,35 +63,13 @@ use Drupal\user\UserInterface;
  */
 class Profile extends ContentEntityBase implements ProfileInterface {
 
-  use EntityChangedTrait;
+  use EntityChangedTrait, EntityKeysFieldsTrait;
 
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-
-    $fields['profile_id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Profile ID'))
-      ->setDescription(t('The profile ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The profile UUID.'))
-      ->setReadOnly(TRUE);
-
-    $fields['revision_id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Revision ID'))
-      ->setDescription(t('The profile revision ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Profile type'))
-      ->setDescription(t('The profile type.'))
-      ->setSetting('target_type', 'profile_type')
-      ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
+    $fields = self::entityKeysBaseFieldDefinitions($entity_type);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))
@@ -98,11 +77,6 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default');
-
-    $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
-      ->setDescription(t('The profile language code.'))
-      ->setRevisionable(TRUE);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
