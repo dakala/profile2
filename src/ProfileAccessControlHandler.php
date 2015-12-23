@@ -20,26 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @see \Drupal\profile\Entity\Profile
  */
-class ProfileAccessControlHandler extends EntityAccessControlHandler implements EntityHandlerInterface {
-
-  /**
-   * Constructs a NodeAccessControlHandler object.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type definition.
-   */
-  public function __construct(EntityTypeInterface $entity_type) {
-    parent::__construct($entity_type);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    return new static(
-      $entity_type
-    );
-  }
+class ProfileAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}
