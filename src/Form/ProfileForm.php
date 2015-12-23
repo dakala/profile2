@@ -88,7 +88,7 @@ class ProfileForm extends ContentEntityForm {
    *   A reference to a keyed array containing the current state of the form.
    */
   public function activate(array $form, FormStateInterface $form_state) {
-    $form_state->setValue('status', FALSE);
+    $form_state->setValue('status', TRUE);
   }
 
   /**
