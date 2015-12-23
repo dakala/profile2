@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\entity\EntityKeysFieldsTrait;
 use Drupal\user\UserInterface;
 
 
@@ -62,35 +63,13 @@ use Drupal\user\UserInterface;
  */
 class Profile extends ContentEntityBase implements ProfileInterface {
 
-  use EntityChangedTrait;
+  use EntityChangedTrait, EntityKeysFieldsTrait;
 
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-
-    $fields['profile_id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Profile ID'))
-      ->setDescription(t('The profile ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The profile UUID.'))
-      ->setReadOnly(TRUE);
-
-    $fields['revision_id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Revision ID'))
-      ->setDescription(t('The profile revision ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Profile type'))
-      ->setDescription(t('The profile type.'))
-      ->setSetting('target_type', 'profile_type')
-      ->setSetting('max_length', EntityTypeInterface::BUNDLE_MAX_LENGTH);
+    $fields = self::entityKeysBaseFieldDefinitions($entity_type);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))
@@ -99,15 +78,15 @@ class Profile extends ContentEntityBase implements ProfileInterface {
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default');
 
-    $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
-      ->setDescription(t('The profile language code.'))
-      ->setRevisionable(TRUE);
-
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
       ->setDescription(t('A boolean indicating whether the profile is active.'))
       ->setRevisionable(TRUE);
+
+    $fields['is_default'] = BaseFieldDefinition::create('boolean')
+       ->setLabel(t('Default'))
+       ->setDescription(t('A boolean indicating whether the profile is the default one.'))
+       ->setRevisionable(TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
@@ -251,12 +230,49 @@ class Profile extends ContentEntityBase implements ProfileInterface {
   /**
    * {@inheritdoc}
    */
+  public function isDefault() {
+    return (bool) $this->get('is_default')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDefault($is_default) {
+    $this->set('is_default', $is_default ? PROFILE_DEFAULT : PROFILE_NOT_DEFAULT);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCacheTagsToInvalidate() {
     $tags = parent::getCacheTagsToInvalidate();
     return Cache::mergeTags($tags, [
       'user:' . $this->getOwnerId(),
       'user_view',
     ]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    /** @var \Drupal\profile\ProfileStorage $storage */
+    parent::postSave($storage, $update);
+
+    // Check if this profile is, or became the default.
+    if ($this->isDefault()) {
+      /** @var \Drupal\profile\Entity\ProfileInterface[] $profiles */
+      $profiles = $storage->loadMultipleByUser($this->getOwner(), $this->getType());
+
+      // Ensure that all other profiles are set to not default.
+      foreach ($profiles as $profile) {
+        if ($profile->id() != $this->id()) {
+          $profile->setDefault(FALSE);
+          $profile->save();
+        }
+      }
+    }
   }
 
 }

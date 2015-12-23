@@ -17,6 +17,7 @@ use Drupal\profile\Entity\ProfileInterface;
 use Drupal\field\FieldConfigInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
+
 /**
  * Denotes that the profile is not active.
  */
@@ -26,6 +27,16 @@ const PROFILE_NOT_ACTIVE = 0;
  * Denotes that the profile is active.
  */
 const PROFILE_ACTIVE = 1;
+
+/**
+ * Denotes that the profile is not default.
+ */
+const PROFILE_NOT_DEFAULT = 0;
+
+/**
+ * Denotes that the profile is default.
+ */
+const PROFILE_DEFAULT = 1;
 
 /**
  * Implements hook_help().

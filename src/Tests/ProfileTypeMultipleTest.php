@@ -18,19 +18,19 @@ use Drupal\Core\Cache\Cache;
 class ProfileTypeMultipleTest extends ProfileTestBase {
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-    $this->type->setMultiple(TRUE);
-    $this->type->save();
-    $this->container->get('router.builder')->rebuild();
-  }
-
-  /**
    * Tests the flow of a profile type that has multiple enabled.
    */
   public function testMultipleProfileType() {
+    $this->drupalLogin($this->adminUser);
+
+    $edit = [
+      'multiple' => 1,
+    ];
+    $this->drupalPostForm("admin/config/people/profiles/types/manage/{$this->type->id()}", $edit, t('Save'));
+    $this->assertRaw(new FormattableMarkup('%type profile type has been updated.', [
+      '%type' => $this->type->label(),
+    ]));
+
     $web_user1 = $this->drupalCreateUser(
       ["add own {$this->type->id()} profile", "edit own {$this->type->id()} profile"]
     );
