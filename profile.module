@@ -60,41 +60,24 @@ function profile_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_user_view().
  */
 function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode) {
-  // Only attach profiles for the full account view.
-  if ($view_mode != 'full') {
-    return;
-  }
-
   // Iterate through each bundle and see if it's component exists.
   foreach (ProfileType::loadMultiple() as $bundle) {
     $component_key = 'profile_' . $bundle->id();
     if ($display->getComponent($component_key)) {
 
-      // Load the profiles for the account and bundle.
-      $profiles = \Drupal::entityTypeManager()
-        ->getStorage('profile')
-        ->loadMultipleByUser($account, $bundle->id());
-
-      if (count($profiles)) {
-        // Only display profiles user has access.
-        foreach ($profiles as $key => $profile) {
-          if (!$profile->access('view')) {
-            unset($profiles[$key]);
-          }
-        }
-
-        if (count($profiles)) {
-          // Add to build render array.
-          $build[$component_key] = [
-            '#theme' => 'profile_items',
-            '#profile_items' => $profiles,
-            '#title' => $bundle->label(),
-            '#attached' => [
-              'library' => ['profile/drupal.profile-items']
-            ]
-          ];
-        }
-      }
+      // Embed the view of active profiles for profile type.
+      $build[$component_key] = [
+        '#type' => 'view',
+        '#name' => 'profiles',
+        '#display_id' => 'user_view',
+        '#arguments' => [$account->id(), $bundle->id(), 1],
+        '#embed' => TRUE,
+        '#title' => $bundle->label(),
+        '#pre_render' => [
+          ['\Drupal\views\Element\View', 'preRenderViewElement'],
+          'profile_views_add_title_pre_render',
+        ],
+      ];
     }
   }
 }
@@ -259,39 +242,30 @@ function profile_form_user_register_form_submit(array &$form, FormStateInterface
 }
 
 /**
- * Implements hook_theme().
+ * Pre render callback for profile embedded views to ensure a title is set.
+ * @param $element
+ *
+ * @return mixed
  */
-function profile_theme() {
-  return array(
-    'profile_items' => array(
-      'variables' => array('profile_items' => NULL, 'title' => NULL),
-      'template' => 'profile-items',
-    ),
-  );
+function profile_views_add_title_pre_render($element) {
+  /** @var \Drupal\views\ViewExecutable $view */
+  if (isset($element['#title'])) {
+    $view = $element['view_build']['#view'];
+    $view->setTitle($element['#title']);
+  }
+
+  return $element;
 }
 
 /**
- * Implements hook_preprocess_profile_items().
+ * Implements hook_preprocess_HOOK().
  */
-function template_preprocess_profile_items(&$variables) {
-  if (count($variables['profile_items'])) {
-    foreach ($variables['profile_items'] as $profile_item) {
-      $view_builder = \Drupal::entityTypeManager()->getViewBuilder($profile_item->getEntityTypeId());
-      $variables['items'][] = $view_builder->view($profile_item, 'default');
-      if ($profile_item->access('update')) {
-        $variables['edit_links'][] = \Drupal::l(t('Edit'), new Url("entity.profile.edit_form", array(
-          'user' => \Drupal::currentUser()->id(),
-          'profile_type' => $profile_item->bundle(),
-          'profile' => $profile_item->id(),
-        )));
-      }
-      if ($profile_item->access('delete')) {
-        $variables['delete_links'][] = \Drupal::l(t('Delete'), new Url("entity.profile.delete_form", array(
-          'user' => \Drupal::currentUser()->id(),
-          'profile_type' => $profile_item->bundle(),
-          'profile' => $profile_item->id(),
-        )));
-      }
-    }
+function profile_preprocess_views_view(&$variables) {
+  // We have to manually add back the title since it was removed by Views.
+  // @see template_preprocess_views_view()
+  /** @var \Drupal\views\ViewExecutable $view */
+  $view = $variables['view'];
+  if ($view->storage->id() == 'profiles') {
+    $variables['title'] = $view->getTitle();
   }
 }
