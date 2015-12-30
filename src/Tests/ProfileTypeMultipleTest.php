@@ -32,7 +32,11 @@ class ProfileTypeMultipleTest extends ProfileTestBase {
     ]));
 
     $web_user1 = $this->drupalCreateUser(
-      ["add own {$this->type->id()} profile", "edit own {$this->type->id()} profile"]
+      [
+        "view own {$this->type->id()} profile",
+        "add own {$this->type->id()} profile",
+        "edit own {$this->type->id()} profile",
+      ]
     );
     $this->drupalLogin($web_user1);
     $value = $this->randomMachineName();

@@ -93,6 +93,45 @@ class ProfileAccessTest extends ProfileTestBase {
   }
 
   /**
+   * Tests profile view access.
+   */
+  public function testProfileViewAccess() {
+    // Setup users.
+    $web_user1 = $this->drupalCreateUser([
+      "view own {$this->type->id()} profile",
+    ]);
+    $web_user2 = $this->drupalCreateUser([
+      "view any {$this->type->id()} profile",
+    ]);
+
+    // Setup profiles.
+    $profile1 = Profile::create([
+      'uid' => $web_user1->id(),
+      'type' => $this->type->id(),
+    ]);
+    $profile1->set($this->field->getName(), $this->randomString());
+    $profile1->save();
+    $profile2 = Profile::create([
+      'uid' => $web_user2->id(),
+      'type' => $this->type->id(),
+    ]);
+    $profile2->set($this->field->getName(), $this->randomString());
+    $profile2->save();
+
+    // Test user1 can only view own profiles.
+    $access = $profile1->access('view', $web_user1);
+    $this->assertTrue($access);
+    $access = $profile2->access('view', $web_user1);
+    $this->assertFalse($access);
+
+    // Test user2 can view any profiles.
+    $access = $profile1->access('view', $web_user2);
+    $this->assertTrue($access);
+    $access = $profile2->access('view', $web_user2);
+    $this->assertTrue($access);
+  }
+
+  /**
    * Tests profile edit flow and permissions.
    */
   public function testProfileEditAccess() {
@@ -121,15 +160,15 @@ class ProfileAccessTest extends ProfileTestBase {
     $profile2->save();
 
     // Test user1 can only edit own profiles.
-    $access = $this->accessControlHandler->access($profile1, 'edit', $web_user1);
+    $access = $profile1->access('edit', $web_user1);
     $this->assertTrue($access);
-    $access = $this->accessControlHandler->access($profile2, 'edit', $web_user1);
+    $access = $profile2->access('edit', $web_user1);
     $this->assertFalse($access);
 
     // Test user2 can edit any profiles.
-    $access = $this->accessControlHandler->access($profile1, 'edit', $web_user2);
+    $access = $profile1->access('edit', $web_user2);
     $this->assertTrue($access);
-    $access = $this->accessControlHandler->access($profile2, 'edit', $web_user2);
+    $access = $profile2->access('edit', $web_user2);
     $this->assertTrue($access);
   }
 
