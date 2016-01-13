@@ -127,15 +127,12 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
       // Else show the add form.
       return $this->addProfile($route_match, $user, $profile_type);
     }
-    // Display active, inactive, and link to create a profile.
+    // Display active, and link to create a profile.
     else {
       $build = [];
 
-      $inactive_profile = $this->entityTypeManager()->getStorage('profile')
-                                ->loadByUser($user, $profile_type->id(), PROFILE_NOT_ACTIVE);
-
-      // If there is no active profile or inactive, display add form.
-      if (!$active_profile && !$inactive_profile) {
+      // If there is no active profile, display add form.
+      if (!$active_profile) {
         return $this->addProfile($route_match, $user, $profile_type);
       }
 
@@ -145,7 +142,6 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
         ['user' => \Drupal::currentUser()->id(), 'profile_type' => $profile_type->id()])
         ->toRenderable();
 
-
       // Render the active profiles.
       $build['active_profiles'] = [
         '#type' => 'view',
@@ -154,20 +150,6 @@ class ProfileController extends ControllerBase implements ContainerInjectionInte
         '#arguments' => [$user->id(), $profile_type->id(), 1],
         '#embed' => TRUE,
         '#title' => $this->t('Active @type', ['@type' => $profile_type->label()]),
-        '#pre_render' => [
-          ['\Drupal\views\Element\View', 'preRenderViewElement'],
-          'profile_views_add_title_pre_render',
-        ],
-      ];
-
-      // List all inactive profiles.
-      $build['inactive_profiles'] = [
-        '#type' => 'view',
-        '#name' => 'profiles',
-        '#display_id' => 'profile_type_listing',
-        '#arguments' => [$user->id(), $profile_type->id(), 0],
-        '#embed' => TRUE,
-        '#title' => $this->t('Inactive @type', ['@type' => $profile_type->label()]),
         '#pre_render' => [
           ['\Drupal\views\Element\View', 'preRenderViewElement'],
           'profile_views_add_title_pre_render',
