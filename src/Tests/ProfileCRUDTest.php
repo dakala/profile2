@@ -41,6 +41,21 @@ class ProfileCRUDTest extends ProfileTestBase {
   public $profileStorage;
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->adminUser = $this->drupalCreateUser([
+      'access user profiles',
+      'administer profiles',
+      'administer profile types',
+      'bypass profile access',
+      'access administration pages'
+    ]);
+  }
+
+  /**
    * Tests CRUD operations.
    */
   public function testCRUD() {
@@ -176,6 +191,55 @@ class ProfileCRUDTest extends ProfileTestBase {
     $this->assertEqual($list_ids, [(int) $user2_profile1->id()]);
 
     // @todo Rename a profile type; verify that existing profiles are updated.
+  }
+
+  /**
+   * Tests CRUD operations for profile types through the UI.
+   */
+  public function testCRUDUI() {
+    $types_data = [
+      'profile_type_0' => ['label' => $this->randomMachineName()],
+      'profile_type_1' => ['label' => $this->randomMachineName()],
+    ];
+
+    /** @var ProfileType[] $types */
+    $types = [];
+    foreach ($types_data as $id => $values) {
+      $types[$id] = $this->createProfileType($id, $values['label']);
+    }
+
+    $this->user1 = User::create([
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
+    ]);
+    $this->user1->save();
+    $this->user2 = User::create([
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
+    ]);
+    $this->user2->save();
+
+    // Create new profiles.
+    $profile1 = Profile::create($expected = [
+      'type' => $types['profile_type_0']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile1->save();
+    $profile2 = Profile::create($expected = [
+      'type' => $types['profile_type_1']->id(),
+      'uid' => $this->user2->id(),
+    ]);
+    $profile2->save();
+
+    $this->drupalLogin($this->adminUser);
+
+    $this->drupalGet('admin/config');
+    $this->clickLink('User profiles');
+    $this->assertResponse(200);
+    $this->assertUrl('admin/config/people/profiles');
+
+    $this->assertLink($profile1->label());
+    $this->assertLinkByHref($profile2->toUrl('canonical')->toString());
   }
 
 }

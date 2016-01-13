@@ -102,21 +102,13 @@ class ProfileListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\profile\Entity\ProfileInterface $entity */
-    $mark = [
-      '#theme' => 'mark',
-      '#mark_type' => node_mark($entity->id(), $entity->getChangedTime()),
-    ];
-    $langcode = $entity->language()->id;
+    $langcode = $entity->language()->getId();
     $uri = $entity->toUrl();
     $options = $uri->getOptions();
     $options += ($langcode != LanguageInterface::LANGCODE_NOT_SPECIFIED && isset($languages[$langcode]) ? ['language' => $languages[$langcode]] : []);
     $uri->setOptions($options);
-    $row['label']['data'] = [
-      '#type' => 'link',
-      '#title' => $entity->label(),
-      '#suffix' => ' ' . $this->renderer->render($mark),
-    ] + $uri->toRenderArray();
-    $row['type'] = $entity->getType()->id();
+    $row['label'] = $entity->link();
+    $row['type'] = $entity->getType();
     $row['owner']['data'] = [
       '#theme' => 'username',
       '#account' => $entity->getOwner(),
@@ -145,27 +137,7 @@ class ProfileListBuilder extends EntityListBuilder {
       'route_parameters' => $route_params,
     ];
 
-    $row[] = [
-      'data' => [
-        '#type' => 'operations',
-        '#links' => $links,
-      ],
-    ];
-
     return $row + parent::buildRow($entity);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getDefaultOperations(EntityInterface $entity) {
-    $operations = parent::getDefaultOperations($entity);
-
-    $destination = drupal_get_destination();
-    foreach ($operations as $key => $operation) {
-      $operations[$key]['query'] = $destination;
-    }
-    return $operations;
   }
 
 }
