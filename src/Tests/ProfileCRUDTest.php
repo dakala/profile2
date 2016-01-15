@@ -53,6 +53,18 @@ class ProfileCRUDTest extends ProfileTestBase {
       'bypass profile access',
       'access administration pages'
     ]);
+
+    $this->user1 = User::create([
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
+    ]);
+    $this->user1->save();
+    $this->user1->save();
+    $this->user2 = User::create([
+      'name' => $this->randomMachineName(),
+      'mail' => $this->randomMachineName() . '@example.com',
+    ]);
+    $this->user2->save();
   }
 
   /**
@@ -242,4 +254,33 @@ class ProfileCRUDTest extends ProfileTestBase {
     $this->assertLinkByHref($profile2->toUrl('canonical')->toString());
   }
 
+  /**
+   * Tests default profile functionality.
+   */
+  public function testDefaultProfile() {
+    $profile_type = $this->createProfileType('test_defaults', 'test_defaults');
+
+    // Create new profiles.
+    $profile1 = Profile::create($expected = [
+      'type' => $profile_type->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile1->setActive(TRUE);
+    $profile1->save();
+    $profile2 = Profile::create($expected = [
+      'type' => $profile_type->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile2->setActive(TRUE);
+    $profile2->setDefault(TRUE);
+    $profile2->save();
+
+    $this->assertFalse($profile1->isDefault());
+    $this->assertTrue($profile2->isDefault());
+
+    $profile1->setDefault(TRUE)->save();
+
+    $this->assertFalse(Profile::load($profile2->id())->isDefault());
+    $this->assertTrue(Profile::load($profile1->id())->isDefault());
+  }
 }
