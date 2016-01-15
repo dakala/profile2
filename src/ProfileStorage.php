@@ -39,4 +39,18 @@ class ProfileStorage extends SqlContentEntityStorage implements ProfileStorageIn
       ]);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function loadDefaultByUser(AccountInterface $account, $profile_type) {
+    $result = $this->loadByProperties([
+      'uid' => $account->id(),
+      'type' => $profile_type,
+      'status' => PROFILE_ACTIVE,
+      'is_default' => TRUE,
+    ]);
+
+    return reset($result);
+  }
+
 }
