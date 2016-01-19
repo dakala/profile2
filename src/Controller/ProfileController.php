@@ -15,7 +15,6 @@ use Drupal\profile\Entity\ProfileInterface;
 use Drupal\profile\Entity\ProfileTypeInterface;
 use Drupal\profile\Entity\Profile;
 use Drupal\user\UserInterface;
-use Drupal\views\Views;
 
 /**
  * Returns responses for ProfileController routes.
