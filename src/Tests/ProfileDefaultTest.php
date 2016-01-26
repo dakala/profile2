@@ -58,7 +58,6 @@ class ProfileDefaultTest extends ProfileTestBase {
       'mail' => $this->randomMachineName() . '@example.com',
     ]);
     $this->user1->save();
-    $this->user1->save();
     $this->user2 = User::create([
       'name' => $this->randomMachineName(),
       'mail' => $this->randomMachineName() . '@example.com',
@@ -123,4 +122,138 @@ class ProfileDefaultTest extends ProfileTestBase {
     $default_profile = $storage->loadDefaultByUser($this->user1, $profile_type->id());
     $this->assertEqual($profile2->id(), $default_profile->id());
   }
+
+  /**
+   * Tests mark as default action.
+   */
+  public function testDefaultAction() {
+    $types_data = [
+      'profile_type_0' => [
+        'label' => $this->randomMachineName(),
+        'multiple' => TRUE,
+      ],
+      'profile_type_1' => [
+        'label' => $this->randomMachineName(),
+        'multiple' => TRUE,
+      ],
+    ];
+
+    /** @var ProfileType[] $types */
+    $types = [];
+    foreach ($types_data as $id => $values) {
+      $types[$id] = $this->createProfileType($id, $values['label']);
+    }
+
+    $restricted_user = $this->drupalCreateUser([
+      'administer profiles',
+      'edit own ' . $types['profile_type_0']->id() . ' profile',
+      'edit own ' . $types['profile_type_1']->id() . ' profile',
+    ]);
+
+    $admin_user = $this->drupalCreateUser([
+      'administer profiles',
+      'edit any ' . $types['profile_type_0']->id() . ' profile',
+      'edit any ' . $types['profile_type_1']->id() . ' profile',
+    ]);
+
+    // Create new profiles.
+    $profile_profile_type_0_restricted_user = Profile::create($expected = [
+      'type' => $types['profile_type_0']->id(),
+      'uid' => $restricted_user->id(),
+    ]);
+    $profile_profile_type_0_restricted_user->setActive(TRUE);
+    $profile_profile_type_0_restricted_user->save();
+    $profile_profile_type_0_user1_1 = Profile::create($expected = [
+      'type' => $types['profile_type_0']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile_profile_type_0_user1_1->setActive(TRUE);
+    $profile_profile_type_0_user1_1->save();
+    $profile_profile_type_0_user1_2 = Profile::create($expected = [
+      'type' => $types['profile_type_0']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile_profile_type_0_user1_2->setActive(TRUE);
+    $profile_profile_type_0_user1_2->save();
+    $profile_profile_type_1_user1 = Profile::create($expected = [
+      'type' => $types['profile_type_1']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile_profile_type_1_user1->setActive(TRUE);
+    $profile_profile_type_1_user1->save();
+    $profile_profile_type_1_user2 = Profile::create($expected = [
+      'type' => $types['profile_type_1']->id(),
+      'uid' => $this->user2->id(),
+    ]);
+    $profile_profile_type_1_user2->setActive(TRUE);
+    $profile_profile_type_1_user2->save();
+    $profile_profile_type_1_user1_inactive = Profile::create($expected = [
+      'type' => $types['profile_type_1']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile_profile_type_1_user1_inactive->setActive(FALSE);
+    $profile_profile_type_1_user1_inactive->save();
+    $profile_profile_type_1_user1_active = Profile::create($expected = [
+      'type' => $types['profile_type_1']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile_profile_type_1_user1_active->isActive(TRUE);
+    $profile_profile_type_1_user1_active->save();
+
+    // Make sure that $restricted_user is allowed to set default his own profile
+    // and not others'.
+    $this->drupalLogin($restricted_user);
+
+    $this->drupalGet('admin/config/people/profiles');
+
+    $this->clickLink('Mark as default', 0);
+    $this->assertTrue(Profile::load($profile_profile_type_0_restricted_user->id())->isDefault());
+    $this->clickLink('Mark as default', 1);
+    $this->assertResponse(403);
+    $this->drupalLogout();
+
+    $this->drupalLogin($admin_user);
+
+    $this->drupalGet('admin/config/people/profiles');
+
+    // Mark $profile_profile_type_0_user1_1 as default
+    // $profile_profile_type_0_user1_2 should stay not default.
+    $this->clickLink('Mark as default', 0);
+    $this->assertTrue(Profile::load($profile_profile_type_0_user1_1->id())->isDefault());
+    $this->assertFalse($profile_profile_type_0_user1_2->isDefault());
+
+    // Mark $profile_profile_type_0_user1_2 as default
+    // $profile_profile_type_0_user1_1 should become not default.
+    $profile_profile_type_0_user1_2->setDefault(TRUE);
+    $profile_profile_type_0_user1_2->save();
+    $this->assertTrue($profile_profile_type_0_user1_2->isDefault());
+    $this->assertFalse($profile_profile_type_0_user1_1->isDefault());
+
+    // Mark $profile_profile_type_1_user1 as default
+    // $profile_profile_type_1_user2 should stay not default.
+    $this->clickLink('Mark as default', 1);
+    $this->assertTrue(Profile::load($profile_profile_type_1_user1->id())->isDefault());
+    $this->assertFalse($profile_profile_type_1_user2->isDefault());
+
+    // Mark $profile_profile_type_1_user2 as default
+    // $profile_profile_type_1_user1 should stay default.
+    $profile_profile_type_1_user2->setDefault(TRUE);
+    $profile_profile_type_1_user2->save();
+    $this->assertTrue($profile_profile_type_1_user2->isDefault());
+    $this->assertTrue(Profile::load($profile_profile_type_1_user1->id())->isDefault());
+
+    // Mark $profile_profile_type_1_user1_inactive as default
+    // $profile_profile_type_1_user1_active should stay not default.
+    $this->clickLink('Mark as default', 2);
+    $this->assertTrue(Profile::load($profile_profile_type_1_user1_inactive->id())->isDefault());
+    $this->assertFalse($profile_profile_type_1_user1_active->isDefault());
+
+    // Mark $profile_profile_type_1_user1_active as default
+    // $profile_profile_type_1_user1_inactive should stay default.
+    $profile_profile_type_1_user1_active->setDefault(TRUE);
+    $profile_profile_type_1_user1_active->save();
+    $this->assertTrue($profile_profile_type_1_user1_active->isDefault());
+    $this->assertTrue(Profile::load($profile_profile_type_1_user1_inactive->id())->isDefault());
+  }
+
 }

@@ -57,7 +57,8 @@ use Drupal\user\UserInterface;
  *    "canonical" = "/profile/{profile}",
  *    "edit-form" = "/profile/{profile}/edit",
  *    "delete-form" = "/profile/{profile}/delete",
- *    "collection" = "/admin/config/people/profiles"
+ *    "collection" = "/admin/config/people/profiles",
+ *    "set-default" = "/profile/{profile}/set-default"
  *   },
  * )
  */

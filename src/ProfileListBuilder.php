@@ -83,6 +83,7 @@ class ProfileListBuilder extends EntityListBuilder {
         'class' => [RESPONSIVE_PRIORITY_LOW],
       ],
       'status' => $this->t('Status'),
+      'is_default' => $this->t('Default'),
       'changed' => [
         'data' => $this->t('Updated'),
         'class' => [RESPONSIVE_PRIORITY_LOW],
@@ -114,30 +115,31 @@ class ProfileListBuilder extends EntityListBuilder {
       '#account' => $entity->getOwner(),
     ];
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('not active');
+    $row['is_default'] = $entity->isDefault() ? $this->t('default') : $this->t('not default');
     $row['changed'] = $this->dateFormatter->format($entity->getChangedTime(), 'short');
     $language_manager = \Drupal::languageManager();
     if ($language_manager->isMultilingual()) {
       $row['language_name'] = $language_manager->getLanguageName($langcode);
     }
 
-    $route_params = [
-      'user' => $entity->getOwnerId(),
-      'type' => $entity->bundle(),
-      'profile' => $entity->id(),
-    ];
-
-    $links['edit'] = [
-      'title' => t('Edit'),
-      'route_name' => 'entity.profile.edit_form',
-      'route_parameters' => $route_params,
-    ];
-    $links['delete'] = [
-      'title' => t('Delete'),
-      'route_name' => 'entity.profile.delete_form',
-      'route_parameters' => $route_params,
-    ];
-
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOperations(EntityInterface $entity) {
+    $operations = parent::getOperations($entity);
+
+    if (!$entity->isDefault()) {
+      $operations['set_default'] = [
+        'title' => $this->t('Mark as default'),
+        'url' => $entity->toUrl('set-default'),
+        'parameter' => $entity,
+      ];
+    }
+
+    return $operations;
   }
 
 }
