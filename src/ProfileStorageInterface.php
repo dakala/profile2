@@ -45,4 +45,17 @@ interface ProfileStorageInterface extends EntityStorageInterface {
    */
   public function loadMultipleByUser(AccountInterface $account, $profile_type, $active);
 
+  /**
+   * Loads the default user profile.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *    The user entity.
+   * @param string $profile_type
+   *    The profile type.
+   *
+   * @return \Drupal\profile\Entity\ProfileInterface
+   *    An array of loaded profile entities.
+   */
+  public function loadDefaultByUser(AccountInterface $account, $profile_type);
+
 }

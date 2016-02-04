@@ -14,11 +14,14 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\simpletest\WebTestBase;
+use Drupal\profile\Tests\ProfileTestTrait;
 
 /**
  * Tests profile access handling.
  */
 abstract class ProfileTestBase extends WebTestBase {
+
+  use ProfileTestTrait;
 
   public static $modules = ['profile', 'field_ui', 'text', 'block'];
 
@@ -136,30 +139,6 @@ abstract class ProfileTestBase extends WebTestBase {
       "edit any $id profile",
       "delete any $id profile",
     ]);
-  }
-
-  /**
-   * Creates a profile type for tests.
-   *
-   * @param string $id
-   *   The profile type machine name.
-   * @param string $label
-   *   The profile type human display name.
-   * @param bool|FALSE $registration
-   *   Boolean if profile type shows on registration form.
-   *
-   * @return \Drupal\profile\Entity\ProfileInterface
-   *   Returns a profile type entity.
-   */
-  protected function createProfileType($id, $label, $registration = FALSE) {
-    $type = ProfileType::create([
-      'id' => $id,
-      'label' => $label,
-      'registration' => $registration,
-    ]);
-    $type->save();
-    $this->container->get('router.builder')->rebuild();
-    return $type;
   }
 
 }

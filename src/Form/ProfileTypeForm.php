@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field_ui\FieldUI;
 use Drupal\profile\Entity\ProfileType;
+use Drupal\user\Entity\Role;
 
 
 /**
@@ -59,6 +60,22 @@ class ProfileTypeForm extends EntityForm {
       '#title' => t('Allow multiple profiles'),
       '#default_value' => $type->getMultiple(),
     ];
+
+    $form['roles'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Allowed roles'),
+      '#description' => t('Limit the users that can have this profile by role.</br><em>None will indicate that all users can have this profile type.</em>'),
+      '#options' => [],
+      '#default_value' => $type->getRoles(),
+    ];
+    foreach (Role::loadMultiple() as $role) {
+      /** @var \Drupal\user\Entity\Role $role */
+      // We aren't interested in anon role.
+      if ($role->id() !== Role::ANONYMOUS_ID) {
+        $form['roles']['#options'][$role->id()] = $role->label();
+      }
+    }
+
     return $form;
   }
 

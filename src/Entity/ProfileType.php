@@ -39,6 +39,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     "label",
  *     "registration",
  *     "multiple",
+ *     "roles",
  *     "weight",
  *     "status",
  *     "langcode"
@@ -90,6 +91,13 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
   protected $multiple = FALSE;
 
   /**
+   * Which roles a user needs to have to attach profiles of this type.
+   *
+   * @var array
+   */
+  protected $roles = [];
+
+  /**
    * The weight of the profile type compared to others.
    *
    * @var integer
@@ -137,6 +145,21 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    */
   public function setMultiple($multiple) {
     $this->multiple = $multiple;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRoles() {
+    return $this->roles;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRoles($roles) {
+    $this->roles = $roles;
     return $this;
   }
 
