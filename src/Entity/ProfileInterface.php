@@ -110,4 +110,22 @@ interface ProfileInterface extends ContentEntityInterface, EntityChangedInterfac
    */
   public function setActive($active);
 
+  /**
+   * Returns the profile default status indicator.
+   *
+   * @return bool
+   *   TRUE if the profile is default.
+   */
+  public function isDefault();
+
+  /**
+   * Sets the default status of a profile.
+   *
+   * @param bool $is_default
+   *   TRUE to set this profile to default, FALSE to set it to not default.
+   *
+   * @return $this
+   */
+  public function setDefault($is_default);
+
 }

@@ -31,7 +31,7 @@ class ProfileViewController extends EntityViewController {
       $build['#attached']['drupal_add_html_head_link'][] = [
         [
           'rel' => $rel,
-          'href' => $profile->url($rel),
+          'href' => $profile->toUrl($rel)->toString(),
         ],
         TRUE,
       ];
@@ -41,7 +41,7 @@ class ProfileViewController extends EntityViewController {
         $build['#attached']['drupal_add_html_head_link'][] = [
           [
             'rel' => 'shortlink',
-            'href' => $profile->url($rel, ['alias' => TRUE]),
+            'href' => $profile->toUrl($rel, ['alias' => TRUE])->toString(),
           ],
           TRUE,
         ];

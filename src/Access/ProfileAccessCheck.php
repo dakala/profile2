@@ -73,6 +73,4 @@ class ProfileAccessCheck implements AccessInterface {
     // No opinion.
     return AccessResult::neutral();
   }
-
-
 }

@@ -49,7 +49,7 @@ class ProfileAccessTest extends ProfileTestBase {
 
     // Verify access through route.
     $this->drupalLogin($web_user1);
-    $this->drupalGet("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}");
+    $this->drupalGet("user/{$web_user1->id()}/{$this->type->id()}");
     $this->assertResponse(403);
 
     // Test user with permission to only add own profile.
@@ -65,16 +65,16 @@ class ProfileAccessTest extends ProfileTestBase {
 
     // Verify access through route.
     $this->drupalLogin($web_user2);
-    $this->drupalGet("user/{$web_user2->id()}/edit/user_profile_form/{$this->type->id()}");
+    $this->drupalGet("user/{$web_user2->id()}/{$this->type->id()}");
     $this->assertResponse(200);
-    $this->drupalGet("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}");
+    $this->drupalGet("user/{$web_user1->id()}/{$this->type->id()}");
     $this->assertResponse(403);
 
     // Create a new profile type.
     $this->createProfileType('test2', 'Test2 profile', TRUE);
     $access = $this->accessControlHandler->createAccess('test2', $web_user2);
     $this->assertFalse($access);
-    $this->drupalGet("user/{$web_user2->id()}/edit/user_profile_form/test2");
+    $this->drupalGet("user/{$web_user2->id()}/test2");
     $this->assertResponse(403);
 
     // Test user with permission to only add any profile.
@@ -86,10 +86,49 @@ class ProfileAccessTest extends ProfileTestBase {
 
     // Verify access through route.
     $this->drupalLogin($web_user3);
-    $this->drupalGet("user/{$web_user3->id()}/edit/user_profile_form/{$this->type->id()}");
+    $this->drupalGet("user/{$web_user3->id()}/{$this->type->id()}");
     $this->assertResponse(200);
-    $this->drupalGet("user/{$web_user2->id()}/edit/user_profile_form/{$this->type->id()}");
+    $this->drupalGet("user/{$web_user2->id()}/{$this->type->id()}");
     $this->assertResponse(200);
+  }
+
+  /**
+   * Tests profile view access.
+   */
+  public function testProfileViewAccess() {
+    // Setup users.
+    $web_user1 = $this->drupalCreateUser([
+      "view own {$this->type->id()} profile",
+    ]);
+    $web_user2 = $this->drupalCreateUser([
+      "view any {$this->type->id()} profile",
+    ]);
+
+    // Setup profiles.
+    $profile1 = Profile::create([
+      'uid' => $web_user1->id(),
+      'type' => $this->type->id(),
+    ]);
+    $profile1->set($this->field->getName(), $this->randomString());
+    $profile1->save();
+    $profile2 = Profile::create([
+      'uid' => $web_user2->id(),
+      'type' => $this->type->id(),
+    ]);
+    $profile2->set($this->field->getName(), $this->randomString());
+    $profile2->save();
+
+    // Test user1 can only view own profiles.
+    $access = $profile1->access('view', $web_user1);
+    $this->assertTrue($access);
+    $access = $profile2->access('view', $web_user1);
+    $this->assertFalse($access);
+
+    // Test user2 can view any profiles.
+    $access = $profile1->access('view', $web_user2);
+    $this->assertTrue($access);
+    $access = $profile2->access('view', $web_user2);
+    $this->assertTrue($access);
   }
 
   /**
@@ -121,15 +160,15 @@ class ProfileAccessTest extends ProfileTestBase {
     $profile2->save();
 
     // Test user1 can only edit own profiles.
-    $access = $this->accessControlHandler->access($profile1, 'edit', $web_user1);
+    $access = $profile1->access('edit', $web_user1);
     $this->assertTrue($access);
-    $access = $this->accessControlHandler->access($profile2, 'edit', $web_user1);
+    $access = $profile2->access('edit', $web_user1);
     $this->assertFalse($access);
 
     // Test user2 can edit any profiles.
-    $access = $this->accessControlHandler->access($profile1, 'edit', $web_user2);
+    $access = $profile1->access('edit', $web_user2);
     $this->assertTrue($access);
-    $access = $this->accessControlHandler->access($profile2, 'edit', $web_user2);
+    $access = $profile2->access('edit', $web_user2);
     $this->assertTrue($access);
   }
 
@@ -147,7 +186,7 @@ class ProfileAccessTest extends ProfileTestBase {
     $edit = [
       "{$this->field->getName()}[0][value]" => $this->randomString(),
     ];
-    $this->drupalPostForm("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
+    $this->drupalPostForm("user/{$web_user1->id()}/{$this->type->id()}", $edit, t('Save'));
     $this->assertRaw(new FormattableMarkup('%type profile has been created.', [
       '%type' => $this->type->label(),
     ]));
@@ -156,7 +195,7 @@ class ProfileAccessTest extends ProfileTestBase {
     $edit = [
       "{$this->field->getName()}[0][value]" => $this->randomString(),
     ];
-    $this->drupalPostForm("user/{$web_user1->id()}/edit/user_profile_form/{$this->type->id()}", $edit, t('Save'));
+    $this->drupalPostForm("user/{$web_user1->id()}/{$this->type->id()}", $edit, t('Save'));
     $this->assertRaw(new FormattableMarkup('%type profile has been updated.', [
       '%type' => $this->type->label(),
     ]));
@@ -180,7 +219,7 @@ class ProfileAccessTest extends ProfileTestBase {
     $edit = [
       "{$this->field->getName()}[0][value]" => $value,
     ];
-    $this->drupalPostForm("user/$uid/edit/user_profile_form/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/$id", $edit, t('Save'));
 
     /** @var \Drupal\profile\Entity\ProfileInterface $profile */
     $profile = \Drupal::entityTypeManager()

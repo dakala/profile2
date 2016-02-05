@@ -17,6 +17,11 @@ profile.type.*:
     multiple:
       type: boolean
       label: 'Allow multiple profiles'
+    roles:
+      label: 'Allowed roles'
+      type: sequence
+      sequence:
+        type: string
     weight:
       type: integer
       label: 'Weight'

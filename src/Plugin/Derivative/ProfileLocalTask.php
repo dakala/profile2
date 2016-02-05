@@ -51,13 +51,18 @@ class ProfileLocalTask extends DeriverBase implements ContainerDeriverInterface 
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     $this->derivatives = [];
+
+    // Starting weight for ordering the local tasks.
+    $weight = 10;
+
     foreach ($this->entityTypeManager->getStorage('profile_type')->loadMultiple() as $profile_type_id => $profile_type) {
       $this->derivatives["profile.type.$profile_type_id"] = [
         'title' => $profile_type->label(),
         'route_name' => "entity.profile.type.$profile_type_id.user_profile_form",
-        'parent_id' => 'entity.user.edit_form',
+        'base_route' => 'entity.user.canonical',
         'route_parameters' => ['profile_type' => $profile_type_id],
-        ] + $base_plugin_definition;
+        'weight' => ++$weight,
+      ] + $base_plugin_definition;
     }
 
     return $this->derivatives;

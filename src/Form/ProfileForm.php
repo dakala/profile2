@@ -86,14 +86,9 @@ class ProfileForm extends ContentEntityForm {
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   A reference to a keyed array containing the current state of the form.
-   *
-   * @return \Drupal\profile\Entity\ProfileInterface
-   *   The current profile entity.
    */
   public function activate(array $form, FormStateInterface $form_state) {
-    $profile = $this->entity;
-    $profile->setActive(TRUE);
-    return $profile;
+    $form_state->setValue('status', TRUE);
   }
 
   /**
@@ -103,14 +98,9 @@ class ProfileForm extends ContentEntityForm {
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   A reference to a keyed array containing the current state of the form.
-   *
-   * @return \Drupal\profile\Entity\ProfileInterface
-   *   The current profile entity.
    */
   public function deactivate(array $form, FormStateInterface $form_state) {
-    $profile = $this->entity;
-    $profile->setActive(FALSE);
-    return $profile;
+    $form_state->setValue('status', FALSE);
   }
 
   /**

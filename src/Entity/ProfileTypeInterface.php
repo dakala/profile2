@@ -27,6 +27,42 @@ interface ProfileTypeInterface extends ConfigEntityInterface {
   public function getRegistration();
 
   /**
+   * Return the allow multiple flag.
+   *
+   * @return bool
+   *   TRUE if multiple allowed.
+   */
+  public function getMultiple();
+
+  /**
+   * Set the allow multiple flag.
+   *
+   * @param bool $multiple
+   *   Boolean for the allow multiple flag.
+   *
+   * @return $this
+   */
+  public function setMultiple($multiple);
+
+  /**
+   * Return the user roles allowed by this profile type.
+   *
+   * @return array
+   *   Array of Drupal user roles ids.
+   */
+  public function getRoles();
+
+  /**
+   * Set the user roles allowed by this profile type.
+   *
+   * @param array $roles
+   *   Array of Drupal user roles ids.
+   *
+   * @return $this
+   */
+  public function setRoles($roles);
+
+  /**
    * Returns the profile type's weight.
    *
    * @return int

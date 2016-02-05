@@ -8,38 +8,18 @@
 namespace Drupal\profile;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\EntityHandlerInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\user\Entity\User;
+use Drupal\profile\Entity\ProfileType;
 
 /**
  * Defines the access control handler for the profile entity type.
  *
  * @see \Drupal\profile\Entity\Profile
  */
-class ProfileAccessControlHandler extends EntityAccessControlHandler implements EntityHandlerInterface {
-
-  /**
-   * Constructs a NodeAccessControlHandler object.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type definition.
-   */
-  public function __construct(EntityTypeInterface $entity_type) {
-    parent::__construct($entity_type);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    return new static(
-      $entity_type
-    );
-  }
+class ProfileAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}
@@ -58,6 +38,9 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
 
   /**
    * {@inheritdoc}
+   *
+   * When the $operation is 'add' then the $entity is of type 'profile_type',
+   * otherwise $entity is of type 'profile'.
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     $account = $this->prepareUser($account);
@@ -68,6 +51,23 @@ class ProfileAccessControlHandler extends EntityAccessControlHandler implements 
     // Use edit in any case.
     if ($operation == 'update') {
       $operation = 'edit';
+    }
+
+    // Check that if profile type has require roles, the user the profile is
+    // being added to has any of the required roles.
+    if ($entity->getEntityTypeId() == 'profile') {
+      $profile_roles = ProfileType::load($entity->bundle())->getRoles();
+      $user_roles = $entity->getOwner()->getRoles(TRUE);
+      if (!empty(array_filter($profile_roles)) && !array_intersect($user_roles, $profile_roles)) {
+        return AccessResult::forbidden();
+      }
+    }
+    elseif ($entity->getEntityTypeId() == 'profile_type') {
+      $profile_roles = $entity->getRoles();
+      $user_roles = User::load($user_page->id())->getRoles(TRUE);
+      if (!empty(array_filter($profile_roles)) && !array_intersect($user_roles, $profile_roles)) {
+        return AccessResult::forbidden();
+      }
     }
 
     if ($account->hasPermission('bypass profile access')) {

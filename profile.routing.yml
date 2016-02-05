@@ -2,6 +2,7 @@
 entity.profile.collection:
   path: '/admin/config/people/profiles'
   defaults:
+    _entity_list: 'profile'
     _title: 'Profiles'
   requirements:
     _permission: 'administer profiles'
