@@ -266,3 +266,21 @@ function profile_preprocess_views_view(&$variables) {
     $variables['title'] = $view->getTitle();
   }
 }
+
+/**
+ * Implements hook_views_data_alter().
+ *
+ * Adds a relationship from the user table to its' profile entity.
+ */
+function profile_views_data_alter(&$data) {
+  $data['users_field_data']['profile']['relationship'] = [
+    'title' => t('Profile'),
+    'label' => t('Profile'),
+    'group' => 'User',
+    'help' => t('Reference to the profile of a user.'),
+    'id' => 'standard',
+    'base' => 'profile',
+    'base field' => 'uid',
+    'field' => 'uid',
+  ];
+}
