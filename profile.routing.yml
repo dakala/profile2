@@ -35,7 +35,7 @@ entity.profile.add_form:
 entity.profile.canonical:
   path: '/profile/{profile}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileViewController::view'
+    _controller: '\Drupal\profile\Controller\ProfileViewController::view'
     _title_callback: '\Drupal\profile\Controller\ProfileViewController::title'
   requirements:
     _entity_access: 'profile.view'
