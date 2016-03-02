@@ -21,14 +21,14 @@ class ProfileViewController extends EntityViewController {
   public function view(EntityInterface $profile, $view_mode = 'full', $langcode = NULL) {
     $build = [
       'profiles' => \Drupal::entityTypeManager()
-      ->getViewBuilder($profile->getEntityTypeId())
-      ->view($profile, $view_mode, $langcode),
+        ->getViewBuilder($profile->getEntityTypeId())
+        ->view($profile, $view_mode, $langcode),
     ];
     $build['#title'] = $profile->label();
 
     foreach ($profile->uriRelationships() as $rel) {
       // Set the profile path as the canonical URL to prevent duplicate content.
-      $build['#attached']['drupal_add_html_head_link'][] = [
+      $build['#attached']['html_head_link'][] = [
         [
           'rel' => $rel,
           'href' => $profile->toUrl($rel)->toString(),
@@ -38,7 +38,7 @@ class ProfileViewController extends EntityViewController {
 
       if ($rel == 'canonical') {
         // Set the non-aliased canonical path as a default shortlink.
-        $build['#attached']['drupal_add_html_head_link'][] = [
+        $build['#attached']['html_head_link'][] = [
           [
             'rel' => 'shortlink',
             'href' => $profile->toUrl($rel, ['alias' => TRUE])->toString(),
