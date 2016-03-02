@@ -15,7 +15,7 @@ use Drupal\user\Entity\User;
 use Drupal\Component\Utility\Unicode;
 
 /**
- * Provides methods to create additional profiles and profile_types
+ * Provides methods to create additional profiles and profile_types.
  *
  * This trait is meant to be used only by test classes extending
  * \Drupal\simpletest\TestBase or Drupal\KernelTests\KernelTestBase.

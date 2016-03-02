@@ -51,10 +51,27 @@ class ProfileViewTest extends ViewKernelTestBase {
   public function testProfileRelationship() {
     $profile_type = $this->createProfileType();
 
-    $user[0] = $user1 = $this->createUser();
-    $user2 = $this->createUser();
-    $user[1] = $user3 = $this->createUser();
-    $user4 = $this->createUser();
+    $user[0] = $user1 = User::create([
+      'name' => Unicode::strtolower($this->randomMachineName()),
+      'status' => TRUE,
+    ]);
+    $user1->save();
+    $user2 = User::create([
+      'name' => Unicode::strtolower($this->randomMachineName()),
+      'status' => TRUE,
+    ]);
+    $user2->save();
+    $user[1] = $user3 = User::create([
+      'name' => Unicode::strtolower($this->randomMachineName()),
+      'status' => TRUE,
+    ]);
+    $user3->save();
+    $user4 = User::create([
+      'name' => Unicode::strtolower($this->randomMachineName()),
+      'status' => TRUE,
+    ]);
+    $user4->save();
+
     $profile[0] = $this->createProfile($profile_type, $user1);
     $profile[1] = $this->createProfile($profile_type, $user3);
 

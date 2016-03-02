@@ -275,4 +275,52 @@ class ProfileDefaultTest extends ProfileTestBase {
     $this->assertTrue(Profile::load($profile_profile_type_1_user1_inactive->id())->isDefault());
   }
 
+  /**
+   * Tests whether profile default on edit is working.
+   */
+  public function testProfileEdit() {
+    $types_data = [
+      'profile_type_0' => [
+        'label' => $this->randomMachineName(),
+        'multiple' => TRUE,
+      ],
+    ];
+
+    /** @var \Drupal\profile\Entity\ProfileTypeInterface[] $types */
+    $types = [];
+    foreach ($types_data as $id => $values) {
+      $types[$id] = $this->createProfileType($id, $values['label']);
+    }
+
+    $admin_user = $this->drupalCreateUser([
+      'administer profiles',
+      'administer users',
+      'edit any ' . $types['profile_type_0']->id() . ' profile',
+    ]);
+
+    // Create new profiles.
+    $profile1 = Profile::create($expected = [
+      'type' => $types['profile_type_0']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile1->save();
+    $profile2 = Profile::create($expected = [
+      'type' => $types['profile_type_0']->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile2->setDefault(TRUE);
+    $profile2->save();
+
+    $this->assertFalse($profile1->isDefault());
+    $this->assertTrue($profile2->isDefault());
+
+    $this->drupalLogin($admin_user);
+
+    $this->drupalPostForm("profile/{$profile1->id()}/edit", [], 'Save and make default');
+
+    \Drupal::entityTypeManager()->getStorage('profile')->resetCache([$profile1->id(), $profile2->id()]);
+    $this->assertTrue(Profile::load($profile1->id())->isDefault());
+    $this->assertFalse(Profile::load($profile2->id())->isDefault());
+  }
+
 }

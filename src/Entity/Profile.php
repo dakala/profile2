@@ -269,7 +269,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
 
       // Ensure that all other profiles are set to not default.
       foreach ($profiles as $profile) {
-        if ($profile->id() != $this->id()) {
+        if ($profile->id() != $this->id() && $profile->isDefault()) {
           $profile->setDefault(FALSE);
           $profile->save();
         }
