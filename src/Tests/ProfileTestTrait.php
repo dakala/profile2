@@ -52,22 +52,6 @@ trait ProfileTestTrait {
     return $type;
   }
 
-
-  /**
-   * Create a user, and optionally a profile.
-   *
-   * @return \Drupal\user\UserInterface
-   *   A newly created user.
-   */
-  protected function createUser() {
-    $user = User::create([
-      'name' => Unicode::strtolower($this->randomMachineName()),
-      'status' => TRUE,
-    ]);
-    $user->save();
-    return $user;
-  }
-
   /**
    * Create a user, and optionally a profile.
    *

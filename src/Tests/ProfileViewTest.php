@@ -7,6 +7,8 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Utility\Unicode;
+use Drupal\user\Entity\User;
 use Drupal\views\Tests\ViewKernelTestBase;
 use Drupal\views\Views;
 use Drupal\views\Tests\ViewTestData;
@@ -71,6 +73,21 @@ class ProfileViewTest extends ViewKernelTestBase {
       $this->assertEqual($row->uid, $user[$index]->id(), 'User ' . $user[$index]->id() . ' found on row: ' . $index);
       $this->assertEqual($row->profile_users_field_data_profile_id, $profile[$index]->id(), 'Profile ' . $profile[$index]->id() . ' found on view: ' . $index);
     }
+  }
+
+  /**
+   * Create a user, and optionally a profile.
+   *
+   * @return \Drupal\user\UserInterface
+   *   A newly created user.
+   */
+  protected function createUser() {
+    $user = User::create([
+      'name' => Unicode::strtolower($this->randomMachineName()),
+      'status' => TRUE,
+    ]);
+    $user->save();
+    return $user;
   }
 
 }
