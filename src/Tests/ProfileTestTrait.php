@@ -48,7 +48,7 @@ trait ProfileTestTrait {
       'roles' => $roles,
     ]);
     $type->save();
-    $this->container->get('router.builder')->rebuild();
+
     return $type;
   }
 
