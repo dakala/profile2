@@ -66,6 +66,27 @@ class ProfileDefaultTest extends ProfileTestBase {
   }
 
   /**
+   * Tests profiles are active by default.
+   */
+  public function testProfileActive() {
+    $profile_type = $this->createProfileType('test_defaults', 'test_defaults');
+
+    // Create new profiles.
+    $profile1 = Profile::create($expected = [
+      'type' => $profile_type->id(),
+      'uid' => $this->user1->id(),
+    ]);
+    $profile1->save();
+
+    $this->assertTrue($profile1->isActive());
+
+    $profile1->setActive(PROFILE_NOT_ACTIVE);
+    $profile1->save();
+
+    $this->assertFalse($profile1->isActive());
+  }
+
+  /**
    * Tests default profile functionality.
    */
   public function testDefaultProfile() {
@@ -76,13 +97,11 @@ class ProfileDefaultTest extends ProfileTestBase {
       'type' => $profile_type->id(),
       'uid' => $this->user1->id(),
     ]);
-    $profile1->setActive(TRUE);
     $profile1->save();
     $profile2 = Profile::create($expected = [
       'type' => $profile_type->id(),
       'uid' => $this->user1->id(),
     ]);
-    $profile2->setActive(TRUE);
     $profile2->setDefault(TRUE);
     $profile2->save();
 

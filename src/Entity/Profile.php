@@ -82,6 +82,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
       ->setDescription(t('A boolean indicating whether the profile is active.'))
+      ->setDefaultValue(TRUE)
       ->setRevisionable(TRUE);
 
     $fields['is_default'] = BaseFieldDefinition::create('boolean')
