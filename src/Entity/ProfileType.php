@@ -107,20 +107,6 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
   /**
    * {@inheritdoc}
    */
-  public function id() {
-    return $this->id;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLabel() {
-    return $this->get('label')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getRegistration() {
     return $this->registration;
   }
