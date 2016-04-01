@@ -9,6 +9,7 @@ namespace Drupal\profile\Tests;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Url;
 
 /**
  * Tests basic CRUD functionality of profile types.
@@ -30,6 +31,17 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
       'administer profile display',
       'bypass profile access',
     ]);
+  }
+
+  /**
+   * Verify that routes are created for the profile type.
+   */
+  public function testRoutes() {
+    $this->drupalLogin($this->adminUser);
+    $type = $this->createProfileType($this->randomMachineName());
+    \Drupal::service('router.builder')->rebuildIfNeeded();
+    $this->drupalGet("user/{$this->adminUser->id()}/{$type->id()}");
+    $this->assertResponse(200);
   }
 
   /**
@@ -83,19 +95,6 @@ class ProfileTypeCRUDTest extends ProfileTestBase {
     $this->drupalPostForm(NULL, [], t('Save field settings'));
     $this->drupalPostForm(NULL, [], t('Save settings'));
     $this->assertRaw(new FormattableMarkup('Saved %label configuration.', ['%label' => $field_label]));
-
-    // Rename the profile type ID.
-    $this->drupalGet("admin/config/people/profiles/types/manage/$id");
-    $new_id = Unicode::strtolower($this->randomMachineName());
-    $edit = [
-      'id' => $new_id,
-    ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertUrl('admin/config/people/profiles/types');
-    $this->assertRaw(new FormattableMarkup('%label profile type has been updated.', ['%label' => $label]));
-    $this->assertLinkByHref("admin/config/people/profiles/types/manage/$new_id");
-    $this->assertNoLinkByHref("admin/config/people/profiles/types/manage/$id");
-    $id = $new_id;
 
     // Verify that the field is still associated with it.
     $this->drupalGet("admin/config/people/profiles/types/manage/$id/fields");

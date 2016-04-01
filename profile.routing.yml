@@ -35,7 +35,7 @@ entity.profile.add_form:
 entity.profile.canonical:
   path: '/profile/{profile}'
   defaults:
-    _content: '\Drupal\profile\Controller\ProfileViewController::view'
+    _controller: '\Drupal\profile\Controller\ProfileViewController::view'
     _title_callback: '\Drupal\profile\Controller\ProfileViewController::title'
   requirements:
     _entity_access: 'profile.view'
@@ -46,3 +46,15 @@ entity.profile.multiple_delete_confirm:
     _form: '\Drupal\profile\Form\DeleteMultiple'
   requirements:
     _permission: 'administer profiles'
+
+entity.profile.set_default:
+  path: '/profile/{profile}/set-default'
+  defaults:
+    _controller: '\Drupal\profile\Controller\ProfileController::setDefault'
+  options:
+    parameters:
+      profile:
+        type: entity:profile
+  requirements:
+    _entity_access: 'profile.edit'
+    _csrf_token: 'TRUE'

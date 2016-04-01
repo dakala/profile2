@@ -7,10 +7,15 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\profile\Entity\ProfileTypeInterface;
 use Drupal\profile\Entity\ProfileType;
+use Drupal\profile\Entity\Profile;
+use Drupal\user\UserInterface;
+use Drupal\user\Entity\User;
+use Drupal\Component\Utility\Unicode;
 
 /**
- * Provides methods to create additional profiles and profile_types
+ * Provides methods to create additional profiles and profile_types.
  *
  * This trait is meant to be used only by test classes extending
  * \Drupal\simpletest\TestBase or Drupal\KernelTests\KernelTestBase.
@@ -29,7 +34,7 @@ trait ProfileTestTrait {
    * @param array $roles
    *   Array of user role machine names.
    *
-   * @return \Drupal\profile\Entity\ProfileInterface
+   * @return \Drupal\profile\Entity\ProfileTypeInterface
    *   Returns a profile type entity.
    */
   protected function createProfileType($id = NULL, $label = NULL, $registration = FALSE, $roles = []) {
@@ -43,8 +48,28 @@ trait ProfileTestTrait {
       'roles' => $roles,
     ]);
     $type->save();
-    $this->container->get('router.builder')->rebuild();
+
     return $type;
+  }
+
+  /**
+   * Create a user, and optionally a profile.
+   *
+   * @param \Drupal\profile\Entity\ProfileTypeInterface $profile_type
+   *   A profile type for the created profile entity.
+   * @param \Drupal\user\UserInterface $user
+   *   A user to create a profile.
+   *
+   * @return \Drupal\profile\Entity\ProfileInterface
+   *   A profile for a user.
+   */
+  protected function createProfile(ProfileTypeInterface $profile_type, UserInterface $user) {
+    $profile = Profile::create([
+      'type' => $profile_type->id(),
+      'uid' => $user->id(),
+    ]);
+    $profile->save();
+    return $profile;
   }
 
 }

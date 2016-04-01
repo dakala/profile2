@@ -186,7 +186,7 @@ class ProfileAccessTest extends ProfileTestBase {
     $edit = [
       "{$this->field->getName()}[0][value]" => $this->randomString(),
     ];
-    $this->drupalPostForm("user/{$web_user1->id()}/{$this->type->id()}", $edit, t('Save'));
+    $this->drupalPostForm("user/{$web_user1->id()}/{$this->type->id()}", $edit, 'Save and make default');
     $this->assertRaw(new FormattableMarkup('%type profile has been created.', [
       '%type' => $this->type->label(),
     ]));
@@ -219,7 +219,7 @@ class ProfileAccessTest extends ProfileTestBase {
     $edit = [
       "{$this->field->getName()}[0][value]" => $value,
     ];
-    $this->drupalPostForm("user/$uid/$id", $edit, t('Save'));
+    $this->drupalPostForm("user/$uid/$id", $edit, 'Save and make default');
 
     /** @var \Drupal\profile\Entity\ProfileInterface $profile */
     $profile = \Drupal::entityTypeManager()

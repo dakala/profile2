@@ -54,6 +54,40 @@ function profile_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function profile_theme() {
+  return [
+    'profile' => [
+      'render element' => 'elements',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for profile templates.
+ *
+ * Default template: profile.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An associative array containing rendered fields.
+ *   - attributes: HTML attributes for the containing element.
+ */
+function template_preprocess_profile(array &$variables) {
+  /** @var Drupal\profile\Entity\ProfileInterface $profile */
+  $profile = $variables['elements']['#profile'];
+
+  $variables['profile'] = $profile;
+  $variables['url'] = $profile->toUrl();
+  // Helpful $content variable for templates.
+  $variables['content'] = [];
+  foreach (\Drupal\Core\Render\Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
  * Implements hook_user_view().
  */
 function profile_user_view(array &$build, UserInterface $account, EntityViewDisplayInterface $display, $view_mode) {
@@ -265,4 +299,22 @@ function profile_preprocess_views_view(&$variables) {
   if ($view->storage->id() == 'profiles') {
     $variables['title'] = $view->getTitle();
   }
+}
+
+/**
+ * Implements hook_views_data_alter().
+ *
+ * Adds a relationship from the user table to its' profile entity.
+ */
+function profile_views_data_alter(&$data) {
+  $data['users_field_data']['profile']['relationship'] = [
+    'title' => t('Profile'),
+    'label' => t('Profile'),
+    'group' => 'User',
+    'help' => t('Reference to the profile of a user.'),
+    'id' => 'standard',
+    'base' => 'profile',
+    'base field' => 'uid',
+    'field' => 'uid',
+  ];
 }

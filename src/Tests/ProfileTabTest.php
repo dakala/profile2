@@ -7,6 +7,8 @@
 
 namespace Drupal\profile\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Url;
 use Drupal\profile\Entity\Profile;
 use Drupal\profile\Entity\ProfileType;
 use Drupal\user\Entity\User;
@@ -17,7 +19,7 @@ use Drupal\system\Tests\Menu\LocalTasksTest;
  *
  * @group profile
  */
-class ProfileTabTest extends LocalTasksTest {
+class ProfileTabTest extends ProfileTestBase {
 
   public static $modules = ['profile', 'field_ui', 'text', 'block'];
 
@@ -46,7 +48,7 @@ class ProfileTabTest extends LocalTasksTest {
       'administer profiles',
       'administer profile types',
       'bypass profile access',
-      'access administration pages'
+      'access administration pages',
     ]);
   }
 
@@ -106,6 +108,34 @@ class ProfileTabTest extends LocalTasksTest {
     ];
 
     $this->assertLocalTasks($tasks, 0);
+  }
+
+  /**
+   * Asserts local tasks in the page output.
+   *
+   * @param array $routes
+   *   A list of expected local tasks, prepared as an array of route names and
+   *   their associated route parameters, to assert on the page (in the given
+   *   order).
+   * @param int $level
+   *   (optional) The local tasks level to assert; 0 for primary, 1 for
+   *   secondary. Defaults to 0.
+   */
+  protected function assertLocalTasks(array $routes, $level = 0) {
+    $elements = $this->xpath('//*[contains(@class, :class)]//a', array(
+      ':class' => $level == 0 ? 'tabs primary' : 'tabs secondary',
+    ));
+    $this->assertTrue(count($elements), 'Local tasks found.');
+    foreach ($routes as $index => $route_info) {
+      list($route_name, $route_parameters) = $route_info;
+      $expected = Url::fromRoute($route_name, $route_parameters)->toString();
+      $method = ($elements[$index]['href'] == $expected ? 'pass' : 'fail');
+      $this->{$method}(new FormattableMarkup('Task @number href @value equals @expected.', [
+        '@number' => $index + 1,
+        '@value' => (string) $elements[$index]['href'],
+        '@expected' => $expected,
+      ]));
+    }
   }
 
 }

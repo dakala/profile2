@@ -7,7 +7,8 @@
 
 namespace Drupal\profile\Entity;
 
-use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Defines the profile type entity class.
@@ -53,7 +54,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   }
  * )
  */
-class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
+class ProfileType extends ConfigEntityBundleBase implements ProfileTypeInterface {
 
   /**
    * The primary identifier of the profile type.
@@ -103,20 +104,6 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
    * @var integer
    */
   protected $weight = 0;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function id() {
-    return $this->id;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLabel() {
-    return $this->get('label')->value;
-  }
 
   /**
    * {@inheritdoc}
@@ -177,5 +164,16 @@ class ProfileType extends ConfigEntityBase implements ProfileTypeInterface {
     $this->weight = $weight;
     return $this;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    // @todo Setting ->setRebuildNeeded isn't enough. Investigate.
+    \Drupal::service('router.builder')->rebuild();
+  }
+
 
 }

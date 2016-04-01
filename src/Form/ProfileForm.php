@@ -28,67 +28,33 @@ class ProfileForm extends ContentEntityForm {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityForm::actions().
+   * {@inheritdoc}
    */
   protected function actions(array $form, FormStateInterface $form_state) {
     $element = parent::actions($form, $form_state);
+    /** @var \Drupal\profile\Entity\ProfileInterface $profile */
     $profile = $this->entity;
 
-    if (\Drupal::currentUser()->hasPermission('administer profiles')) {
-      // Add an "Activate" button.
-      $element['activate'] = $element['submit'];
-      $element['activate']['#dropbutton'] = 'save';
-      if ($profile->isNew()) {
-        $element['activate']['#value'] = t('Save and make active');
-      }
-      else {
-        $element['activate']['#value'] = $profile->isActive() ? t('Save and keep active') : t('Save and make active');
-      }
-      $element['activate']['#weight'] = 0;
-      array_unshift($element['activate']['#submit'], [$this, 'activate']);
-
-      // Add a "Deactivate" button.
-      $element['deactivate'] = $element['submit'];
-      $element['deactivate']['#dropbutton'] = 'save';
-      if ($profile->isNew()) {
-        $element['deactivate']['#value'] = t('Save as inactive');
-      }
-      else {
-        $element['deactivate']['#value'] = !$profile->isActive() ? t('Save and keep inactive') : t('Save and make inactive');
-      }
-      $element['deactivate']['#weight'] = 10;
-      array_unshift($element['deactivate']['#submit'], [$this, 'deactivate']);
-
-      // If already deactivated, the 'activate' button is primary.
-      if ($profile->isActive()) {
-        unset($element['deactivate']['#button_type']);
-      }
-      // Otherwise, the 'deactivate' button is primary and should come first.
-      else {
-        unset($element['deactivate']['#button_type']);
-        $element['deactivate']['#weight'] = -10;
-      }
-
-      // Remove the "Save" button.
-      $element['submit']['#access'] = FALSE;
-    }
-
-    $element['delete']['#access'] = $profile->access('delete');
-    $element['delete']['#weight'] = 100;
+    // Add an "Activate" button.
+    $element['set_default'] = $element['submit'];
+    $element['set_default']['#value'] = t('Save and make default');
+    $element['set_default']['#weight'] = 10;
+    $element['set_default']['#access'] = !$profile->isDefault();
+    array_unshift($element['set_default']['#submit'], [$this, 'setDefault']);
 
     return $element;
   }
 
   /**
-   * Form submission handler for the 'activate' action.
+   * Form submission handler for the 'set_default' action.
    *
    * @param array $form
    *   An associative array containing the structure of the form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   A reference to a keyed array containing the current state of the form.
    */
-  public function activate(array $form, FormStateInterface $form_state) {
-    $form_state->setValue('status', TRUE);
+  public function setDefault(array $form, FormStateInterface $form_state) {
+    $form_state->setValue('is_default', TRUE);
   }
 
   /**
@@ -101,6 +67,7 @@ class ProfileForm extends ContentEntityForm {
    */
   public function deactivate(array $form, FormStateInterface $form_state) {
     $form_state->setValue('status', FALSE);
+    $form_state->setValue('is_default', TRUE);
   }
 
   /**
@@ -109,10 +76,6 @@ class ProfileForm extends ContentEntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     $profile_type = ProfileType::load($this->entity->bundle());
 
-    // Active profile for non administers if profile is new.
-    if (!\Drupal::currentUser()->hasPermission('administer profiles') && $this->entity->isNew()) {
-      $this->entity->setActive(TRUE);
-    }
     switch ($this->entity->save()) {
       case SAVED_NEW:
         drupal_set_message($this->t('%label profile has been created.', ['%label' => $profile_type->label()]));

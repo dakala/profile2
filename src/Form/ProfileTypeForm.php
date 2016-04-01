@@ -7,18 +7,17 @@
 
 namespace Drupal\profile\Form;
 
+use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field_ui\FieldUI;
-use Drupal\profile\Entity\ProfileType;
 use Drupal\user\Entity\Role;
 
 
 /**
  * Form controller for profile type forms.
  */
-class ProfileTypeForm extends EntityForm {
+class ProfileTypeForm extends BundleEntityFormBase {
 
   /**
    * {@inheritdoc}
@@ -47,7 +46,8 @@ class ProfileTypeForm extends EntityForm {
       '#default_value' => $type->id(),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       '#machine_name' => [
-        'exists' => [$this, 'exists'],
+        'exists' => '\Drupal\profile\Entity\ProfileType::load',
+        'source' => ['label'],
       ],
     ];
     $form['registration'] = [
@@ -64,7 +64,7 @@ class ProfileTypeForm extends EntityForm {
     $form['roles'] = [
       '#type' => 'checkboxes',
       '#title' => t('Allowed roles'),
-      '#description' => t('Limit the users that can have this profile by role.</br><em>None will indicate that all users can have this profile type.</em>'),
+      '#description' => $this->t('Limit the users that can have this profile by role.</br><em>None will indicate that all users can have this profile type.</em>'),
       '#options' => [],
       '#default_value' => $type->getRoles(),
     ];
@@ -76,7 +76,7 @@ class ProfileTypeForm extends EntityForm {
       }
     }
 
-    return $form;
+    return $this->protectBundleIdElement($form);
   }
 
   /**
@@ -108,8 +108,6 @@ class ProfileTypeForm extends EntityForm {
       drupal_set_message(t('%label profile type has been created.', ['%label' => $type->label()]));
     }
     $form_state->setRedirect('entity.profile_type.collection');
-
-    \Drupal::service('router.builder')->setRebuildNeeded();
   }
 
   /**
@@ -128,20 +126,6 @@ class ProfileTypeForm extends EntityForm {
     $form_state->setRedirect('entity.profile_type.delete_form', [
       'profile_type' => $this->entity->id(),
     ]);
-  }
-
-  /**
-   * Check whether the profile type exists.
-   *
-   * @param string $id
-   *   A string representing a profile type ID.
-   *
-   * @return bool
-   *   Returns bool if profile exists.
-   */
-  public function exists($id) {
-    $profile_type = ProfileType::load($id);
-    return !empty($profile_type);
   }
 
 }

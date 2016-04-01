@@ -134,6 +134,7 @@ abstract class ProfileTestBase extends WebTestBase {
     user_role_grant_permissions(AccountInterface::AUTHENTICATED_ROLE, ['access user profiles']);
     $this->adminUser = $this->drupalCreateUser([
       'administer profile types',
+      'administer profiles',
       "view any $id profile",
       "add any $id profile",
       "edit any $id profile",

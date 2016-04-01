@@ -253,4 +253,5 @@ class ProfileCRUDTest extends ProfileTestBase {
     $this->assertLink($profile1->label());
     $this->assertLinkByHref($profile2->toUrl('canonical')->toString());
   }
+
 }

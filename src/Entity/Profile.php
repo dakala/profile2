@@ -13,7 +13,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\entity\EntityKeysFieldsTrait;
 use Drupal\user\UserInterface;
 
 
@@ -57,19 +56,20 @@ use Drupal\user\UserInterface;
  *    "canonical" = "/profile/{profile}",
  *    "edit-form" = "/profile/{profile}/edit",
  *    "delete-form" = "/profile/{profile}/delete",
- *    "collection" = "/admin/config/people/profiles"
+ *    "collection" = "/admin/config/people/profiles",
+ *    "set-default" = "/profile/{profile}/set-default"
  *   },
  * )
  */
 class Profile extends ContentEntityBase implements ProfileInterface {
 
-  use EntityChangedTrait, EntityKeysFieldsTrait;
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = self::entityKeysBaseFieldDefinitions($entity_type);
+    $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))
@@ -81,6 +81,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Active status'))
       ->setDescription(t('A boolean indicating whether the profile is active.'))
+      ->setDefaultValue(TRUE)
       ->setRevisionable(TRUE);
 
     $fields['is_default'] = BaseFieldDefinition::create('boolean')
@@ -267,7 +268,7 @@ class Profile extends ContentEntityBase implements ProfileInterface {
 
       // Ensure that all other profiles are set to not default.
       foreach ($profiles as $profile) {
-        if ($profile->id() != $this->id()) {
+        if ($profile->id() != $this->id() && $profile->isDefault()) {
           $profile->setDefault(FALSE);
           $profile->save();
         }

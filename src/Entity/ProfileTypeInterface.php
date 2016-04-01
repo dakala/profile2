@@ -15,11 +15,6 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface ProfileTypeInterface extends ConfigEntityInterface {
 
   /**
-   * Returns the label of the profile type.
-   */
-  public function getLabel();
-
-  /**
    * Return the registration form flag.
    *
    * For allowing creation of profile type at user registration.
