@@ -59,6 +59,7 @@ use Drupal\user\UserInterface;
  *    "collection" = "/admin/config/people/profiles",
  *    "set-default" = "/profile/{profile}/set-default"
  *   },
+ *   common_reference_target = TRUE,
  * )
  */
 class Profile extends ContentEntityBase implements ProfileInterface {
